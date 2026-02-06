@@ -17,7 +17,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui";
-import { Plus, Trash2, Copy, Eye } from "lucide-react";
+import { Trash2, Copy, Eye } from "lucide-react";
 
 interface Person {
   id: string;
@@ -225,17 +225,8 @@ export function Tab1Persons({
   onSelectPerson,
 }: Tab1PersonsProps) {
   const router = useRouter();
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [newPerson, setNewPerson] = useState({
-    name: "",
-    email: "",
-    jobTitle: "",
-    department: "",
-    managerId: "",
-  });
-  const [errorMessage, setErrorMessage] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Fonction de mise à jour d'une personne
@@ -256,42 +247,6 @@ export function Tab1Persons({
       }
     } catch {
       onSaveError();
-    }
-  };
-
-  const handleCreatePerson = async () => {
-    if (!newPerson.name || !newPerson.email) {
-      setErrorMessage("Le nom et l'email sont requis");
-      return;
-    }
-
-    setIsLoading(true);
-    setErrorMessage("");
-    onSaveStart();
-
-    try {
-      const res = await fetch(`/api/sites/${siteId}/persons`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newPerson),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setShowCreateDialog(false);
-        setNewPerson({ name: "", email: "", jobTitle: "", department: "", managerId: "" });
-        onSaveDone();
-        router.refresh();
-      } else {
-        setErrorMessage(data.error || "Une erreur est survenue");
-        onSaveError();
-      }
-    } catch {
-      setErrorMessage("Erreur de connexion au serveur");
-      onSaveError();
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -322,18 +277,10 @@ export function Tab1Persons({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Personnes ({persons.length})</h2>
-        <Button onClick={() => setShowCreateDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Ajouter une personne
-        </Button>
-      </div>
-
       {persons.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
           <p>Aucune personne dans ce site</p>
-          <p className="text-sm mt-1">Commencez par ajouter la première personne</p>
+          <p className="text-sm mt-1">Utilisez le bouton &quot;Ajouter une personne&quot; ci-dessus</p>
         </div>
       ) : (
         <div className="border rounded-lg overflow-hidden">
@@ -428,81 +375,6 @@ export function Tab1Persons({
           </Table>
         </div>
       )}
-
-      {/* Create Dialog */}
-      <Dialog open={showCreateDialog} onOpenChange={(open) => {
-        setShowCreateDialog(open);
-        if (!open) setErrorMessage("");
-      }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Ajouter une personne</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            {errorMessage && (
-              <div className="p-3 rounded-md bg-red-50 text-red-700 text-sm dark:bg-red-900/20 dark:text-red-400">
-                {errorMessage}
-              </div>
-            )}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Nom complet *</label>
-              <Input
-                placeholder="Jean Dupont"
-                value={newPerson.name}
-                onChange={(e) => setNewPerson({ ...newPerson, name: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Email *</label>
-              <Input
-                type="email"
-                placeholder="jean.dupont@entreprise.com"
-                value={newPerson.email}
-                onChange={(e) => setNewPerson({ ...newPerson, email: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Poste</label>
-              <Input
-                placeholder="Développeur"
-                value={newPerson.jobTitle}
-                onChange={(e) => setNewPerson({ ...newPerson, jobTitle: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Service</label>
-              <Input
-                placeholder="IT"
-                value={newPerson.department}
-                onChange={(e) => setNewPerson({ ...newPerson, department: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Responsable</label>
-              <select
-                className="w-full h-10 px-3 rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
-                value={newPerson.managerId}
-                onChange={(e) => setNewPerson({ ...newPerson, managerId: e.target.value })}
-              >
-                <option value="">Aucun (personne au sommet)</option>
-                {persons.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} - {p.jobTitle || "Sans poste"}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-              Annuler
-            </Button>
-            <Button onClick={handleCreatePerson} isLoading={isLoading}>
-              Ajouter
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Delete Dialog */}
       <Dialog open={!!showDeleteDialog} onOpenChange={() => setShowDeleteDialog(null)}>

@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useHeaderContent } from "./header-context";
-import { Button, SaveIndicator, useSaveStatus } from "@/components/ui";
-import { ArrowLeft, Settings, Globe, GlobeLock } from "lucide-react";
+import { Button, SaveIndicator } from "@/components/ui";
+import { Settings, Globe, GlobeLock } from "lucide-react";
 
 interface SiteHeaderContentProps {
   siteId: string;
@@ -42,14 +41,7 @@ export function SiteHeaderContent({
 
   useEffect(() => {
     setCenterContent(
-      <div className="flex items-center gap-3">
-        <Link href="/dashboard">
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <h1 className="text-base font-semibold">{siteName}</h1>
-      </div>
+      <h1 className="text-base font-semibold">{siteName}</h1>
     );
 
     setRightActions(

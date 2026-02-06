@@ -8,6 +8,13 @@ import {
   TabsTrigger,
   TabsContent,
   useSaveStatus,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  Input,
 } from "@/components/ui";
 import {
   Users,
@@ -15,6 +22,7 @@ import {
   User,
   GraduationCap,
   ClipboardCheck,
+  Plus,
 } from "lucide-react";
 import { Tab1Persons } from "./tabs/tab1-persons";
 import { Tab2Organigramme } from "./tabs/tab2-organigramme";
@@ -78,6 +86,52 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
   const { status, startSaving, saveDone, saveError } = useSaveStatus();
   const [showSettings, setShowSettings] = useState(false);
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
+  const [showAddPersonDialog, setShowAddPersonDialog] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [newPerson, setNewPerson] = useState({
+    name: "",
+    email: "",
+    jobTitle: "",
+    department: "",
+    managerId: "",
+  });
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleCreatePerson = async () => {
+    if (!newPerson.name || !newPerson.email) {
+      setErrorMessage("Le nom et l'email sont requis");
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMessage("");
+    startSaving();
+
+    try {
+      const res = await fetch(`/api/sites/${site.id}/persons`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newPerson),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setShowAddPersonDialog(false);
+        setNewPerson({ name: "", email: "", jobTitle: "", department: "", managerId: "" });
+        saveDone();
+        router.refresh();
+      } else {
+        setErrorMessage(data.error || "Une erreur est survenue");
+        saveError();
+      }
+    } catch {
+      setErrorMessage("Erreur de connexion au serveur");
+      saveError();
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const settings = site.settings || {
     tab1Title: "Équipe",
@@ -107,38 +161,44 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
       <div className="flex gap-6">
         <div className={`flex-1 transition-all ${showSettings ? "mr-80" : ""}`}>
           <Tabs defaultValue="tab1" className="w-full">
-            <TabsList className="w-full justify-start">
-              {settings.tab1Enabled && (
-                <TabsTrigger value="tab1" className="gap-2">
-                  <Users className="h-4 w-4" />
-                  <span className="hidden sm:inline">{settings.tab1Title}</span>
-                </TabsTrigger>
-              )}
-              {settings.tab2Enabled && (
-                <TabsTrigger value="tab2" className="gap-2">
-                  <Network className="h-4 w-4" />
-                  <span className="hidden sm:inline">{settings.tab2Title}</span>
-                </TabsTrigger>
-              )}
-              {settings.tab3Enabled && (
-                <TabsTrigger value="tab3" className="gap-2">
-                  <User className="h-4 w-4" />
-                  <span className="hidden sm:inline">{settings.tab3Title}</span>
-                </TabsTrigger>
-              )}
-              {settings.tab4Enabled && (
-                <TabsTrigger value="tab4" className="gap-2">
-                  <GraduationCap className="h-4 w-4" />
-                  <span className="hidden sm:inline">{settings.tab4Title}</span>
-                </TabsTrigger>
-              )}
-              {settings.tab5Enabled && (
-                <TabsTrigger value="tab5" className="gap-2">
-                  <ClipboardCheck className="h-4 w-4" />
-                  <span className="hidden sm:inline">{settings.tab5Title}</span>
-                </TabsTrigger>
-              )}
-            </TabsList>
+            <div className="flex items-center justify-between w-full">
+              <TabsList className="justify-start">
+                {settings.tab1Enabled && (
+                  <TabsTrigger value="tab1" className="gap-2">
+                    <Users className="h-4 w-4" />
+                    <span className="hidden sm:inline">{settings.tab1Title}</span>
+                  </TabsTrigger>
+                )}
+                {settings.tab2Enabled && (
+                  <TabsTrigger value="tab2" className="gap-2">
+                    <Network className="h-4 w-4" />
+                    <span className="hidden sm:inline">{settings.tab2Title}</span>
+                  </TabsTrigger>
+                )}
+                {settings.tab3Enabled && (
+                  <TabsTrigger value="tab3" className="gap-2">
+                    <User className="h-4 w-4" />
+                    <span className="hidden sm:inline">{settings.tab3Title}</span>
+                  </TabsTrigger>
+                )}
+                {settings.tab4Enabled && (
+                  <TabsTrigger value="tab4" className="gap-2">
+                    <GraduationCap className="h-4 w-4" />
+                    <span className="hidden sm:inline">{settings.tab4Title}</span>
+                  </TabsTrigger>
+                )}
+                {settings.tab5Enabled && (
+                  <TabsTrigger value="tab5" className="gap-2">
+                    <ClipboardCheck className="h-4 w-4" />
+                    <span className="hidden sm:inline">{settings.tab5Title}</span>
+                  </TabsTrigger>
+                )}
+              </TabsList>
+              <Button size="sm" onClick={() => setShowAddPersonDialog(true)}>
+                <Plus className="h-4 w-4 mr-1" />
+                Ajouter une personne ({site.persons.length})
+              </Button>
+            </div>
 
             <TabsContent value="tab1" className="mt-6">
               <Tab1Persons
@@ -202,6 +262,81 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
           />
         )}
       </div>
+
+      {/* Add Person Dialog */}
+      <Dialog open={showAddPersonDialog} onOpenChange={(open) => {
+        setShowAddPersonDialog(open);
+        if (!open) setErrorMessage("");
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ajouter une personne</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {errorMessage && (
+              <div className="p-3 rounded-md bg-red-50 text-red-700 text-sm dark:bg-red-900/20 dark:text-red-400">
+                {errorMessage}
+              </div>
+            )}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Nom complet *</label>
+              <Input
+                placeholder="Jean Dupont"
+                value={newPerson.name}
+                onChange={(e) => setNewPerson({ ...newPerson, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Email *</label>
+              <Input
+                type="email"
+                placeholder="jean.dupont@entreprise.com"
+                value={newPerson.email}
+                onChange={(e) => setNewPerson({ ...newPerson, email: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Poste</label>
+              <Input
+                placeholder="Développeur"
+                value={newPerson.jobTitle}
+                onChange={(e) => setNewPerson({ ...newPerson, jobTitle: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Service</label>
+              <Input
+                placeholder="IT"
+                value={newPerson.department}
+                onChange={(e) => setNewPerson({ ...newPerson, department: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Responsable</label>
+              <select
+                className="w-full h-10 px-3 rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
+                value={newPerson.managerId}
+                onChange={(e) => setNewPerson({ ...newPerson, managerId: e.target.value })}
+              >
+                <option value="">Aucun (personne au sommet)</option>
+                {site.persons.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} - {p.jobTitle || "Sans poste"}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddPersonDialog(false)}>
+              Annuler
+            </Button>
+            <Button onClick={handleCreatePerson} isLoading={isLoading}>
+              Ajouter
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

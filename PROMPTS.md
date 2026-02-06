@@ -101,5 +101,10 @@ L'édition des personnes n'est toujours pas possible dans le studio et un site. 
 Dans la page de gestion des sites, met "Ajouter un site" à gauche du menu de l'utilisateur tout en haut. Mets "Mes sites" et le texte en dessous dans la barre du haut au centre de l'espace entre le bouton "Ajouter..." et la version du studio. Garde tout le contenu de la tuile de site en dessous, mais réduit sa taille. Enlèce le menu avec les trois petits points pour mettre les icones à droite du nom du site, côte à côte et en les justifiant à droite. Dans la vue de gestion d'un site dans le studio, remonte le bouton de menu des paramètres du site juste à gauche du menu de l'utilisateur, puis juste à gauche met le statut publié ou non, puis met , entre le statut et la version du studio le titre du site en le centrant entre les deux. réduit la hauteur des lignes de personnes.
 ```
 
+## Prompt #18 - Bouton ajouter personne dans onglets
+```
+Le bouton "Ajouter une personne" doit monter dans la barre des onglets du site. Le nombre de personnes doit être affiché dans le bouton d'Ajouter une personne en le mettant entre parenthèse à droite de personne. L'affichage à gauche du nombre de personnes doit donc disparaitre. La flèche à gauche du titre dusite doit disparaître puisqu'on peut revenir au menu de gestion des sites en cliquant en haut à gauche de l'écran.
+```
+
 ---
 *Dernière mise à jour: 2026-02-06*
