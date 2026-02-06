@@ -232,5 +232,38 @@ Les onglets, le contenu du menu sites, les titres des colonnes de personnes, le 
 → Mise à jour tab1-persons.tsx avec traductions titres colonnes (Nom, Email, Poste, Service, Niv., Responsable, Actions)
 → Mise à jour site-editor.tsx pour forcer les traductions des onglets (au lieu des valeurs stockées en base)
 
+## Prompt #31 - Affichage niveau dans liste comme organigramme
+```
+Dans la liste des personnes les affichages pour les niveaux doivent avoir exactement la même forme que pour les tuiles d'organigramme.
+```
+→ Mise à jour LevelSelector dans tab1-persons.tsx
+→ Style harmonisé avec l'organigramme : "Niv. X" + icône
+→ Fond bleu arrondi comme badge
+
+## Prompt #32 - Hauteur lignes et forme niveau exacte
+```
+Mais enfin, la même forme que dans les tuiles d'organigrammes, avec de gauche à droite : Niv X et l'icône. Pareil, pas avec un rond bleu, et en gardant les lignes par personnes mince en hauteur.
+```
+→ Réduction hauteur des lignes (h-6 au lieu de h-7)
+→ Style niveau compact : texte + icône sans fond proéminent
+→ Ajustement padding et espacement global du tableau
+
+## Prompt #33 - Icône niveau dans profil
+```
+Dans le menu d'édition des personnes, l'icône bleue en haut à gauche doit être remplacée par l'icône de niveau à la même taille.
+```
+→ Remplacement de l'icône User par l'icône du niveau dans tab3-profile.tsx
+→ Utilisation de getLevelIcon() avec taille h-12 w-12
+
+## Prompt #34 - Profil en popup et fond blanc icône
+```
+Ne met pas de fond de couleur sous l'icône, laisse la sur un fond blanc. Fait en sorte que la fenêtre d'édition du profil soit un pop up dans l'onglet de l'équipe plutôt qu'un autre onglet profil (que tu peux supprimer). Dans la liste des personnes, tu peux élargir le fond bleu imparfait qui est mis sous le niveau et la petite icône associée afin que le bleu soit aussi sous l'icône.
+```
+→ Création du composant PersonProfileDialog (popup)
+→ Suppression de l'onglet Profil (tab3) du site-editor.tsx
+→ Intégration du dialog directement dans Tab1Persons
+→ Icône de profil sur fond blanc (sans gradient)
+→ Élargissement du fond bleu du LevelSelector pour couvrir l'icône (pl-2 pr-1 gap-1)
+
 ---
 *Dernière mise à jour: 2026-02-06*

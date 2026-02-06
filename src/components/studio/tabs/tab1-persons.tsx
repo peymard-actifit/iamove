@@ -171,7 +171,7 @@ function LevelSelector({
         }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={() => setShowTooltip(false)}
-        className="pl-2 pr-1 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 inline-flex items-center gap-1 cursor-pointer whitespace-nowrap"
+        className="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
       >
         Niv. {value}
         {levelIcon}
