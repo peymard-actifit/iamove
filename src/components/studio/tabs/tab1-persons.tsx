@@ -171,9 +171,9 @@ function LevelSelector({
         }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={() => setShowTooltip(false)}
-        className="cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-800 px-1.5 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 flex items-center gap-1"
+        className="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 flex items-center gap-1 cursor-pointer"
       >
-        Niv. {value}
+        <span>Niv. {value}</span>
         {levelIcon}
       </span>
       {showTooltip && (
