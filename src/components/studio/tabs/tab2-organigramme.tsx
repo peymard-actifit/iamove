@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useRef, useCallback } from "react";
 import { Card, Button, Input } from "@/components/ui";
-import { ChevronDown, Plus, Minus, Maximize, Minimize, Move, ZoomIn } from "lucide-react";
+import { ChevronDown, Plus, Minus, Maximize, Minimize, Scan, Printer } from "lucide-react";
 import { getLevelIcon, getLevelInfo } from "@/lib/levels";
 
 interface Person {
@@ -184,15 +184,8 @@ export function Tab2Organigramme({
     }
   }, []);
 
-  const handleCenter = useCallback(() => {
-    if (containerRef.current) {
-      const container = containerRef.current;
-      container.scrollTo({
-        left: (container.scrollWidth - container.clientWidth) / 2,
-        top: (container.scrollHeight - container.clientHeight) / 2,
-        behavior: "smooth",
-      });
-    }
+  const handlePrint = useCallback(() => {
+    window.print();
   }, []);
 
   const handleFitToWindow = useCallback(() => {
@@ -333,20 +326,10 @@ export function Tab2Organigramme({
             variant="ghost"
             size="icon"
             className="h-8 w-8"
-            onClick={handleCenter}
-            title="Centrer"
-          >
-            <Move className="h-4 w-4" />
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
             onClick={handleFitToWindow}
             title="Ajuster à la fenêtre"
           >
-            <ZoomIn className="h-4 w-4" />
+            <Scan className="h-4 w-4" />
           </Button>
           
           <Button
@@ -361,6 +344,16 @@ export function Tab2Organigramme({
             ) : (
               <Maximize className="h-4 w-4" />
             )}
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={handlePrint}
+            title="Imprimer (PDF)"
+          >
+            <Printer className="h-4 w-4" />
           </Button>
         </div>
       </div>

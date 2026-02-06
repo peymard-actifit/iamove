@@ -175,16 +175,16 @@ export function SiteEditor({ site, levels, currentUserEmail }: SiteEditorProps) 
                     <span className="hidden sm:inline">{settings.tab2Title}</span>
                   </TabsTrigger>
                 )}
-                {settings.tab4Enabled && (
-                  <TabsTrigger value="tab4" className="gap-2">
-                    <GraduationCap className="h-4 w-4" />
-                    <span className="hidden sm:inline">{settings.tab4Title}</span>
-                  </TabsTrigger>
-                )}
                 {settings.tab5Enabled && (
                   <TabsTrigger value="tab5" className="gap-2">
                     <ClipboardCheck className="h-4 w-4" />
                     <span className="hidden sm:inline">{settings.tab5Title}</span>
+                  </TabsTrigger>
+                )}
+                {settings.tab4Enabled && (
+                  <TabsTrigger value="tab4" className="gap-2">
+                    <GraduationCap className="h-4 w-4" />
+                    <span className="hidden sm:inline">{settings.tab4Title}</span>
                   </TabsTrigger>
                 )}
               </TabsList>
@@ -216,15 +216,15 @@ export function SiteEditor({ site, levels, currentUserEmail }: SiteEditorProps) 
               />
             </TabsContent>
 
-            <TabsContent value="tab4" className="mt-6">
-              <Tab4Formation
+            <TabsContent value="tab5" className="mt-2">
+              <Tab5Quiz
                 siteId={site.id}
                 isStudioMode={true}
               />
             </TabsContent>
 
-            <TabsContent value="tab5" className="mt-2">
-              <Tab5Quiz
+            <TabsContent value="tab4" className="mt-6">
+              <Tab4Formation
                 siteId={site.id}
                 isStudioMode={true}
               />
