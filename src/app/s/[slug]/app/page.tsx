@@ -1,10 +1,23 @@
 import { redirect, notFound } from "next/navigation";
+import { Metadata } from "next";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { PublishedSiteApp } from "@/components/published/site-app";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const site = await prisma.site.findUnique({
+    where: { slug },
+    select: { name: true },
+  });
+
+  return {
+    title: site ? `${site.name} - Publié` : "Site - Publié",
+  };
 }
 
 export default async function PublishedSiteAppPage({ params }: PageProps) {

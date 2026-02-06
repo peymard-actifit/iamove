@@ -276,5 +276,15 @@ Quand j'utilise la roulette sur la vue organigramme, je zoome ou je dézoome et 
 → Édition possible de tous les champs SAUF le niveau (verrouillé + explication)
 → Icône du niveau de la personne affichée en grand dans le header du profil
 
+## Prompt #36 - Titres onglets navigateur et favicon dynamique
+```
+Dans le titre de l'onglet du navigateur dans la vue publiée : met le titre du site rajoute "Publié". Dans le titre de l'onglet du navigateur du studio met "Studio IAMOVE" et pour la vue publiée, met l'icone du niveau de la dernière personne connectée en visibilité du navigateur.
+```
+→ Layout studio avec metadata "Studio IAMOVE"
+→ Pages publiées avec generateMetadata "{nom du site} - Publié"
+→ Création du composant DynamicFavicon (change favicon via JS)
+→ Favicon dynamique = icône du niveau de la personne connectée (level-X.png)
+→ Restauration du favicon par défaut lors de la déconnexion
+
 ---
 *Dernière mise à jour: 2026-02-06*

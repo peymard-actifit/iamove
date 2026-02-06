@@ -7,6 +7,7 @@ import { Tab2Organigramme } from "@/components/studio/tabs/tab2-organigramme";
 import { Tab4Formation } from "@/components/studio/tabs/tab4-formation";
 import { Tab5Quiz } from "@/components/studio/tabs/tab5-quiz";
 import { PersonalProfileEditor } from "./personal-profile-editor";
+import { DynamicFavicon } from "./dynamic-favicon";
 
 interface Person {
   id: string;
@@ -84,6 +85,9 @@ export function PublishedSiteApp({
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Favicon dynamique basé sur le niveau de la personne connectée */}
+      {currentPerson && <DynamicFavicon level={currentPerson.currentLevel} />}
+      
       {/* Header */}
       <header 
         className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800"

@@ -1,7 +1,13 @@
 import { redirect } from "next/navigation";
+import { Metadata } from "next";
 import { getSession } from "@/lib/auth";
 import { StudioHeader } from "@/components/studio/header";
 import { StudioProviders } from "@/components/studio/studio-providers";
+
+export const metadata: Metadata = {
+  title: "Studio IAMOVE",
+  description: "Studio de création de sites d'accompagnement IA",
+};
 
 export default async function StudioLayout({
   children,
