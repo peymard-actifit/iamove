@@ -71,5 +71,10 @@ Mais toutes les variables d'environnement sont déjà présentes dans vercel... 
 J'ai déjà dit que les variables d'environnement sont présentes dans Vercel dans le projet. Réexamine tout, vérifie les accès à la base, examine bien les liaisons et dit moi si quelque chose ne fonctionne pas. Mais ne me redemande pas la même chose à laquelle j'ai déjà répondu. Par ailleurs, sauvegarde la liste des prompts en les incrémentant dans un fichier dans le git.
 ```
 
+## Prompt #12 - Rappel script déploiement
+```
+As-tu commit and deploy avec le script et indenté la version ? Tu dois le faire systématiquement après chaque amélioration
+```
+
 ---
-*Dernière mise à jour: 2026-02-06*
+*Dernière mise à jour: 2026-02-06 - v2.1.5*
