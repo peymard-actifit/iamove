@@ -1,39 +1,67 @@
-# =============================================================================
-# SCRIPT DE COMMIT ET DEPLOIEMENT - iamove
-# =============================================================================
-# Usage: .\commit-and-deploy.ps1 [-Level <major|minor|patch>] [-Message <string>]
-# 
-# Niveaux de version :
-#   major (1er niveau) : Modification majeure
-#   minor (2e niveau)  : Ajout de fonctionnalité  
-#   patch (3e niveau)  : Correctif ou modification mineure (défaut)
-# =============================================================================
+<#
+.SYNOPSIS
+    Script de commit et deploiement automatique pour iamove
+
+.DESCRIPTION
+    Ce script gere le versioning semantique et le deploiement sur Vercel via GitHub.
+    
+    Niveaux de version :
+      major (1er niveau) : Modification majeure
+      minor (2e niveau)  : Ajout de fonctionnalite  
+      patch (3e niveau)  : Correctif ou modification mineure (defaut)
+
+.PARAMETER Level
+    Niveau de version : major, minor, ou patch (defaut: patch)
+
+.PARAMETER Message
+    Message de commit (defaut: "Mise a jour automatique")
+
+.EXAMPLE
+    .\commit-and-deploy.ps1 -Level minor -Message "Nouvelle fonctionnalite"
+#>
 
 param(
     [ValidateSet("major", "minor", "patch")]
     [string]$Level = "patch",
-    [string]$Message = "Mise à jour automatique"
+    [string]$Message = "Mise a jour automatique"
 )
 
 # Configuration
 $ErrorActionPreference = "Stop"
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-# Fonction pour afficher les étapes
+# Fonction pour afficher les etapes
 function Write-Step {
-    param([string]$Step, [string]$Status = "INFO")
-    $color = switch ($Status) {
-        "OK" { "Green" }
-        "ERROR" { "Red" }
-        "WARN" { "Yellow" }
-        default { "Cyan" }
+    param(
+        [string]$Step,
+        [ValidateSet("INFO", "OK", "ERROR", "WARN")]
+        [string]$Status = "INFO"
+    )
+    
+    $colors = @{
+        "OK"    = "Green"
+        "ERROR" = "Red"
+        "WARN"  = "Yellow"
+        "INFO"  = "Cyan"
     }
+    
+    $symbols = @{
+        "OK"    = "[OK]"
+        "ERROR" = "[!!]"
+        "WARN"  = "[??]"
+        "INFO"  = "[..]"
+    }
+    
     $timestamp = Get-Date -Format "HH:mm:ss"
-    Write-Host "[$timestamp] [$Status] $Step" -ForegroundColor $color
+    Write-Host "[$timestamp] $($symbols[$Status]) $Step" -ForegroundColor $colors[$Status]
 }
 
-# Fonction pour incrémenter la version
+# Fonction pour incrementer la version
 function Get-NextVersion {
-    param([string]$CurrentVersion, [string]$Level)
+    param(
+        [string]$CurrentVersion,
+        [string]$Level
+    )
     
     $parts = $CurrentVersion -split '\.'
     $major = [int]$parts[0]
@@ -41,13 +69,37 @@ function Get-NextVersion {
     $patch = [int]$parts[2]
     
     switch ($Level) {
-        "major" { $major++; $minor = 0; $patch = 0 }
-        "minor" { $minor++; $patch = 0 }
-        "patch" { $patch++ }
+        "major" { 
+            $major++
+            $minor = 0
+            $patch = 0
+        }
+        "minor" { 
+            $minor++
+            $patch = 0
+        }
+        "patch" { 
+            $patch++
+        }
     }
     
     return "$major.$minor.$patch"
 }
+
+# Fonction pour mettre a jour package.json proprement
+function Update-PackageVersion {
+    param(
+        [string]$NewVersion
+    )
+    
+    $content = Get-Content "package.json" -Raw -Encoding UTF8
+    $content = $content -replace '"version":\s*"[^"]*"', "`"version`": `"$NewVersion`""
+    Set-Content "package.json" -Value $content -Encoding UTF8 -NoNewline
+}
+
+# =============================================================================
+# DEBUT DU PIPELINE
+# =============================================================================
 
 Write-Host ""
 Write-Host "=============================================" -ForegroundColor Magenta
@@ -56,54 +108,62 @@ Write-Host "=============================================" -ForegroundColor Mage
 Write-Host ""
 
 try {
-    # Étape 1: Vérification des changements
-    Write-Step "Vérification des changements locaux..."
+    # Etape 1: Verification des changements
+    Write-Step "Verification des changements locaux..."
     $status = git status --porcelain
     
     if (-not $status) {
-        Write-Step "Aucun changement détecté" "WARN"
+        Write-Step "Aucun changement detecte" "WARN"
         Write-Host ""
-        Write-Host "Aucune modification à déployer." -ForegroundColor Yellow
+        Write-Host "Aucune modification a deployer." -ForegroundColor Yellow
         exit 0
     }
     
-    Write-Step "Changements détectés: $($status.Count) fichier(s)" "OK"
+    $fileCount = ($status | Measure-Object).Count
+    Write-Step "Changements detectes: $fileCount fichier(s)" "OK"
     
-    # Étape 2: Lecture de la version actuelle
+    # Etape 2: Lecture de la version actuelle
     Write-Step "Lecture de la version actuelle..."
-    $packageJson = Get-Content "package.json" | ConvertFrom-Json
-    $currentVersion = $packageJson.version
+    $packageContent = Get-Content "package.json" -Raw -Encoding UTF8
+    if ($packageContent -match '"version":\s*"([^"]*)"') {
+        $currentVersion = $matches[1]
+    } else {
+        throw "Impossible de lire la version dans package.json"
+    }
     Write-Step "Version actuelle: $currentVersion" "OK"
     
-    # Étape 3: Calcul de la nouvelle version
+    # Etape 3: Calcul de la nouvelle version
     Write-Step "Calcul de la nouvelle version (niveau: $Level)..."
     $newVersion = Get-NextVersion -CurrentVersion $currentVersion -Level $Level
     Write-Step "Nouvelle version: $newVersion" "OK"
     
-    # Étape 4: Mise à jour du package.json
-    Write-Step "Mise à jour de package.json..."
-    $packageJson.version = $newVersion
-    $packageJson | ConvertTo-Json -Depth 10 | Set-Content "package.json" -Encoding UTF8
-    Write-Step "package.json mis à jour" "OK"
+    # Etape 4: Mise a jour du package.json
+    Write-Step "Mise a jour de package.json..."
+    Update-PackageVersion -NewVersion $newVersion
+    Write-Step "package.json mis a jour" "OK"
     
-    # Étape 5: Git add
+    # Etape 5: Git add
     Write-Step "Ajout des fichiers au staging..."
-    git add -A
-    Write-Step "Fichiers ajoutés" "OK"
+    git add -A 2>&1 | Out-Null
+    Write-Step "Fichiers ajoutes" "OK"
     
-    # Étape 6: Git commit
-    Write-Step "Création du commit..."
+    # Etape 6: Git commit
+    Write-Step "Creation du commit..."
     $commitMessage = "v$newVersion - $Message"
-    git commit -m $commitMessage
-    Write-Step "Commit créé: $commitMessage" "OK"
+    git commit -m $commitMessage 2>&1 | Out-Null
+    Write-Step "Commit cree: $commitMessage" "OK"
     
-    # Étape 7: Git push
+    # Etape 7: Git push
     Write-Step "Push vers GitHub..."
-    git push origin main
-    Write-Step "Push réussi" "OK"
+    $pushResult = git push origin main 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        throw "Echec du push: $pushResult"
+    }
+    Write-Step "Push reussi" "OK"
     
-    # Étape 8: Attente du déploiement Vercel
-    Write-Step "Déploiement Vercel en cours (automatique via GitHub)..."
+    # Etape 8: Confirmation
+    Write-Step "Deploiement Vercel en cours (automatique via GitHub)..."
+    
     Write-Host ""
     Write-Host "=============================================" -ForegroundColor Green
     Write-Host "   DEPLOIEMENT REUSSI!" -ForegroundColor Green
@@ -113,11 +173,14 @@ try {
     Write-Host "  Commit:  $commitMessage" -ForegroundColor White
     Write-Host "  URL:     https://iamove.vercel.app" -ForegroundColor Cyan
     Write-Host ""
-    Write-Step "Pipeline terminé avec succès" "OK"
+    Write-Step "Pipeline termine avec succes" "OK"
+    
+    # Retourner la nouvelle version
+    return $newVersion
     
 } catch {
     Write-Step "Erreur: $_" "ERROR"
     Write-Host ""
-    Write-Host "Le déploiement a échoué. Vérifiez les erreurs ci-dessus." -ForegroundColor Red
+    Write-Host "Le deploiement a echoue. Verifiez les erreurs ci-dessus." -ForegroundColor Red
     exit 1
 }
