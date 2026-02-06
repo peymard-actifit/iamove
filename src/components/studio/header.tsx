@@ -25,7 +25,6 @@ import {
   Settings,
   Shield,
   ShieldOff,
-  FileQuestion,
   ChevronDown,
   Scale,
 } from "lucide-react";
@@ -111,14 +110,6 @@ export function StudioHeader({ session }: StudioHeaderProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Administration</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/quizzes">
-                    <FileQuestion className="mr-2 h-4 w-4" />
-                    {t.nav.manageQuizzes}
-                  </Link>
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setShowLevelsDialog(true)}>
                   <Scale className="mr-2 h-4 w-4" />
                   Échelle des niveaux
