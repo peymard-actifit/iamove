@@ -1,0 +1,354 @@
+// =============================================================================
+// SCHEMA PRISMA - IAMOVE STUDIO
+// =============================================================================
+// Studio de création de sites web pour l'accompagnement des compétences IA
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =============================================================================
+// UTILISATEURS DU STUDIO
+// =============================================================================
+
+model StudioUser {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  password      String    // Hash bcrypt
+  role          UserRole  @default(STANDARD)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+
+  // Relations
+  sites         Site[]
+  folders       SiteFolder[]
+  quizzes       Quiz[]        // Quizz créés par les admins
+
+  @@map("studio_users")
+}
+
+enum UserRole {
+  STANDARD
+  ADMIN
+}
+
+// =============================================================================
+// DOSSIERS DE SITES
+// =============================================================================
+
+model SiteFolder {
+  id            String    @id @default(cuid())
+  name          String
+  parentId      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  owner         StudioUser @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId       String
+  parent        SiteFolder? @relation("FolderHierarchy", fields: [parentId], references: [id])
+  children      SiteFolder[] @relation("FolderHierarchy")
+  sites         Site[]
+
+  @@map("site_folders")
+}
+
+// =============================================================================
+// SITES (ENTREPRISES)
+// =============================================================================
+
+model Site {
+  id            String      @id @default(cuid())
+  name          String
+  slug          String      @unique   // URL du site publié
+  description   String?
+  logo          String?     // URL du logo
+  primaryColor  String      @default("#3B82F6")
+  secondaryColor String     @default("#8B5CF6")
+  isPublished   Boolean     @default(false)
+  publishedAt   DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relations
+  owner         StudioUser  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId       String
+  folder        SiteFolder? @relation(fields: [folderId], references: [id])
+  folderId      String?
+  persons       Person[]
+  settings      SiteSettings?
+
+  @@map("sites")
+}
+
+// =============================================================================
+// PARAMÈTRES DU SITE
+// =============================================================================
+
+model SiteSettings {
+  id                    String   @id @default(cuid())
+  
+  // Onglet 1 - Liste des personnes
+  tab1Title             String   @default("Équipe")
+  tab1Enabled           Boolean  @default(true)
+  tab1ColumnsVisible    String[] @default(["name", "email", "level", "position"])
+  
+  // Onglet 2 - Organigramme
+  tab2Title             String   @default("Organisation")
+  tab2Enabled           Boolean  @default(true)
+  tab2Layout            String   @default("vertical") // vertical, horizontal
+  
+  // Onglet 3 - Fiche personne
+  tab3Title             String   @default("Profil")
+  tab3Enabled           Boolean  @default(true)
+  
+  // Onglet 4 - Formation IA
+  tab4Title             String   @default("Formation")
+  tab4Enabled           Boolean  @default(true)
+  tab4SystemPrompt      String   @default("Tu es un assistant spécialisé dans la formation aux compétences IA en entreprise.")
+  
+  // Onglet 5 - Quizz
+  tab5Title             String   @default("Évaluation")
+  tab5Enabled           Boolean  @default(true)
+  tab5QuestionsPerQuiz  Int      @default(20)
+  tab5PassThreshold     Int      @default(10)
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relations
+  site                  Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  siteId                String   @unique
+
+  @@map("site_settings")
+}
+
+// =============================================================================
+// PERSONNES (EMPLOYÉS D'UNE ENTREPRISE)
+// =============================================================================
+
+model Person {
+  id                String    @id @default(cuid())
+  email             String
+  name              String
+  firstName         String?
+  lastName          String?
+  jobTitle          String?   // Poste/fonction
+  department        String?   // Service/département
+  phone             String?
+  avatar            String?   // URL avatar
+  
+  // Authentification
+  password          String?   // Hash bcrypt (null = pas encore initialisé)
+  inviteToken       String?   @unique // Token pour initialiser le mot de passe
+  inviteExpiresAt   DateTime?
+  lastLoginAt       DateTime?
+  isOnline          Boolean   @default(false)
+  lastSeenAt        DateTime?
+  
+  // Niveau IA
+  currentLevel      Int       @default(0)
+  
+  // Droits spéciaux
+  canViewAll        Boolean   @default(false) // Vue élargie
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  site              Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  siteId            String
+  
+  // Hiérarchie (organigramme)
+  managerId         String?
+  manager           Person?   @relation("ManagerSubordinates", fields: [managerId], references: [id])
+  subordinates      Person[]  @relation("ManagerSubordinates")
+  
+  // Compétences validées
+  skills            PersonSkill[]
+  
+  // Tentatives de quizz
+  quizAttempts      QuizAttempt[]
+  
+  // Historique chat IA
+  chatMessages      ChatMessage[]
+
+  @@unique([siteId, email])
+  @@map("persons")
+}
+
+// =============================================================================
+// NIVEAUX IA
+// =============================================================================
+
+model Level {
+  id            String    @id @default(cuid())
+  number        Int       @unique // 1, 2, 3, etc.
+  name          String    // "Débutant", "Intermédiaire", etc.
+  description   String?
+  color         String    @default("#3B82F6")
+  requiredScore Int       @default(10) // Score requis pour valider
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  quizzes       Quiz[]
+  skills        Skill[]
+
+  @@map("levels")
+}
+
+// =============================================================================
+// COMPÉTENCES
+// =============================================================================
+
+model Skill {
+  id            String    @id @default(cuid())
+  name          String
+  description   String?
+  category      String?   // Catégorie de compétence
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  level         Level     @relation(fields: [levelId], references: [id])
+  levelId       String
+  personSkills  PersonSkill[]
+
+  @@map("skills")
+}
+
+// =============================================================================
+// COMPÉTENCES VALIDÉES PAR PERSONNE
+// =============================================================================
+
+model PersonSkill {
+  id            String    @id @default(cuid())
+  validatedAt   DateTime  @default(now())
+  selfDeclared  Boolean   @default(true) // Auto-déclaré par la personne
+  notes         String?
+
+  // Relations
+  person        Person    @relation(fields: [personId], references: [id], onDelete: Cascade)
+  personId      String
+  skill         Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  skillId       String
+
+  @@unique([personId, skillId])
+  @@map("person_skills")
+}
+
+// =============================================================================
+// QUESTIONS QUIZZ
+// =============================================================================
+
+model Quiz {
+  id            String    @id @default(cuid())
+  question      String    @db.Text
+  
+  // Réponses (JSON array: [{text: string, isCorrect: boolean}])
+  answers       Json      // Max 4 réponses
+  
+  explanation   String?   @db.Text // Explication de la bonne réponse
+  category      String?   // Catégorie de la question
+  difficulty    Int       @default(1) // 1-3
+  isActive      Boolean   @default(true)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  level         Level     @relation(fields: [levelId], references: [id])
+  levelId       String
+  createdBy     StudioUser @relation(fields: [createdById], references: [id])
+  createdById   String
+  attempts      QuizAttempt[]
+
+  @@map("quizzes")
+}
+
+// =============================================================================
+// TENTATIVES DE QUIZZ
+// =============================================================================
+
+model QuizAttempt {
+  id            String    @id @default(cuid())
+  
+  // Réponses données par l'utilisateur (indices des réponses cochées)
+  selectedAnswers Int[]
+  isCorrect     Boolean
+  
+  attemptedAt   DateTime  @default(now())
+
+  // Relations
+  person        Person    @relation(fields: [personId], references: [id], onDelete: Cascade)
+  personId      String
+  quiz          Quiz      @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizId        String
+
+  @@map("quiz_attempts")
+}
+
+// =============================================================================
+// MESSAGES CHAT IA (FORMATION)
+// =============================================================================
+
+model ChatMessage {
+  id            String    @id @default(cuid())
+  role          ChatRole  // user, assistant, system
+  content       String    @db.Text
+  
+  // Métadonnées
+  tokens        Int?      // Nombre de tokens utilisés
+  model         String?   // Modèle utilisé
+  
+  createdAt     DateTime  @default(now())
+
+  // Relations
+  person        Person    @relation(fields: [personId], references: [id], onDelete: Cascade)
+  personId      String
+
+  @@map("chat_messages")
+}
+
+enum ChatRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+// =============================================================================
+// SESSIONS (pour le suivi des connexions)
+// =============================================================================
+
+model Session {
+  id            String    @id @default(cuid())
+  sessionToken  String    @unique
+  
+  // Type de session
+  userType      SessionUserType
+  userId        String    // ID du StudioUser ou Person
+  
+  expiresAt     DateTime
+  createdAt     DateTime  @default(now())
+  
+  // Données de session
+  ipAddress     String?
+  userAgent     String?
+
+  @@map("sessions")
+}
+
+enum SessionUserType {
+  STUDIO_USER
+  PERSON
+}
