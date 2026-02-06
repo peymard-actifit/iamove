@@ -73,11 +73,16 @@ export function Tab1Persons({
     department: "",
     managerId: "",
   });
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleCreatePerson = async () => {
-    if (!newPerson.name || !newPerson.email) return;
+    if (!newPerson.name || !newPerson.email) {
+      setErrorMessage("Le nom et l'email sont requis");
+      return;
+    }
 
     setIsLoading(true);
+    setErrorMessage("");
     onSaveStart();
 
     try {
@@ -87,15 +92,19 @@ export function Tab1Persons({
         body: JSON.stringify(newPerson),
       });
 
+      const data = await res.json();
+
       if (res.ok) {
         setShowCreateDialog(false);
         setNewPerson({ name: "", email: "", jobTitle: "", department: "", managerId: "" });
         onSaveDone();
         router.refresh();
       } else {
+        setErrorMessage(data.error || "Une erreur est survenue");
         onSaveError();
       }
     } catch {
+      setErrorMessage("Erreur de connexion au serveur");
       onSaveError();
     } finally {
       setIsLoading(false);
@@ -208,12 +217,20 @@ export function Tab1Persons({
       )}
 
       {/* Create Dialog */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+      <Dialog open={showCreateDialog} onOpenChange={(open) => {
+        setShowCreateDialog(open);
+        if (!open) setErrorMessage("");
+      }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Ajouter une personne</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            {errorMessage && (
+              <div className="p-3 rounded-md bg-red-50 text-red-700 text-sm dark:bg-red-900/20 dark:text-red-400">
+                {errorMessage}
+              </div>
+            )}
             <div className="space-y-2">
               <label className="text-sm font-medium">Nom complet *</label>
               <Input

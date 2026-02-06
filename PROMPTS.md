@@ -86,5 +86,10 @@ Je ne veux pas que le build soit lancé automatiquement par le commit entre Gith
 A droite de la mention "Studio", il faut rajouter la version du commit du projet. Quand on crée une personne dans un site, il ne faut pas etre obligé de nommer un responsable. Parfois on veu créer le responsable justement. La fonction d'édition d'une personne ne fonctionne pas.
 ```
 
+## Prompt #15 - Bug ajout personne
+```
+Je ne sors pas de la fenetre en faisant ajouter
+```
+
 ---
 *Dernière mise à jour: 2026-02-06*

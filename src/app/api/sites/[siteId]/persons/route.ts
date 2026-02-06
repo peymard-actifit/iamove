@@ -46,14 +46,6 @@ export async function POST(
       );
     }
 
-    // Si ce n'est pas la première personne, vérifier le manager
-    if (site._count.persons > 0 && !managerId) {
-      return NextResponse.json(
-        { error: "Un responsable est requis" },
-        { status: 400 }
-      );
-    }
-
     // Générer un token d'invitation
     const inviteToken = generateToken(32);
     const inviteExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 jours
