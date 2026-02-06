@@ -125,5 +125,14 @@ Pourquoi tu ne peux pas lire les fichiers excel, fais en sorte de pouvoir les li
 → Création de `src/data/levels.json` avec les données complètes
 → Mise à jour de `src/lib/levels.tsx` avec les icônes correspondantes
 
+## Prompt #22 - Extraction des vraies icônes Excel
+```
+Prend les icones réels qui sont dans le fichier excel sous forme d'images dans les cases.
+```
+→ Installation de `adm-zip` pour extraire les images du fichier Excel
+→ Extraction des 21 images PNG dans `public/images/levels/`
+→ Renommage en `level-0.png` à `level-20.png`
+→ Mise à jour de `src/lib/levels.tsx` pour utiliser les images via `next/image`
+
 ---
 *Dernière mise à jour: 2026-02-06*

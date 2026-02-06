@@ -1,28 +1,6 @@
 "use client";
 
-import {
-  HelpCircle,
-  Eye,
-  Tv,
-  Bot,
-  Lightbulb,
-  Repeat,
-  BookOpen,
-  Target,
-  Zap,
-  Users,
-  Star,
-  Cpu,
-  Code,
-  Database,
-  Server,
-  Sparkles,
-  FlaskConical,
-  Atom,
-  Crown,
-  Globe,
-  Flame,
-} from "lucide-react";
+import Image from "next/image";
 import { ReactNode } from "react";
 import levelsData from "@/data/levels.json";
 
@@ -32,7 +10,6 @@ export interface LevelInfo {
   name: string;
   seriousGaming: string;
   description: string;
-  icon: ReactNode;
   skills: {
     usage: number;
     automatisation: number;
@@ -42,49 +19,50 @@ export interface LevelInfo {
   };
 }
 
-// Mapping des icônes par niveau
-const LEVEL_ICONS = [
-  HelpCircle,    // 0 - Ignorant
-  Eye,           // 1 - Touriste
-  Tv,            // 2 - Spectateur
-  Bot,           // 3 - Utilisateur inconscient
-  Lightbulb,     // 4 - Utilisateur conscient
-  Repeat,        // 5 - Utilisateur régulier
-  BookOpen,      // 6 - Utilisateur éclairé
-  Target,        // 7 - Utilisateur structuré
-  Zap,           // 8 - Utilisateur avancé
-  Users,         // 9 - Référent fonctionnel
-  Star,          // 10 - Super Utilisateur
-  Cpu,           // 11 - Technicien IA
-  Code,          // 12 - Développeur IA
-  Database,      // 13 - Data Scientist IA
-  Server,        // 14 - Ingénieur IA
-  Sparkles,      // 15 - Expert IA
-  FlaskConical,  // 16 - Chercheur appliqué
-  Atom,          // 17 - Chercheur fondamental
-  Crown,         // 18 - Leader scientifique
-  Globe,         // 19 - Référence mondiale
-  Flame,         // 20 - Sommité du domaine
-];
-
 // Construire les infos de niveau à partir du JSON
-export const LEVELS: LevelInfo[] = levelsData.levels.map((level, index) => ({
-  ...level,
-  icon: (() => {
-    const Icon = LEVEL_ICONS[index] || HelpCircle;
-    return <Icon className="h-4 w-4" />;
-  })(),
-}));
+export const LEVELS: LevelInfo[] = levelsData.levels;
 
 // Fonction pour obtenir les infos d'un niveau
 export function getLevelInfo(levelNumber: number): LevelInfo {
   return LEVELS[levelNumber] || LEVELS[0];
 }
 
-// Fonction pour obtenir l'icône d'un niveau
+// Fonction pour obtenir l'icône/image d'un niveau
 export function getLevelIcon(levelNumber: number, className?: string): ReactNode {
-  const Icon = LEVEL_ICONS[levelNumber] || LEVEL_ICONS[0];
-  return <Icon className={className || "h-4 w-4"} />;
+  const size = className?.includes("h-3") ? 14 : className?.includes("h-5") ? 20 : 16;
+  
+  return (
+    <Image
+      src={`/images/levels/level-${levelNumber}.png`}
+      alt={`Niveau ${levelNumber}`}
+      width={size}
+      height={size}
+      className={className || "h-4 w-4"}
+      style={{ objectFit: "contain" }}
+    />
+  );
+}
+
+// Composant image de niveau (pour usage direct)
+export function LevelImage({ 
+  level, 
+  size = 16,
+  className = ""
+}: { 
+  level: number; 
+  size?: number;
+  className?: string;
+}) {
+  return (
+    <Image
+      src={`/images/levels/level-${level}.png`}
+      alt={`Niveau ${level}`}
+      width={size}
+      height={size}
+      className={className}
+      style={{ objectFit: "contain" }}
+    />
+  );
 }
 
 // Couleurs Tailwind pour les badges de niveau (gradient progressif)
