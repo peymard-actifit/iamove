@@ -86,7 +86,7 @@ function Get-NextVersion {
     return "$major.$minor.$patch"
 }
 
-# Fonction pour mettre a jour package.json proprement
+# Fonction pour mettre a jour package.json proprement (sans BOM)
 function Update-PackageVersion {
     param(
         [string]$NewVersion
@@ -94,7 +94,9 @@ function Update-PackageVersion {
     
     $content = Get-Content "package.json" -Raw -Encoding UTF8
     $content = $content -replace '"version":\s*"[^"]*"', "`"version`": `"$NewVersion`""
-    Set-Content "package.json" -Value $content -Encoding UTF8 -NoNewline
+    # Ecrire sans BOM pour compatibilite Vercel
+    $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+    [System.IO.File]::WriteAllText("$PWD\package.json", $content, $utf8NoBom)
 }
 
 # =============================================================================

@@ -1,15 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "nextjs",
-  "buildCommand": "next build",
-  "installCommand": "npm install",
-  "functions": {
-    "src/**/*.ts": {
-      "maxDuration": 60
-    },
-    "app/**/*.ts": {
-      "maxDuration": 60
-    }
-  },
-  "crons": []
+  "framework": "nextjs"
 }
