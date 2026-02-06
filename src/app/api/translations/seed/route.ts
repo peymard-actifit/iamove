@@ -100,24 +100,31 @@ export async function POST() {
         const value = translations[lang];
         if (!value) continue;
 
-        await prisma.translation.upsert({
+        // Chercher si la traduction existe déjà
+        const existing = await prisma.translation.findFirst({
           where: {
-            key_language_type_siteId: {
-              key,
-              language: lang,
-              type: "GLOBAL",
-              siteId: null,
-            },
-          },
-          update: { value },
-          create: {
             key,
             language: lang,
-            value,
             type: "GLOBAL",
             siteId: null,
           },
         });
+
+        if (existing) {
+          await prisma.translation.update({
+            where: { id: existing.id },
+            data: { value },
+          });
+        } else {
+          await prisma.translation.create({
+            data: {
+              key,
+              language: lang,
+              value,
+              type: "GLOBAL",
+            },
+          });
+        }
         count++;
       }
     }

@@ -381,7 +381,7 @@ model Translation {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  @@unique([key, language, type, siteId])
+  @@index([key, language, type])
   @@index([language, type])
   @@index([siteId, language])
   @@map("translations")

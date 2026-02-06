@@ -178,5 +178,21 @@ Ce ne sont pas des drapeaux. Trouve les drapeaux. Sur GLOBAL et LOCAL. Le sous-t
 → Traduction des titres d'onglets (Équipe, Organisation, Profil, Formation, Évaluation)
 → Traduction des labels du formulaire d'ajout de personne
 
+## Prompt #27 - Traductions 26 langues complètes en base
+```
+J'ai demandé que les 26 langues soient traitées et que tous les éléments, soit GLOBAUX soit LOCAUX soient traduits. Reprend les données, et prépare les traductions dans les 26 langues et mémorise les dans la base de données.
+```
+→ Modèle Prisma `Translation` créé pour stocker toutes les traductions
+→ 80+ clés de traduction pour l'interface GLOBAL
+→ Traductions complètes dans les 26 langues DeepL :
+  - FR, EN, DE, ES, IT, PT, NL, PL, RU
+  - JA, ZH, KO, AR, TR, SV, DA, FI, NO
+  - CS, EL, HU, RO, SK, BG, UK, ID
+→ API `/api/translations` pour charger les traductions par langue
+→ API `/api/translations/seed` pour initialiser la base avec toutes les traductions
+→ Contexte I18n mis à jour pour charger depuis la base de données
+→ Fonction `buildTranslationsObject()` pour construire l'objet de traductions
+→ Cache des traductions pour éviter les requêtes répétées
+
 ---
 *Dernière mise à jour: 2026-02-06*
