@@ -19,14 +19,12 @@ import {
 import {
   Users,
   Network,
-  User,
   GraduationCap,
   ClipboardCheck,
   Plus,
 } from "lucide-react";
 import { Tab1Persons } from "./tabs/tab1-persons";
 import { Tab2Organigramme } from "./tabs/tab2-organigramme";
-import { Tab3Profile } from "./tabs/tab3-profile";
 import { Tab4Formation } from "./tabs/tab4-formation";
 import { Tab5Quiz } from "./tabs/tab5-quiz";
 import { SiteSettingsPanel } from "./site-settings-panel";
@@ -87,7 +85,6 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
   const { t } = useI18n();
   const { status, startSaving, saveDone, saveError } = useSaveStatus();
   const [showSettings, setShowSettings] = useState(false);
-  const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("tab1");
   const [showAddPersonDialog, setShowAddPersonDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -142,18 +139,10 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
     tab1Enabled: site.settings?.tab1Enabled ?? true,
     tab2Title: t.tabs.organization,
     tab2Enabled: site.settings?.tab2Enabled ?? true,
-    tab3Title: t.tabs.profile,
-    tab3Enabled: site.settings?.tab3Enabled ?? true,
     tab4Title: t.tabs.training,
     tab4Enabled: site.settings?.tab4Enabled ?? true,
     tab5Title: t.tabs.assessment,
     tab5Enabled: site.settings?.tab5Enabled ?? true,
-  };
-
-  // Fonction pour voir le profil d'une personne (change d'onglet)
-  const handleViewProfile = (personId: string) => {
-    setSelectedPersonId(personId);
-    setActiveTab("tab3");
   };
 
   return (
@@ -185,12 +174,6 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
                     <span className="hidden sm:inline">{settings.tab2Title}</span>
                   </TabsTrigger>
                 )}
-                {settings.tab3Enabled && (
-                  <TabsTrigger value="tab3" className="gap-2">
-                    <User className="h-4 w-4" />
-                    <span className="hidden sm:inline">{settings.tab3Title}</span>
-                  </TabsTrigger>
-                )}
                 {settings.tab4Enabled && (
                   <TabsTrigger value="tab4" className="gap-2">
                     <GraduationCap className="h-4 w-4" />
@@ -218,7 +201,6 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
                 onSaveStart={startSaving}
                 onSaveDone={saveDone}
                 onSaveError={saveError}
-                onSelectPerson={handleViewProfile}
               />
             </TabsContent>
 
@@ -226,19 +208,6 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
               <Tab2Organigramme
                 siteId={site.id}
                 persons={site.persons}
-                onSaveStart={startSaving}
-                onSaveDone={saveDone}
-                onSaveError={saveError}
-              />
-            </TabsContent>
-
-            <TabsContent value="tab3" className="mt-2">
-              <Tab3Profile
-                siteId={site.id}
-                persons={site.persons}
-                levels={levels}
-                selectedPersonId={selectedPersonId}
-                onSelectPerson={setSelectedPersonId}
                 onSaveStart={startSaving}
                 onSaveDone={saveDone}
                 onSaveError={saveError}

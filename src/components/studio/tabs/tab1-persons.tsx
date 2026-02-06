@@ -20,6 +20,7 @@ import {
 import { Trash2, Copy, Eye, ArrowUp, ArrowDown } from "lucide-react";
 import { getLevelIcon, getLevelInfo } from "@/lib/levels";
 import { useI18n } from "@/lib/i18n";
+import { PersonProfileDialog } from "../person-profile-dialog";
 
 interface Person {
   id: string;
@@ -48,7 +49,6 @@ interface Tab1PersonsProps {
   onSaveStart: () => void;
   onSaveDone: () => void;
   onSaveError: () => void;
-  onSelectPerson: (id: string) => void;
 }
 
 // Composant cellule éditable
@@ -171,7 +171,7 @@ function LevelSelector({
         }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={() => setShowTooltip(false)}
-        className="px-1.5 py-0 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 inline-flex items-center gap-0.5 cursor-pointer whitespace-nowrap"
+        className="pl-2 pr-1 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 inline-flex items-center gap-1 cursor-pointer whitespace-nowrap"
       >
         Niv. {value}
         {levelIcon}
@@ -249,7 +249,6 @@ export function Tab1Persons({
   onSaveStart,
   onSaveDone,
   onSaveError,
-  onSelectPerson,
 }: Tab1PersonsProps) {
   const router = useRouter();
   const { t } = useI18n();
@@ -258,6 +257,8 @@ export function Tab1Persons({
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [sortColumn, setSortColumn] = useState<SortColumn>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
+  const selectedPerson = persons.find((p) => p.id === selectedPersonId) || null;
 
   // Fonction de tri
   const handleSort = (column: SortColumn) => {
@@ -478,7 +479,7 @@ export function Tab1Persons({
                         variant="ghost"
                         size="icon"
                         className="h-5 w-5"
-                        onClick={() => onSelectPerson(person.id)}
+                        onClick={() => setSelectedPersonId(person.id)}
                         title={t.tooltip.viewProfile}
                       >
                         <Eye className="h-3 w-3" />
@@ -533,6 +534,18 @@ export function Tab1Persons({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Profile Dialog */}
+      <PersonProfileDialog
+        siteId={siteId}
+        person={selectedPerson}
+        persons={persons}
+        open={!!selectedPersonId}
+        onOpenChange={(open) => !open && setSelectedPersonId(null)}
+        onSaveStart={onSaveStart}
+        onSaveDone={onSaveDone}
+        onSaveError={onSaveError}
+      />
     </div>
   );
 }
