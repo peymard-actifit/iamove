@@ -30,6 +30,8 @@ import {
 } from "lucide-react";
 import type { SessionPayload } from "@/lib/auth";
 import { useHeaderContent } from "./header-context";
+import { LanguageSelector } from "./language-selector";
+import { useI18n } from "@/lib/i18n";
 
 interface StudioHeaderProps {
   session: SessionPayload;
@@ -37,6 +39,7 @@ interface StudioHeaderProps {
 
 export function StudioHeader({ session }: StudioHeaderProps) {
   const { centerContent, rightActions } = useHeaderContent();
+  const { t } = useI18n();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showAdminDialog, setShowAdminDialog] = useState(false);
@@ -100,7 +103,7 @@ export function StudioHeader({ session }: StudioHeaderProps) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
-                  Actions
+                  {t.nav.actions}
                   <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -110,12 +113,15 @@ export function StudioHeader({ session }: StudioHeaderProps) {
                 <DropdownMenuItem asChild>
                   <Link href="/quizzes">
                     <FileQuestion className="mr-2 h-4 w-4" />
-                    Gérer les Quizz
+                    {t.nav.manageQuizzes}
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
+
+          {/* Language Selector */}
+          <LanguageSelector />
 
           {/* User Menu */}
           <DropdownMenu>
@@ -139,7 +145,7 @@ export function StudioHeader({ session }: StudioHeaderProps) {
                     {session.email}
                   </span>
                   <span className="text-xs font-normal text-gray-400 mt-1">
-                    {session.role === "ADMIN" ? "Administrateur" : "Utilisateur standard"}
+                    {session.role === "ADMIN" ? t.user.administrator : t.user.standardUser}
                   </span>
                 </div>
               </DropdownMenuLabel>
@@ -147,25 +153,25 @@ export function StudioHeader({ session }: StudioHeaderProps) {
               <DropdownMenuItem asChild>
                 <Link href="/settings">
                   <Settings className="mr-2 h-4 w-4" />
-                  Paramètres du compte
+                  {t.user.accountSettings}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               {session.role === "STANDARD" ? (
                 <DropdownMenuItem onClick={() => setShowAdminDialog(true)}>
                   <Shield className="mr-2 h-4 w-4" />
-                  Devenir administrateur
+                  {t.user.becomeAdmin}
                 </DropdownMenuItem>
               ) : (
                 <DropdownMenuItem onClick={handleDowngradeToStandard}>
                   <ShieldOff className="mr-2 h-4 w-4" />
-                  Redevenir standard
+                  {t.user.becomeStandard}
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout} disabled={isLoading}>
                 <LogOut className="mr-2 h-4 w-4" />
-                Se déconnecter
+                {t.nav.logout}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -176,9 +182,9 @@ export function StudioHeader({ session }: StudioHeaderProps) {
       <Dialog open={showAdminDialog} onOpenChange={setShowAdminDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Devenir administrateur</DialogTitle>
+            <DialogTitle>{t.user.adminCodeTitle}</DialogTitle>
             <DialogDescription>
-              Entrez le code administrateur pour accéder aux fonctionnalités avancées.
+              {t.user.adminCodeDescription}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
@@ -187,16 +193,16 @@ export function StudioHeader({ session }: StudioHeaderProps) {
             )}
             <Input
               type="password"
-              placeholder="Code administrateur"
+              placeholder={t.user.adminCodePlaceholder}
               value={adminCode}
               onChange={(e) => setAdminCode(e.target.value)}
             />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAdminDialog(false)}>
-              Annuler
+              {t.user.cancel}
             </Button>
-            <Button onClick={handleUpgradeToAdmin}>Valider</Button>
+            <Button onClick={handleUpgradeToAdmin}>{t.user.validate}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

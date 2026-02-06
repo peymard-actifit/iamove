@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { StudioHeader } from "@/components/studio/header";
-import { HeaderProvider } from "@/components/studio/header-context";
+import { StudioProviders } from "@/components/studio/studio-providers";
 
 export default async function StudioLayout({
   children,
@@ -15,11 +15,11 @@ export default async function StudioLayout({
   }
 
   return (
-    <HeaderProvider>
+    <StudioProviders>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <StudioHeader session={session} />
         <main className="container mx-auto px-4 py-4">{children}</main>
       </div>
-    </HeaderProvider>
+    </StudioProviders>
   );
 }

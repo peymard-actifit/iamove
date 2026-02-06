@@ -23,6 +23,7 @@ model StudioUser {
   name          String
   password      String    // Hash bcrypt
   role          UserRole  @default(STANDARD)
+  language      String    @default("FR")  // Langue préférée (code ISO)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   lastLoginAt   DateTime?

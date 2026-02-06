@@ -142,5 +142,17 @@ Quand on survole le niveau ou l'icone, sur les tuiles d'organigramme, s'affiche 
 → Ordre inversé : "Niv. X" puis icône dans l'organigramme
 → Icône ajoutée à droite du niveau dans la liste des personnes (Tab1)
 
+## Prompt #24 - Système de traduction multilingue
+```
+Vérifie que toutes les données sont bien sauvegardées. Rajoute un drapeau français à gauche du menu utilisateur. Au clic, affiche tous les drapeaux des langues DeepL. Système GLOBAL (studio) et LOCAL (sites) indépendants.
+```
+→ Création du système i18n complet (`src/lib/i18n/`)
+→ 26 langues supportées (DeepL) avec drapeaux
+→ Contexte React `I18nProvider` pour la gestion de langue
+→ Composant `LanguageSelector` avec dialog de sélection
+→ Traductions FR et EN complètes
+→ API `/api/user/language` pour sauvegarder la préférence
+→ Champ `language` ajouté au modèle `StudioUser`
+
 ---
 *Dernière mise à jour: 2026-02-06*
