@@ -51,6 +51,8 @@ interface Site {
   slug: string;
   description: string | null;
   isPublished: boolean;
+  primaryColor: string;
+  secondaryColor: string;
   settings: {
     tab1Title: string;
     tab1Enabled: boolean;

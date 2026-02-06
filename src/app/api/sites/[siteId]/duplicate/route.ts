@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
 
 export async function POST(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ siteId: string }> }
 ) {
   try {

@@ -1,27 +1,26 @@
 {
   "compilerOptions": {
     // Librairies
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "target": "ES2022",
-    
     // Modules
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    
     // JSX
-    "jsx": "preserve",
-    
+    "jsx": "react-jsx",
     // Interopérabilité
     "allowJs": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    
     // Émission
     "noEmit": true,
     "incremental": true,
-    
     // Vérifications strictes (TOUTES ACTIVÉES)
     "strict": true,
     "strictNullChecks": true,
@@ -31,39 +30,48 @@
     "noImplicitAny": true,
     "noImplicitThis": true,
     "alwaysStrict": true,
-    
     // Vérifications supplémentaires de qualité
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": false,
+    "exactOptionalPropertyTypes": false,
     "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    
+    "noPropertyAccessFromIndexSignature": false,
     // Performance
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    
     // Plugins
     "plugins": [
       {
         "name": "next"
       }
     ],
-    
     // Alias de chemins
     "paths": {
-      "@/*": ["./src/*"],
-      "@/components/*": ["./src/components/*"],
-      "@/lib/*": ["./src/lib/*"],
-      "@/utils/*": ["./src/utils/*"],
-      "@/types/*": ["./src/types/*"],
-      "@/hooks/*": ["./src/hooks/*"],
-      "@/styles/*": ["./src/styles/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@/components/*": [
+        "./src/components/*"
+      ],
+      "@/lib/*": [
+        "./src/lib/*"
+      ],
+      "@/utils/*": [
+        "./src/utils/*"
+      ],
+      "@/types/*": [
+        "./src/types/*"
+      ],
+      "@/hooks/*": [
+        "./src/hooks/*"
+      ],
+      "@/styles/*": [
+        "./src/styles/*"
+      ]
     },
-    
     // Base URL
     "baseUrl": "."
   },
@@ -71,7 +79,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

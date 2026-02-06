@@ -80,7 +80,7 @@ export async function POST(
 
 // GET - Liste des personnes
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ siteId: string }> }
 ) {
   try {

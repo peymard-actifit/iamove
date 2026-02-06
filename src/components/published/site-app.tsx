@@ -62,7 +62,7 @@ export function PublishedSiteApp({
   currentPerson,
   visiblePersons,
   levels,
-  isStudioUser,
+  isStudioUser: _isStudioUser,
 }: PublishedSiteAppProps) {
   const router = useRouter();
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(

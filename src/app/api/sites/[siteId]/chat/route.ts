@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import OpenAI from "openai";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env["OPENAI_API_KEY"],
 });
 
 export async function POST(
@@ -73,14 +73,14 @@ export async function POST(
             personId,
             role: "USER",
             content: message,
-            tokens: completion.usage?.prompt_tokens,
+            tokens: completion.usage?.prompt_tokens ?? null,
             model: "gpt-4-turbo-preview",
           },
           {
             personId,
             role: "ASSISTANT",
             content: response,
-            tokens: completion.usage?.completion_tokens,
+            tokens: completion.usage?.completion_tokens ?? null,
             model: "gpt-4-turbo-preview",
           },
         ],

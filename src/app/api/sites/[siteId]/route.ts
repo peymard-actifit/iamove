@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 
 // GET - Récupérer un site
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ siteId: string }> }
 ) {
   try {
@@ -88,7 +88,7 @@ export async function PATCH(
 
 // DELETE - Supprimer un site
 export async function DELETE(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ siteId: string }> }
 ) {
   try {

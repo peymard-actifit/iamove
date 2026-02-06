@@ -40,7 +40,7 @@ export async function PATCH(
 
 // DELETE - Supprimer un quiz
 export async function DELETE(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ quizId: string }> }
 ) {
   try {

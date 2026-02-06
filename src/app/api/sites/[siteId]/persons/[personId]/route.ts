@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 
 // DELETE - Supprimer une personne
 export async function DELETE(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ siteId: string; personId: string }> }
 ) {
   try {

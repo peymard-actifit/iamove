@@ -29,13 +29,15 @@ interface Level {
 interface Quiz {
   id: string;
   question: string;
-  answers: { text: string; isCorrect: boolean }[];
+  answers: unknown; // JsonValue from Prisma
   levelId: string;
   level: Level;
   category: string | null;
   isActive: boolean;
   createdBy: { name: string };
 }
+
+type QuizAnswer = { text: string; isCorrect: boolean };
 
 interface QuizzesManagerProps {
   levels: Level[];
@@ -129,13 +131,14 @@ export function QuizzesManager({ levels, initialQuizzes, userId }: QuizzesManage
   };
 
   const handleEdit = (quiz: Quiz) => {
+    const quizAnswers = (quiz.answers as QuizAnswer[]) || [];
     setFormData({
       question: quiz.question,
       levelId: quiz.levelId,
       category: quiz.category || "",
       answers: [
-        ...quiz.answers,
-        ...Array(4 - quiz.answers.length).fill({ text: "", isCorrect: false }),
+        ...quizAnswers,
+        ...Array(4 - quizAnswers.length).fill({ text: "", isCorrect: false }),
       ].slice(0, 4),
     });
     setEditingQuiz(quiz);
@@ -271,7 +274,7 @@ export function QuizzesManager({ levels, initialQuizzes, userId }: QuizzesManage
                   </span>
                 </TableCell>
                 <TableCell>{quiz.category || "-"}</TableCell>
-                <TableCell>{quiz.answers.length}</TableCell>
+                <TableCell>{(quiz.answers as QuizAnswer[])?.length || 0}</TableCell>
                 <TableCell>
                   <div className="flex gap-1">
                     <Button

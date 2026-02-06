@@ -20,6 +20,7 @@ export function SaveIndicator({ status, className }: SaveIndicatorProps) {
       const timer = setTimeout(() => setShowSaved(false), 2000);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [status]);
 
   if (status === "idle" && !showSaved) return null;

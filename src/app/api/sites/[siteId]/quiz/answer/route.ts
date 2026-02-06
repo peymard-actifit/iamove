@@ -12,7 +12,7 @@ export async function POST(
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
-    const { siteId } = await params;
+    const { siteId: _siteId } = await params;
     const body = await request.json();
     const { personId, questionId, selectedAnswers, isCorrect } = body;
 
