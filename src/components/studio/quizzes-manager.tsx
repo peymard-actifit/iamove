@@ -233,6 +233,16 @@ export function QuizzesManager({ levels, initialQuizzes, userId }: QuizzesManage
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-12">#</TableHead>
+              <TableHead
+                className="cursor-pointer w-24"
+                onClick={() => toggleSort("level")}
+              >
+                <div className="flex items-center gap-2">
+                  Niveau
+                  <SortIcon field="level" />
+                </div>
+              </TableHead>
               <TableHead
                 className="cursor-pointer"
                 onClick={() => toggleSort("question")}
@@ -242,59 +252,62 @@ export function QuizzesManager({ levels, initialQuizzes, userId }: QuizzesManage
                   <SortIcon field="question" />
                 </div>
               </TableHead>
-              <TableHead
-                className="cursor-pointer w-32"
-                onClick={() => toggleSort("level")}
-              >
-                <div className="flex items-center gap-2">
-                  Niveau
-                  <SortIcon field="level" />
-                </div>
-              </TableHead>
-              <TableHead
-                className="cursor-pointer w-32"
-                onClick={() => toggleSort("category")}
-              >
-                <div className="flex items-center gap-2">
-                  Catégorie
-                  <SortIcon field="category" />
-                </div>
-              </TableHead>
-              <TableHead className="w-24">Réponses</TableHead>
+              <TableHead className="w-64">Réponses</TableHead>
               <TableHead className="w-20"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredQuizzes.map((quiz) => (
-              <TableRow key={quiz.id}>
-                <TableCell className="max-w-md truncate">{quiz.question}</TableCell>
-                <TableCell>
-                  <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                    {quiz.level.name}
-                  </span>
-                </TableCell>
-                <TableCell>{quiz.category || "-"}</TableCell>
-                <TableCell>{(quiz.answers as QuizAnswer[])?.length || 0}</TableCell>
-                <TableCell>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleEdit(quiz)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(quiz.id)}
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+            {filteredQuizzes.map((quiz, index) => {
+              const answers = quiz.answers as QuizAnswer[];
+              return (
+                <TableRow key={quiz.id}>
+                  <TableCell className="font-mono text-gray-500">{index + 1}</TableCell>
+                  <TableCell>
+                    <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                      Niv. {quiz.level.number}
+                    </span>
+                  </TableCell>
+                  <TableCell className="max-w-md">
+                    <p className="truncate font-medium">{quiz.question}</p>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      {answers?.map((a, i) => (
+                        <span
+                          key={i}
+                          className={`px-1.5 py-0.5 rounded text-[10px] ${
+                            a.isCorrect
+                              ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                              : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                          }`}
+                          title={a.text}
+                        >
+                          R{i + 1}:{a.isCorrect ? "✓" : "✗"}
+                        </span>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(quiz)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(quiz.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </Card>

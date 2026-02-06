@@ -1,11 +1,18 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { useHeaderContent } from "./header-context";
 import { AddSiteButton } from "./sites-list";
+import { Button } from "@/components/ui";
 import { useI18n } from "@/lib/i18n";
+import { FileQuestion } from "lucide-react";
 
-export function DashboardHeaderContent() {
+interface DashboardHeaderContentProps {
+  isAdmin?: boolean;
+}
+
+export function DashboardHeaderContent({ isAdmin = false }: DashboardHeaderContentProps) {
   const { setCenterContent, setRightActions } = useHeaderContent();
   const { t, language } = useI18n();
 
@@ -17,13 +24,25 @@ export function DashboardHeaderContent() {
       </div>
     );
 
-    setRightActions(<AddSiteButton />);
+    setRightActions(
+      <div className="flex items-center gap-2">
+        {isAdmin && (
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/quizzes">
+              <FileQuestion className="h-4 w-4 mr-1" />
+              Quizz
+            </Link>
+          </Button>
+        )}
+        <AddSiteButton />
+      </div>
+    );
 
     return () => {
       setCenterContent(null);
       setRightActions(null);
     };
-  }, [setCenterContent, setRightActions, t, language]);
+  }, [setCenterContent, setRightActions, t, language, isAdmin]);
 
   return null;
 }
