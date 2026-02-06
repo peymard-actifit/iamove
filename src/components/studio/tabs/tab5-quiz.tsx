@@ -21,12 +21,18 @@ interface LevelScaleProps {
 function LevelScale({ onStartQuiz, selectedLevel }: LevelScaleProps) {
   const [hoveredLevel, setHoveredLevel] = useState<number | null>(null);
 
+  // Trouver les infos du niveau survolé
+  const hoveredLevelInfo = hoveredLevel !== null ? LEVELS[hoveredLevel] : null;
+
   return (
-    <div className="w-56 h-full bg-gray-50 dark:bg-gray-900 border-r overflow-y-auto overflow-x-hidden flex-shrink-0">
-      <div className="p-2">
+    <div className="w-56 h-full bg-gray-50 dark:bg-gray-900 border-r flex-shrink-0 flex flex-col">
+      <div className="p-2 flex-shrink-0">
         <h3 className="text-sm font-semibold mb-2 text-center text-gray-600 dark:text-gray-400">
           Échelle des niveaux
         </h3>
+      </div>
+      
+      <div className="flex-1 overflow-y-auto px-2 pb-2">
         <div className="space-y-0.5">
           {LEVELS.map((level) => (
             <div
@@ -60,32 +66,31 @@ function LevelScale({ onStartQuiz, selectedLevel }: LevelScaleProps) {
                   </p>
                 </div>
               </div>
-              
-              {/* Tooltip avec description */}
-              {hoveredLevel === level.number && (
-                <div className="absolute left-full top-0 ml-2 z-50 w-72 p-3 bg-gray-900 text-white rounded-lg shadow-xl pointer-events-none">
-                  <p className="text-xs font-semibold mb-1">
-                    Niveau {level.number} - {level.name}
-                  </p>
-                  <p className="text-[10px] text-gray-300 mb-2 italic">
-                    {level.seriousGaming}
-                  </p>
-                  <p className="text-[10px] leading-relaxed">
-                    {level.description}
-                  </p>
-                  {onStartQuiz && (
-                    <p className="text-[9px] text-blue-300 mt-2 flex items-center gap-1">
-                      <Play className="h-3 w-3" />
-                      Double-cliquez pour lancer le quizz
-                    </p>
-                  )}
-                  <div className="absolute right-full top-3 border-8 border-transparent border-r-gray-900" />
-                </div>
-              )}
             </div>
           ))}
         </div>
       </div>
+
+      {/* Tooltip fixe en bas de la colonne */}
+      {hoveredLevelInfo && (
+        <div className="flex-shrink-0 p-2 border-t bg-gray-900 text-white">
+          <p className="text-xs font-semibold mb-1">
+            Niveau {hoveredLevelInfo.number} - {hoveredLevelInfo.name}
+          </p>
+          <p className="text-[10px] text-gray-300 mb-1 italic">
+            {hoveredLevelInfo.seriousGaming}
+          </p>
+          <p className="text-[10px] leading-relaxed text-gray-200">
+            {hoveredLevelInfo.description}
+          </p>
+          {onStartQuiz && (
+            <p className="text-[9px] text-blue-300 mt-2 flex items-center gap-1">
+              <Play className="h-3 w-3" />
+              Double-cliquez pour lancer le quizz
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
