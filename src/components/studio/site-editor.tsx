@@ -31,6 +31,7 @@ import { Tab4Formation } from "./tabs/tab4-formation";
 import { Tab5Quiz } from "./tabs/tab5-quiz";
 import { SiteSettingsPanel } from "./site-settings-panel";
 import { SiteHeaderContent } from "./site-header-content";
+import { useI18n } from "@/lib/i18n";
 
 interface Person {
   id: string;
@@ -83,6 +84,7 @@ interface SiteEditorProps {
 
 export function SiteEditor({ site, levels }: SiteEditorProps) {
   const router = useRouter();
+  const { t } = useI18n();
   const { status, startSaving, saveDone, saveError } = useSaveStatus();
   const [showSettings, setShowSettings] = useState(false);
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
@@ -100,7 +102,7 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
 
   const handleCreatePerson = async () => {
     if (!newPerson.name || !newPerson.email) {
-      setErrorMessage("Le nom et l'email sont requis");
+      setErrorMessage(t.common.required);
       return;
     }
 
@@ -135,15 +137,15 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
   };
 
   const settings = site.settings || {
-    tab1Title: "Équipe",
+    tab1Title: t.tabs.team,
     tab1Enabled: true,
-    tab2Title: "Organisation",
+    tab2Title: t.tabs.organization,
     tab2Enabled: true,
-    tab3Title: "Profil",
+    tab3Title: t.tabs.profile,
     tab3Enabled: true,
-    tab4Title: "Formation",
+    tab4Title: t.tabs.training,
     tab4Enabled: true,
-    tab5Title: "Évaluation",
+    tab5Title: t.tabs.assessment,
     tab5Enabled: true,
   };
 
@@ -203,7 +205,7 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
               </TabsList>
               <Button size="sm" onClick={() => setShowAddPersonDialog(true)}>
                 <Plus className="h-4 w-4 mr-1" />
-                Ajouter une personne ({site.persons.length})
+                {t.header.addPerson} ({site.persons.length})
               </Button>
             </div>
 
@@ -277,7 +279,7 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
       }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Ajouter une personne</DialogTitle>
+            <DialogTitle>{t.persons.addPerson}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             {errorMessage && (
@@ -286,7 +288,7 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
               </div>
             )}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Nom complet *</label>
+              <label className="text-sm font-medium">{t.persons.fullName} *</label>
               <Input
                 placeholder="Jean Dupont"
                 value={newPerson.name}
@@ -294,7 +296,7 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Email *</label>
+              <label className="text-sm font-medium">{t.persons.email} *</label>
               <Input
                 type="email"
                 placeholder="jean.dupont@entreprise.com"
@@ -303,7 +305,7 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Poste</label>
+              <label className="text-sm font-medium">{t.persons.position}</label>
               <Input
                 placeholder="Développeur"
                 value={newPerson.jobTitle}
@@ -311,7 +313,7 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Service</label>
+              <label className="text-sm font-medium">{t.persons.department}</label>
               <Input
                 placeholder="IT"
                 value={newPerson.department}
@@ -319,16 +321,16 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Responsable</label>
+              <label className="text-sm font-medium">{t.persons.manager}</label>
               <select
                 className="w-full h-10 px-3 rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
                 value={newPerson.managerId}
                 onChange={(e) => setNewPerson({ ...newPerson, managerId: e.target.value })}
               >
-                <option value="">Aucun (personne au sommet)</option>
+                <option value="">{t.persons.none} ({t.persons.topLevel})</option>
                 {site.persons.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name} - {p.jobTitle || "Sans poste"}
+                    {p.name} - {p.jobTitle || t.persons.none}
                   </option>
                 ))}
               </select>
@@ -336,10 +338,10 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddPersonDialog(false)}>
-              Annuler
+              {t.common.cancel}
             </Button>
             <Button onClick={handleCreatePerson} isLoading={isLoading}>
-              Ajouter
+              {t.common.add}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { SiteLanguageSelector } from "./site-language-selector";
+import { useI18n } from "@/lib/i18n";
 
 interface Site {
   id: string;
@@ -294,6 +295,7 @@ export function AddSiteButton() {
   const [isLoading, setIsLoading] = useState(false);
   const [newSite, setNewSite] = useState({ name: "", description: "" });
   const router = useRouter();
+  const { t } = useI18n();
 
   const handleCreate = async () => {
     if (!newSite.name.trim()) return;
@@ -318,16 +320,16 @@ export function AddSiteButton() {
     <>
       <Button size="sm" onClick={() => setShowDialog(true)}>
         <Plus className="h-4 w-4 mr-1" />
-        Ajouter un site
+        {t.header.addSite}
       </Button>
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Créer un nouveau site</DialogTitle>
+            <DialogTitle>{t.sites.createSite}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Nom du site *</label>
+              <label className="text-sm font-medium">{t.sites.siteName} *</label>
               <Input
                 placeholder="Ex: Acme Corporation"
                 value={newSite.name}
@@ -335,7 +337,7 @@ export function AddSiteButton() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Description</label>
+              <label className="text-sm font-medium">{t.sites.siteDescription}</label>
               <Input
                 placeholder="Description optionnelle"
                 value={newSite.description}
@@ -344,8 +346,8 @@ export function AddSiteButton() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDialog(false)}>Annuler</Button>
-            <Button onClick={handleCreate} isLoading={isLoading}>Créer</Button>
+            <Button variant="outline" onClick={() => setShowDialog(false)}>{t.common.cancel}</Button>
+            <Button onClick={handleCreate} isLoading={isLoading}>{t.common.add}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

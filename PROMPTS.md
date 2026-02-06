@@ -164,5 +164,19 @@ Vas-y pour les traductions LOCALES par site
 → API `/api/sites/[siteId]/language` pour changer la langue
 → Système indépendant du sélecteur GLOBAL
 
+## Prompt #26 - Vrais drapeaux et traductions complètes
+```
+Ce ne sont pas des drapeaux. Trouve les drapeaux. Sur GLOBAL et LOCAL. Le sous-titre Studio doit être traduit ainsi que les boutons Ajouter et les titres d'onglets.
+```
+→ Installation du package `flag-icons` (vrais drapeaux SVG)
+→ Création du composant `Flag` avec 3 tailles (sm, md, lg)
+→ Mise à jour du sélecteur GLOBAL avec vrais drapeaux
+→ Mise à jour du sélecteur LOCAL avec vrais drapeaux
+→ Traduction du sous-titre "Studio" dans le header
+→ Traduction de "Ajouter un site" (dashboard)
+→ Traduction de "Ajouter une personne" (site editor)
+→ Traduction des titres d'onglets (Équipe, Organisation, Profil, Formation, Évaluation)
+→ Traduction des labels du formulaire d'ajout de personne
+
 ---
 *Dernière mise à jour: 2026-02-06*

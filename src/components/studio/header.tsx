@@ -84,7 +84,7 @@ export function StudioHeader({ session }: StudioHeaderProps) {
           <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             iamove
           </span>
-          <span className="text-xs text-gray-500">Studio</span>
+          <span className="text-xs text-gray-500">{t.nav.studio}</span>
           <span className="text-[10px] text-gray-400 font-mono">v{process.env.NEXT_PUBLIC_APP_VERSION || "2.3.0"}</span>
         </Link>
 

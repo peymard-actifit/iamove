@@ -11,37 +11,37 @@ export interface LanguageInfo {
   code: SupportedLanguage;
   name: string;
   nativeName: string;
-  flag: string; // Emoji drapeau
+  countryCode: string; // Code pays ISO pour flag-icons (ex: "fr", "gb")
 }
 
-// Langues supportées par DeepL
+// Langues supportées par DeepL avec codes pays pour flag-icons
 export const SUPPORTED_LANGUAGES: LanguageInfo[] = [
-  { code: "FR", name: "French", nativeName: "Français", flag: "🇫🇷" },
-  { code: "EN", name: "English", nativeName: "English", flag: "🇬🇧" },
-  { code: "DE", name: "German", nativeName: "Deutsch", flag: "🇩🇪" },
-  { code: "ES", name: "Spanish", nativeName: "Español", flag: "🇪🇸" },
-  { code: "IT", name: "Italian", nativeName: "Italiano", flag: "🇮🇹" },
-  { code: "PT", name: "Portuguese", nativeName: "Português", flag: "🇵🇹" },
-  { code: "NL", name: "Dutch", nativeName: "Nederlands", flag: "🇳🇱" },
-  { code: "PL", name: "Polish", nativeName: "Polski", flag: "🇵🇱" },
-  { code: "RU", name: "Russian", nativeName: "Русский", flag: "🇷🇺" },
-  { code: "JA", name: "Japanese", nativeName: "日本語", flag: "🇯🇵" },
-  { code: "ZH", name: "Chinese", nativeName: "中文", flag: "🇨🇳" },
-  { code: "KO", name: "Korean", nativeName: "한국어", flag: "🇰🇷" },
-  { code: "AR", name: "Arabic", nativeName: "العربية", flag: "🇸🇦" },
-  { code: "TR", name: "Turkish", nativeName: "Türkçe", flag: "🇹🇷" },
-  { code: "SV", name: "Swedish", nativeName: "Svenska", flag: "🇸🇪" },
-  { code: "DA", name: "Danish", nativeName: "Dansk", flag: "🇩🇰" },
-  { code: "FI", name: "Finnish", nativeName: "Suomi", flag: "🇫🇮" },
-  { code: "NO", name: "Norwegian", nativeName: "Norsk", flag: "🇳🇴" },
-  { code: "CS", name: "Czech", nativeName: "Čeština", flag: "🇨🇿" },
-  { code: "EL", name: "Greek", nativeName: "Ελληνικά", flag: "🇬🇷" },
-  { code: "HU", name: "Hungarian", nativeName: "Magyar", flag: "🇭🇺" },
-  { code: "RO", name: "Romanian", nativeName: "Română", flag: "🇷🇴" },
-  { code: "SK", name: "Slovak", nativeName: "Slovenčina", flag: "🇸🇰" },
-  { code: "BG", name: "Bulgarian", nativeName: "Български", flag: "🇧🇬" },
-  { code: "UK", name: "Ukrainian", nativeName: "Українська", flag: "🇺🇦" },
-  { code: "ID", name: "Indonesian", nativeName: "Bahasa Indonesia", flag: "🇮🇩" },
+  { code: "FR", name: "French", nativeName: "Français", countryCode: "fr" },
+  { code: "EN", name: "English", nativeName: "English", countryCode: "gb" },
+  { code: "DE", name: "German", nativeName: "Deutsch", countryCode: "de" },
+  { code: "ES", name: "Spanish", nativeName: "Español", countryCode: "es" },
+  { code: "IT", name: "Italian", nativeName: "Italiano", countryCode: "it" },
+  { code: "PT", name: "Portuguese", nativeName: "Português", countryCode: "pt" },
+  { code: "NL", name: "Dutch", nativeName: "Nederlands", countryCode: "nl" },
+  { code: "PL", name: "Polish", nativeName: "Polski", countryCode: "pl" },
+  { code: "RU", name: "Russian", nativeName: "Русский", countryCode: "ru" },
+  { code: "JA", name: "Japanese", nativeName: "日本語", countryCode: "jp" },
+  { code: "ZH", name: "Chinese", nativeName: "中文", countryCode: "cn" },
+  { code: "KO", name: "Korean", nativeName: "한국어", countryCode: "kr" },
+  { code: "AR", name: "Arabic", nativeName: "العربية", countryCode: "sa" },
+  { code: "TR", name: "Turkish", nativeName: "Türkçe", countryCode: "tr" },
+  { code: "SV", name: "Swedish", nativeName: "Svenska", countryCode: "se" },
+  { code: "DA", name: "Danish", nativeName: "Dansk", countryCode: "dk" },
+  { code: "FI", name: "Finnish", nativeName: "Suomi", countryCode: "fi" },
+  { code: "NO", name: "Norwegian", nativeName: "Norsk", countryCode: "no" },
+  { code: "CS", name: "Czech", nativeName: "Čeština", countryCode: "cz" },
+  { code: "EL", name: "Greek", nativeName: "Ελληνικά", countryCode: "gr" },
+  { code: "HU", name: "Hungarian", nativeName: "Magyar", countryCode: "hu" },
+  { code: "RO", name: "Romanian", nativeName: "Română", countryCode: "ro" },
+  { code: "SK", name: "Slovak", nativeName: "Slovenčina", countryCode: "sk" },
+  { code: "BG", name: "Bulgarian", nativeName: "Български", countryCode: "bg" },
+  { code: "UK", name: "Ukrainian", nativeName: "Українська", countryCode: "ua" },
+  { code: "ID", name: "Indonesian", nativeName: "Bahasa Indonesia", countryCode: "id" },
 ];
 
 // Structure des traductions
@@ -162,6 +162,9 @@ export interface Translations {
     sort: string;
     noData: string;
     required: string;
+    chooseLanguage: string;
+    siteLanguage: string;
+    siteLanguageDescription: string;
   };
   // Dates
   dates: {
@@ -280,6 +283,9 @@ export const FR: Translations = {
     sort: "Trier",
     noData: "Aucune donnée",
     required: "Requis",
+    chooseLanguage: "Choisir la langue",
+    siteLanguage: "Langue du contenu",
+    siteLanguageDescription: "Langue utilisée pour le contenu de ce site",
   },
   dates: {
     today: "Aujourd'hui",
@@ -397,6 +403,9 @@ export const EN: Translations = {
     sort: "Sort",
     noData: "No data",
     required: "Required",
+    chooseLanguage: "Choose language",
+    siteLanguage: "Content language",
+    siteLanguageDescription: "Language used for this site's content",
   },
   dates: {
     today: "Today",

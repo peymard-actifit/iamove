@@ -8,8 +8,9 @@ import {
   DialogHeader,
   DialogTitle,
   Button,
+  Flag,
 } from "@/components/ui";
-import { SUPPORTED_LANGUAGES, SupportedLanguage, getLanguageInfo } from "@/lib/i18n";
+import { SUPPORTED_LANGUAGES, SupportedLanguage, getLanguageInfo, useI18n } from "@/lib/i18n";
 
 interface SiteLanguageSelectorProps {
   siteId: string;
@@ -23,6 +24,7 @@ export function SiteLanguageSelector({
   onLanguageChange,
 }: SiteLanguageSelectorProps) {
   const router = useRouter();
+  const { t } = useI18n();
   const [showDialog, setShowDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
@@ -59,22 +61,22 @@ export function SiteLanguageSelector({
           e.stopPropagation();
           setShowDialog(true);
         }}
-        className="h-7 w-7 text-lg"
-        title={`Langue du site: ${languageInfo?.nativeName || currentLanguage}`}
+        className="h-7 w-7"
+        title={`${t.common.siteLanguage}: ${languageInfo?.nativeName || currentLanguage}`}
         disabled={isLoading}
       >
-        {languageInfo?.flag || "🌐"}
+        <Flag countryCode={languageInfo?.countryCode || "fr"} size="sm" />
       </Button>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-w-md" onClick={(e) => e.stopPropagation()}>
+        <DialogContent className="max-w-lg" onClick={(e) => e.stopPropagation()}>
           <DialogHeader>
             <DialogTitle className="text-center">
-              🌍 Langue du contenu du site
+              {t.common.siteLanguage}
             </DialogTitle>
           </DialogHeader>
           <p className="text-sm text-gray-500 text-center mb-2">
-            Cette langue sera utilisée pour le contenu spécifique à ce site (textes, descriptions, etc.)
+            {t.common.siteLanguageDescription}
           </p>
           <div className="grid grid-cols-4 gap-2 py-4">
             {SUPPORTED_LANGUAGES.map((lang) => (
@@ -83,7 +85,7 @@ export function SiteLanguageSelector({
                 onClick={() => handleSelectLanguage(lang.code)}
                 disabled={isLoading}
                 className={`
-                  flex flex-col items-center gap-1 p-3 rounded-lg transition-all
+                  flex flex-col items-center gap-2 p-3 rounded-lg transition-all
                   hover:bg-gray-100 dark:hover:bg-gray-800
                   disabled:opacity-50 disabled:cursor-not-allowed
                   ${currentLanguage === lang.code 
@@ -93,7 +95,7 @@ export function SiteLanguageSelector({
                 `}
                 title={lang.name}
               >
-                <span className="text-2xl">{lang.flag}</span>
+                <Flag countryCode={lang.countryCode} size="lg" />
                 <span className="text-[10px] text-gray-600 dark:text-gray-400 truncate w-full text-center">
                   {lang.nativeName}
                 </span>

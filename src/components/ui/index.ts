@@ -7,3 +7,4 @@ export * from "./dialog";
 export * from "./table";
 export * from "./dropdown-menu";
 export * from "./save-indicator";
+export * from "./flag";
