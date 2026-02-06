@@ -82,19 +82,23 @@ export async function PATCH(
       return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
     }
 
+    // Construire les données de mise à jour dynamiquement (pour le mode inline)
+    const updateData: Record<string, unknown> = {};
+    
+    if (body.name !== undefined) updateData.name = body.name;
+    if (body.email !== undefined) updateData.email = body.email;
+    if (body.firstName !== undefined) updateData.firstName = body.firstName;
+    if (body.lastName !== undefined) updateData.lastName = body.lastName;
+    if (body.jobTitle !== undefined) updateData.jobTitle = body.jobTitle || null;
+    if (body.department !== undefined) updateData.department = body.department || null;
+    if (body.phone !== undefined) updateData.phone = body.phone;
+    if (body.canViewAll !== undefined) updateData.canViewAll = body.canViewAll;
+    if (body.managerId !== undefined) updateData.managerId = body.managerId || null;
+    if (body.currentLevel !== undefined) updateData.currentLevel = body.currentLevel;
+
     const person = await prisma.person.update({
       where: { id: personId },
-      data: {
-        name: body.name,
-        email: body.email,
-        firstName: body.firstName,
-        lastName: body.lastName,
-        jobTitle: body.jobTitle,
-        department: body.department,
-        phone: body.phone,
-        canViewAll: body.canViewAll,
-        managerId: body.managerId || null,
-      },
+      data: updateData,
     });
 
     return NextResponse.json(person);

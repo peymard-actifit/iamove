@@ -91,5 +91,10 @@ A droite de la mention "Studio", il faut rajouter la version du commit du projet
 Je ne sors pas de la fenetre en faisant ajouter
 ```
 
+## Prompt #16 - Edition inline personnes
+```
+L'édition des personnes n'est toujours pas possible dans le studio et un site. Quand je clique sur Editer, cela ne fait rien,. Je veux qu'il n'y ait pas de menu avec trois petit points à droite des lignes de personnes, mais directement les icônes les uns à coté des autres, justifiés à droite. Je veux pouvoir éditer directement les valeurs dans la liste en cliquant sur chaque texte. Y compris le niveau que je veux pouvoir ajuster de 0 à 20.
+```
+
 ---
 *Dernière mise à jour: 2026-02-06*

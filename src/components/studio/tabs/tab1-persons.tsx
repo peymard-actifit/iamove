@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Button,
@@ -16,12 +16,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
 } from "@/components/ui";
-import { Plus, MoreVertical, Edit, Trash2, Link as LinkIcon, Copy } from "lucide-react";
+import { Plus, Trash2, Copy, Eye } from "lucide-react";
 
 interface Person {
   id: string;
@@ -53,6 +49,172 @@ interface Tab1PersonsProps {
   onSelectPerson: (id: string) => void;
 }
 
+// Composant cellule éditable
+function EditableCell({
+  value,
+  onChange,
+  type = "text",
+  placeholder = "-",
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  type?: "text" | "email";
+  placeholder?: string;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(value);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
+  useEffect(() => {
+    setEditValue(value);
+  }, [value]);
+
+  const handleBlur = () => {
+    setIsEditing(false);
+    if (editValue !== value) {
+      onChange(editValue);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleBlur();
+    } else if (e.key === "Escape") {
+      setEditValue(value);
+      setIsEditing(false);
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <Input
+        ref={inputRef}
+        type={type}
+        value={editValue}
+        onChange={(e) => setEditValue(e.target.value)}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        className="h-8 text-sm"
+      />
+    );
+  }
+
+  return (
+    <span
+      onClick={(e) => {
+        e.stopPropagation();
+        setIsEditing(true);
+      }}
+      className="cursor-text hover:bg-gray-100 dark:hover:bg-gray-800 px-2 py-1 rounded inline-block min-w-[60px]"
+    >
+      {value || <span className="text-gray-400">{placeholder}</span>}
+    </span>
+  );
+}
+
+// Composant sélecteur de niveau
+function LevelSelector({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+
+  if (isEditing) {
+    return (
+      <select
+        value={value}
+        onChange={(e) => {
+          onChange(Number(e.target.value));
+          setIsEditing(false);
+        }}
+        onBlur={() => setIsEditing(false)}
+        autoFocus
+        className="h-8 px-2 text-sm rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
+      >
+        {Array.from({ length: 21 }, (_, i) => (
+          <option key={i} value={i}>
+            Niveau {i}
+          </option>
+        ))}
+      </select>
+    );
+  }
+
+  return (
+    <span
+      onClick={(e) => {
+        e.stopPropagation();
+        setIsEditing(true);
+      }}
+      className="cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-800 px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+    >
+      Niveau {value}
+    </span>
+  );
+}
+
+// Composant sélecteur de responsable
+function ManagerSelector({
+  value,
+  persons,
+  currentPersonId,
+  onChange,
+}: {
+  value: string | null;
+  persons: Person[];
+  currentPersonId: string;
+  onChange: (value: string | null) => void;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const manager = persons.find((p) => p.id === value);
+
+  if (isEditing) {
+    return (
+      <select
+        value={value || ""}
+        onChange={(e) => {
+          onChange(e.target.value || null);
+          setIsEditing(false);
+        }}
+        onBlur={() => setIsEditing(false)}
+        autoFocus
+        className="h-8 px-2 text-sm rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900 max-w-[150px]"
+      >
+        <option value="">Aucun</option>
+        {persons
+          .filter((p) => p.id !== currentPersonId)
+          .map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+      </select>
+    );
+  }
+
+  return (
+    <span
+      onClick={(e) => {
+        e.stopPropagation();
+        setIsEditing(true);
+      }}
+      className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 px-2 py-1 rounded inline-block min-w-[60px]"
+    >
+      {manager?.name || <span className="text-gray-400">-</span>}
+    </span>
+  );
+}
+
 export function Tab1Persons({
   siteId,
   persons,
@@ -74,6 +236,28 @@ export function Tab1Persons({
     managerId: "",
   });
   const [errorMessage, setErrorMessage] = useState("");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  // Fonction de mise à jour d'une personne
+  const updatePerson = async (personId: string, field: string, value: string | number | null) => {
+    onSaveStart();
+    try {
+      const res = await fetch(`/api/sites/${siteId}/persons/${personId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [field]: value }),
+      });
+
+      if (res.ok) {
+        onSaveDone();
+        router.refresh();
+      } else {
+        onSaveError();
+      }
+    } catch {
+      onSaveError();
+    }
+  };
 
   const handleCreatePerson = async () => {
     if (!newPerson.name || !newPerson.email) {
@@ -130,13 +314,10 @@ export function Tab1Persons({
   };
 
   const copyInviteLink = (personId: string) => {
-    const link = `${window.location.origin}/s/${siteId}/invite/${personId}`;
+    const link = `${window.location.origin}/invite/${personId}`;
     navigator.clipboard.writeText(link);
-  };
-
-  const getLevelName = (levelNumber: number) => {
-    const level = levels.find((l) => l.number === levelNumber);
-    return level ? level.name : `Niveau ${levelNumber}`;
+    setCopiedId(personId);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   return (
@@ -152,68 +333,100 @@ export function Tab1Persons({
       {persons.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
           <p>Aucune personne dans ce site</p>
-          <p className="text-sm mt-1">Commencez par ajouter la première personne (sans responsable)</p>
+          <p className="text-sm mt-1">Commencez par ajouter la première personne</p>
         </div>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nom</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Poste</TableHead>
-              <TableHead>Service</TableHead>
-              <TableHead>Niveau IA</TableHead>
-              <TableHead>Responsable</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {persons.map((person) => (
-              <TableRow
-                key={person.id}
-                className="cursor-pointer"
-                onClick={() => onSelectPerson(person.id)}
-              >
-                <TableCell className="font-medium">{person.name}</TableCell>
-                <TableCell>{person.email}</TableCell>
-                <TableCell>{person.jobTitle || "-"}</TableCell>
-                <TableCell>{person.department || "-"}</TableCell>
-                <TableCell>
-                  <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                    {getLevelName(person.currentLevel)}
-                  </span>
-                </TableCell>
-                <TableCell>{person.manager?.name || "-"}</TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                      <Button variant="ghost" size="icon">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onSelectPerson(person.id)}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Éditer
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => copyInviteLink(person.id)}>
-                        <Copy className="mr-2 h-4 w-4" />
-                        Copier lien invitation
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-red-600"
-                        onClick={() => setShowDeleteDialog(person.id)}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Supprimer
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+        <div className="border rounded-lg overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nom</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Poste</TableHead>
+                <TableHead>Service</TableHead>
+                <TableHead>Niveau IA</TableHead>
+                <TableHead>Responsable</TableHead>
+                <TableHead className="w-[120px] text-right">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {persons.map((person) => (
+                <TableRow key={person.id} className="group">
+                  <TableCell className="font-medium">
+                    <EditableCell
+                      value={person.name}
+                      onChange={(v) => updatePerson(person.id, "name", v)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <EditableCell
+                      value={person.email}
+                      type="email"
+                      onChange={(v) => updatePerson(person.id, "email", v)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <EditableCell
+                      value={person.jobTitle || ""}
+                      onChange={(v) => updatePerson(person.id, "jobTitle", v || null)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <EditableCell
+                      value={person.department || ""}
+                      onChange={(v) => updatePerson(person.id, "department", v || null)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <LevelSelector
+                      value={person.currentLevel}
+                      onChange={(v) => updatePerson(person.id, "currentLevel", v)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <ManagerSelector
+                      value={person.managerId}
+                      persons={persons}
+                      currentPersonId={person.id}
+                      onChange={(v) => updatePerson(person.id, "managerId", v)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => onSelectPerson(person.id)}
+                        title="Voir le profil"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => copyInviteLink(person.id)}
+                        title="Copier le lien d'invitation"
+                      >
+                        <Copy className={`h-4 w-4 ${copiedId === person.id ? "text-green-500" : ""}`} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        onClick={() => setShowDeleteDialog(person.id)}
+                        title="Supprimer"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
 
       {/* Create Dialog */}
