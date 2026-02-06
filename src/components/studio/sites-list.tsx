@@ -16,7 +16,6 @@ import {
 } from "@/components/ui";
 import {
   Plus,
-  Edit,
   Copy,
   Trash2,
   Globe,
@@ -25,12 +24,14 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { SiteLanguageSelector } from "./site-language-selector";
 
 interface Site {
   id: string;
   name: string;
   slug: string;
   description: string | null;
+  language: string;
   isPublished: boolean;
   publishedAt: Date | null;
   createdAt: Date;
@@ -144,6 +145,11 @@ export function SitesList({ sites, folders, isAdmin }: SitesListProps) {
                   </div>
                   {/* Icônes d'action */}
                   <div className="flex items-center gap-0.5 shrink-0">
+                    {/* Langue du site (LOCAL) */}
+                    <SiteLanguageSelector 
+                      siteId={site.id} 
+                      currentLanguage={site.language || "FR"} 
+                    />
                     <Button
                       variant="ghost"
                       size="icon"

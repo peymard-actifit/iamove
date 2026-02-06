@@ -154,5 +154,15 @@ Vérifie que toutes les données sont bien sauvegardées. Rajoute un drapeau fra
 → API `/api/user/language` pour sauvegarder la préférence
 → Champ `language` ajouté au modèle `StudioUser`
 
+## Prompt #25 - Traductions LOCALES par site
+```
+Vas-y pour les traductions LOCALES par site
+```
+→ Champ `language` ajouté au modèle `Site` (Prisma)
+→ Composant `SiteLanguageSelector` créé
+→ Sélecteur de langue sur chaque tuile de site (drapeau)
+→ API `/api/sites/[siteId]/language` pour changer la langue
+→ Système indépendant du sélecteur GLOBAL
+
 ---
 *Dernière mise à jour: 2026-02-06*
