@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, Button, Input } from "@/components/ui";
 import { User, Mail, Briefcase, Building, Award, ChevronRight, Edit, Save, X } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { getLevelIcon } from "@/lib/levels";
 
 interface Person {
   id: string;
@@ -170,10 +171,10 @@ export function Tab3Profile({
         {selectedPerson ? (
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="h-16 w-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
-                    <User className="h-8 w-8 text-white" />
+                  <div className="h-16 w-16 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 flex items-center justify-center overflow-hidden">
+                    {getLevelIcon(selectedPerson.currentLevel, "h-12 w-12")}
                   </div>
                   <div>
                     {isEditing ? (
