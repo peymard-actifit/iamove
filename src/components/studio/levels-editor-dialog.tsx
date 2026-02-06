@@ -31,6 +31,7 @@ export function LevelsEditorDialog({ open, onOpenChange }: LevelsEditorDialogPro
   const [levels, setLevels] = useState<Level[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [seeding, setSeeding] = useState(false);
   const [editingLevel, setEditingLevel] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Level>>({});
 
@@ -48,11 +49,31 @@ export function LevelsEditorDialog({ open, onOpenChange }: LevelsEditorDialogPro
       if (res.ok) {
         const data = await res.json();
         setLevels(data);
+        
+        // Si moins de 21 niveaux, initialiser automatiquement
+        if (data.length < 21) {
+          await seedLevels();
+        }
       }
     } catch {
       // Erreur silencieuse
     } finally {
       setLoading(false);
+    }
+  };
+
+  const seedLevels = async () => {
+    setSeeding(true);
+    try {
+      const res = await fetch("/api/levels/seed", { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        setLevels(data.levels);
+      }
+    } catch {
+      // Erreur silencieuse
+    } finally {
+      setSeeding(false);
     }
   };
 
