@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Input, Card } from "@/components/ui";
 import { X, Save } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 interface Site {
   id: string;
@@ -42,6 +43,7 @@ export function SiteSettingsPanel({
   onSaveError,
 }: SiteSettingsPanelProps) {
   const router = useRouter();
+  const { t } = useI18n();
   const [formData, setFormData] = useState({
     name: site.name,
     description: site.description || "",
@@ -67,7 +69,7 @@ export function SiteSettingsPanel({
   return (
     <div className="fixed right-0 top-16 bottom-0 w-80 bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-800 overflow-auto">
       <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
-        <h3 className="font-semibold">Paramètres du site</h3>
+        <h3 className="font-semibold">{t.settings.siteSettings}</h3>
         <Button variant="ghost" size="icon" onClick={onClose}>
           <X className="h-4 w-4" />
         </Button>
@@ -76,34 +78,36 @@ export function SiteSettingsPanel({
       <div className="p-4 space-y-6">
         {/* Informations générales */}
         <div className="space-y-4">
-          <h4 className="text-sm font-medium text-gray-500">Informations générales</h4>
+          <h4 className="text-sm font-medium text-gray-500">{t.settings.generalInfo}</h4>
           
           <div className="space-y-2">
-            <label className="text-sm">Nom du site</label>
+            <label className="text-sm">{t.sites.siteName}</label>
             <Input
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder={t.placeholder.enterSiteName}
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm">Description</label>
+            <label className="text-sm">{t.sites.siteDescription}</label>
             <textarea
               className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm"
               rows={3}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder={t.placeholder.enterDescription}
             />
           </div>
         </div>
 
         {/* Couleurs */}
         <div className="space-y-4">
-          <h4 className="text-sm font-medium text-gray-500">Personnalisation</h4>
+          <h4 className="text-sm font-medium text-gray-500">{t.settings.personalization}</h4>
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm">Couleur principale</label>
+              <label className="text-sm">{t.settings.primaryColor}</label>
               <div className="flex gap-2">
                 <input
                   type="color"
@@ -120,7 +124,7 @@ export function SiteSettingsPanel({
             </div>
             
             <div className="space-y-2">
-              <label className="text-sm">Couleur secondaire</label>
+              <label className="text-sm">{t.settings.secondaryColor}</label>
               <div className="flex gap-2">
                 <input
                   type="color"
@@ -140,7 +144,7 @@ export function SiteSettingsPanel({
 
         {/* URL du site */}
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-gray-500">URL du site publié</h4>
+          <h4 className="text-sm font-medium text-gray-500">{t.settings.publishedUrl}</h4>
           <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
             <code className="text-sm break-all">
               {typeof window !== "undefined" ? window.location.origin : ""}/s/{site.slug}
@@ -151,7 +155,7 @@ export function SiteSettingsPanel({
         {/* Bouton sauvegarder */}
         <Button onClick={handleSave} className="w-full">
           <Save className="h-4 w-4 mr-2" />
-          Sauvegarder
+          {t.common.save}
         </Button>
       </div>
     </div>

@@ -212,5 +212,25 @@ Les informations au survol ne sont pas traduites, ainsi que les informations à 
 → Mise à jour de tab3-profile.tsx avec placeholders et labels traduits
 → Mise à jour des sélecteurs de langue avec tooltips traduits
 
+## Prompt #29 - Orientation drapeaux et niveaux dans liste personnes
+```
+Les drapeaux sont dans le mauvais sens sur l'image, essaye de ne pas faire ce genre d'erreur ridicule que je gagne du temps. Regarde un peu, même l'affichage du drapeau pour rentrer dans la fenêtre avec tous les drapeaux n'est pas correct (met pareil que pour la tuile d'un site). Dans la liste des personnes, je veux la même façon d'indiquer les niveaux que dans les tuiles d'organigramme. et le survol doit aussi donner le même résultat que dans les organigrammes.
+```
+→ Correction du composant Flag avec ratio 3:2 horizontal (width > height)
+→ Dimensions en pixels explicites pour proportions parfaites
+→ Ajout de `tooltip.viewSite` dans les 26 langues
+→ Mise à jour tab1-persons.tsx avec tooltip sur hover du niveau (comme organigramme)
+→ Niveau affiché avec icône + numéro + tooltip 5 secondes
+
+## Prompt #30 - Traductions manquantes (onglets, colonnes, menu paramètres)
+```
+Les onglets, le contenu du menu sites, les titres des colonnes de personnes, le mot publié en haut, NE SONT PAS TRADUITS : vérifie vraiment partout et complète les traductions dans toutes les langues dans la base.
+```
+→ Ajout section `settings` avec 6 traductions (siteSettings, generalInfo, personalization, primaryColor, secondaryColor, publishedUrl) dans 26 langues
+→ Mise à jour site-settings-panel.tsx avec traductions complètes
+→ Mise à jour site-header-content.tsx avec traductions "Publié"/"Brouillon"
+→ Mise à jour tab1-persons.tsx avec traductions titres colonnes (Nom, Email, Poste, Service, Niv., Responsable, Actions)
+→ Mise à jour site-editor.tsx pour forcer les traductions des onglets (au lieu des valeurs stockées en base)
+
 ---
 *Dernière mise à jour: 2026-02-06*

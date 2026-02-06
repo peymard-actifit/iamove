@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useHeaderContent } from "./header-context";
 import { Button, SaveIndicator } from "@/components/ui";
 import { Settings, Globe, GlobeLock } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 interface SiteHeaderContentProps {
   siteId: string;
@@ -23,6 +24,7 @@ export function SiteHeaderContent({
 }: SiteHeaderContentProps) {
   const { setCenterContent, setRightActions } = useHeaderContent();
   const router = useRouter();
+  const { t } = useI18n();
   const [publishing, setPublishing] = useState(false);
 
   const handlePublishToggle = async () => {
@@ -57,16 +59,16 @@ export function SiteHeaderContent({
           {isPublished ? (
             <>
               <Globe className="h-4 w-4 mr-1" />
-              Publié
+              {t.sites.published}
             </>
           ) : (
             <>
               <GlobeLock className="h-4 w-4 mr-1" />
-              Brouillon
+              {t.sites.draft}
             </>
           )}
         </Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onSettingsClick}>
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onSettingsClick} title={t.tooltip.siteSettings}>
           <Settings className="h-4 w-4" />
         </Button>
       </div>
@@ -76,7 +78,7 @@ export function SiteHeaderContent({
       setCenterContent(null);
       setRightActions(null);
     };
-  }, [siteName, isPublished, saveStatus, publishing]);
+  }, [siteName, isPublished, saveStatus, publishing, t]);
 
   return null;
 }

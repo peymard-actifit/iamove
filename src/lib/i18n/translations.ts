@@ -216,6 +216,14 @@ export function buildTranslationsObject(flatTranslations: Record<string, string>
       siteContentLanguage: getValue("tooltip.siteContentLanguage", "Langue du contenu du site"),
       viewSite: getValue("tooltip.viewSite", "Voir le site"),
     },
+    settings: {
+      siteSettings: getValue("settings.siteSettings", "Paramètres du site"),
+      generalInfo: getValue("settings.generalInfo", "Informations générales"),
+      personalization: getValue("settings.personalization", "Personnalisation"),
+      primaryColor: getValue("settings.primaryColor", "Couleur principale"),
+      secondaryColor: getValue("settings.secondaryColor", "Couleur secondaire"),
+      publishedUrl: getValue("settings.publishedUrl", "URL du site publié"),
+    },
   };
 }
 
@@ -376,6 +384,15 @@ export interface Translations {
     siteContentLanguage: string;
     viewSite: string;
   };
+  // Paramètres du site
+  settings: {
+    siteSettings: string;
+    generalInfo: string;
+    personalization: string;
+    primaryColor: string;
+    secondaryColor: string;
+    publishedUrl: string;
+  };
 }
 
 // Traductions françaises (par défaut)
@@ -522,6 +539,14 @@ export const FR: Translations = {
     siteContentLanguage: "Langue du contenu du site",
     viewSite: "Voir le site",
   },
+  settings: {
+    siteSettings: "Paramètres du site",
+    generalInfo: "Informations générales",
+    personalization: "Personnalisation",
+    primaryColor: "Couleur principale",
+    secondaryColor: "Couleur secondaire",
+    publishedUrl: "URL du site publié",
+  },
 };
 
 // Traductions anglaises
@@ -667,6 +692,14 @@ export const EN: Translations = {
     sortDescending: "Sort descending",
     siteContentLanguage: "Site content language",
     viewSite: "View site",
+  },
+  settings: {
+    siteSettings: "Site settings",
+    generalInfo: "General information",
+    personalization: "Personalization",
+    primaryColor: "Primary color",
+    secondaryColor: "Secondary color",
+    publishedUrl: "Published site URL",
   },
 };
 

@@ -136,17 +136,19 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
     }
   };
 
-  const settings = site.settings || {
+  // Toujours utiliser les traductions pour les titres, garder les enabled/disabled depuis les settings
+  const siteSettings = site.settings || {};
+  const settings = {
     tab1Title: t.tabs.team,
-    tab1Enabled: true,
+    tab1Enabled: siteSettings.tab1Enabled ?? true,
     tab2Title: t.tabs.organization,
-    tab2Enabled: true,
+    tab2Enabled: siteSettings.tab2Enabled ?? true,
     tab3Title: t.tabs.profile,
-    tab3Enabled: true,
+    tab3Enabled: siteSettings.tab3Enabled ?? true,
     tab4Title: t.tabs.training,
-    tab4Enabled: true,
+    tab4Enabled: siteSettings.tab4Enabled ?? true,
     tab5Title: t.tabs.assessment,
-    tab5Enabled: true,
+    tab5Enabled: siteSettings.tab5Enabled ?? true,
   };
 
   // Fonction pour voir le profil d'une personne (change d'onglet)

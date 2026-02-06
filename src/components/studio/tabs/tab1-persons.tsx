@@ -370,58 +370,64 @@ export function Tab1Persons({
                 <TableHead 
                   className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-1"
                   onClick={() => handleSort("name")}
+                  title={sortDirection === "asc" ? t.tooltip.sortDescending : t.tooltip.sortAscending}
                 >
                   <div className="flex items-center gap-1">
-                    Nom
+                    {t.persons.name}
                     {sortColumn === "name" && (sortDirection === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
                   </div>
                 </TableHead>
                 <TableHead 
                   className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-1"
                   onClick={() => handleSort("email")}
+                  title={sortDirection === "asc" ? t.tooltip.sortDescending : t.tooltip.sortAscending}
                 >
                   <div className="flex items-center gap-1">
-                    Email
+                    {t.persons.email}
                     {sortColumn === "email" && (sortDirection === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
                   </div>
                 </TableHead>
                 <TableHead 
                   className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-1"
                   onClick={() => handleSort("jobTitle")}
+                  title={sortDirection === "asc" ? t.tooltip.sortDescending : t.tooltip.sortAscending}
                 >
                   <div className="flex items-center gap-1">
-                    Poste
+                    {t.persons.position}
                     {sortColumn === "jobTitle" && (sortDirection === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
                   </div>
                 </TableHead>
                 <TableHead 
                   className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-1"
                   onClick={() => handleSort("department")}
+                  title={sortDirection === "asc" ? t.tooltip.sortDescending : t.tooltip.sortAscending}
                 >
                   <div className="flex items-center gap-1">
-                    Service
+                    {t.persons.department}
                     {sortColumn === "department" && (sortDirection === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
                   </div>
                 </TableHead>
                 <TableHead 
                   className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-1 w-12"
                   onClick={() => handleSort("currentLevel")}
+                  title={sortDirection === "asc" ? t.tooltip.sortDescending : t.tooltip.sortAscending}
                 >
                   <div className="flex items-center gap-1">
-                    Niv.
+                    {t.persons.level}
                     {sortColumn === "currentLevel" && (sortDirection === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
                   </div>
                 </TableHead>
                 <TableHead 
                   className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-1"
                   onClick={() => handleSort("manager")}
+                  title={sortDirection === "asc" ? t.tooltip.sortDescending : t.tooltip.sortAscending}
                 >
                   <div className="flex items-center gap-1">
-                    Responsable
+                    {t.persons.manager}
                     {sortColumn === "manager" && (sortDirection === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
                   </div>
                 </TableHead>
-                <TableHead className="w-[90px] text-right text-xs py-1">Actions</TableHead>
+                <TableHead className="w-[90px] text-right text-xs py-1">{t.persons.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
