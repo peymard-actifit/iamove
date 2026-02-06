@@ -173,8 +173,8 @@ export function Tab3Profile({
             <CardHeader>
                 <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="h-16 w-16 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 flex items-center justify-center overflow-hidden">
-                    {getLevelIcon(selectedPerson.currentLevel, "h-12 w-12")}
+                  <div className="h-16 w-16 flex items-center justify-center">
+                    {getLevelIcon(selectedPerson.currentLevel, "h-14 w-14")}
                   </div>
                   <div>
                     {isEditing ? (

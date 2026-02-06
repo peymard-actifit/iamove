@@ -86,8 +86,8 @@ export function PersonalProfileEditor({
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="h-16 w-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
-                {getLevelIcon(person.currentLevel, "h-10 w-10")}
+              <div className="h-16 w-16 flex items-center justify-center">
+                {getLevelIcon(person.currentLevel, "h-14 w-14")}
               </div>
               <div>
                 {isEditing ? (
