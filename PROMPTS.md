@@ -116,5 +116,14 @@ Les titres de colonnes de gestion des personnages doivent permettre un tri par o
 Il faut enlever l'espace au dessus et en dessous des onglets, qui ne sert à rien. Dans les tuiles d'organigramme, il faut enlever l'icone de photo qui ne sert à rien, en revanche, au meme niveau que le numéro du niveau, il faudra rajouter l'icone correspondante (je joins le fichier a lire pour placer les niveaux et les définitions et icones associées à stocker dans un JSON structuré comme l'excel, par niveau).
 ```
 
+## Prompt #21 - Lecture fichiers Excel
+```
+Pourquoi tu ne peux pas lire les fichiers excel, fais en sorte de pouvoir les lire.
+```
+→ Installation de la bibliothèque `xlsx` et création du script `scripts/read-excel.js`
+→ Lecture du fichier IASCALE avec 21 niveaux (0-20) et thème Star Wars
+→ Création de `src/data/levels.json` avec les données complètes
+→ Mise à jour de `src/lib/levels.tsx` avec les icônes correspondantes
+
 ---
 *Dernière mise à jour: 2026-02-06*

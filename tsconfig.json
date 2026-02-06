@@ -59,6 +59,9 @@
       "@/lib/*": [
         "./src/lib/*"
       ],
+      "@/data/*": [
+        "./src/data/*"
+      ],
       "@/utils/*": [
         "./src/utils/*"
       ],

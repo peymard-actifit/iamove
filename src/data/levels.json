@@ -1,0 +1,151 @@
+{
+  "levels": [
+    {
+      "number": 0,
+      "name": "Ignorant",
+      "seriousGaming": "Jeune Padawan Perdu",
+      "description": "N'a jamais entendu parler de l'intelligence artificielle. Aucun concept associé.",
+      "skills": { "usage": 0, "automatisation": 0, "programmation": 0, "conception": 0, "recherche": 0 }
+    },
+    {
+      "number": 1,
+      "name": "Touriste",
+      "seriousGaming": "Civil de Tatooine",
+      "description": "A déjà entendu le terme « IA » sans savoir ce que cela recouvre. Assimilation à de la science-fiction ou à des idées floues.",
+      "skills": { "usage": 0, "automatisation": 0, "programmation": 0, "conception": 0, "recherche": 0 }
+    },
+    {
+      "number": 2,
+      "name": "Spectateur",
+      "seriousGaming": "Spectateur de l'Holonet",
+      "description": "Identifie l'IA via des exemples grand public (assistants vocaux, recommandations, chatbots) sans compréhension de fonctionnement.",
+      "skills": { "usage": 0, "automatisation": 0, "programmation": 0, "conception": 0, "recherche": 0 }
+    },
+    {
+      "number": 3,
+      "name": "Utilisateur inconscient",
+      "seriousGaming": "Droïde de Service",
+      "description": "Utilise des outils intégrant de l'IA sans en avoir conscience ou sans chercher à comprendre (recherche web, correcteurs automatiques).",
+      "skills": { "usage": 1, "automatisation": 0, "programmation": 0, "conception": 0, "recherche": 0 }
+    },
+    {
+      "number": 4,
+      "name": "Utilisateur conscient",
+      "seriousGaming": "Padawan Curieux",
+      "description": "Sait qu'il utilise des outils basés sur l'IA et comprend leur finalité générale (générer du texte, des images, recommander).",
+      "skills": { "usage": 2, "automatisation": 0, "programmation": 0, "conception": 0, "recherche": 0 }
+    },
+    {
+      "number": 5,
+      "name": "Utilisateur régulier",
+      "seriousGaming": "Padawan Opérationnel",
+      "description": "Utilise volontairement des outils d'IA (chatbots, génération d'images, transcription) pour des tâches personnelles ou professionnelles simples.",
+      "skills": { "usage": 3, "automatisation": 0, "programmation": 0, "conception": 0, "recherche": 0 }
+    },
+    {
+      "number": 6,
+      "name": "Utilisateur éclairé",
+      "seriousGaming": "Padawan Confirmé",
+      "description": "Comprend les grands principes (données, entraînement, probabilités, modèles) sans maîtrise technique.",
+      "skills": { "usage": 4, "automatisation": 0, "programmation": 0, "conception": 0, "recherche": 0 }
+    },
+    {
+      "number": 7,
+      "name": "Utilisateur structuré",
+      "seriousGaming": "Apprenti Jedi",
+      "description": "Intègre l'IA dans des processus métiers (rédaction, analyse, support, marketing) avec méthodes et objectifs clairs.",
+      "skills": { "usage": 5, "automatisation": 0, "programmation": 0, "conception": 0, "recherche": 0 }
+    },
+    {
+      "number": 8,
+      "name": "Utilisateur avancé",
+      "seriousGaming": "Jedi Junior",
+      "description": "Optimise l'usage (prompting avancé, automatisations simples, intégration avec des outils existants).",
+      "skills": { "usage": 5, "automatisation": 1, "programmation": 0, "conception": 0, "recherche": 0 }
+    },
+    {
+      "number": 9,
+      "name": "Référent fonctionnel",
+      "seriousGaming": "Jedi Opérationnel",
+      "description": "Est capable d'expliquer les usages, limites et risques de l'IA à d'autres utilisateurs. Contribue aux choix d'outils.",
+      "skills": { "usage": 5, "automatisation": 2, "programmation": 0, "conception": 0, "recherche": 0 }
+    },
+    {
+      "number": 10,
+      "name": "Super Utilisateur",
+      "seriousGaming": "Jedi Confirmé",
+      "description": "Conçoit des workflows complexes combinant plusieurs outils IA. Bonne compréhension des biais, limites et enjeux éthiques.",
+      "skills": { "usage": 5, "automatisation": 3, "programmation": 0, "conception": 0, "recherche": 0 }
+    },
+    {
+      "number": 11,
+      "name": "Technicien IA",
+      "seriousGaming": "Jedi Stratège",
+      "description": "Comprend les bases techniques : types de modèles, entraînement, inférence, API, sans développer de modèles complexes.",
+      "skills": { "usage": 5, "automatisation": 4, "programmation": 0, "conception": 0, "recherche": 0 }
+    },
+    {
+      "number": 12,
+      "name": "Développeur IA",
+      "seriousGaming": "Maître Jedi",
+      "description": "Intègre des modèles IA dans des applications, utilise des API, fine-tune des modèles existants.",
+      "skills": { "usage": 5, "automatisation": 5, "programmation": 1, "conception": 0, "recherche": 0 }
+    },
+    {
+      "number": 13,
+      "name": "Data Scientist IA",
+      "seriousGaming": "Maître Jedi du Conseil",
+      "description": "Maîtrise les données, l'évaluation de modèles, le choix d'algorithmes, et la mise en production basique.",
+      "skills": { "usage": 5, "automatisation": 5, "programmation": 2, "conception": 0, "recherche": 0 }
+    },
+    {
+      "number": 14,
+      "name": "Ingénieur IA",
+      "seriousGaming": "Gardien du Temple",
+      "description": "Conçoit, entraîne, déploie et optimise des modèles. Maîtrise MLOps, performances, sécurité et scalabilité.",
+      "skills": { "usage": 5, "automatisation": 5, "programmation": 3, "conception": 1, "recherche": 0 }
+    },
+    {
+      "number": 15,
+      "name": "Expert IA",
+      "seriousGaming": "Sage de la Force",
+      "description": "Possède une expertise approfondie sur plusieurs familles de modèles. Intervient comme expert interne ou consultant.",
+      "skills": { "usage": 5, "automatisation": 5, "programmation": 4, "conception": 2, "recherche": 0 }
+    },
+    {
+      "number": 16,
+      "name": "Chercheur appliqué",
+      "seriousGaming": "Seigneur de la Force",
+      "description": "Travaille sur l'amélioration des architectures existantes, publie ou contribue à des travaux de référence appliqués.",
+      "skills": { "usage": 5, "automatisation": 5, "programmation": 5, "conception": 3, "recherche": 1 }
+    },
+    {
+      "number": 17,
+      "name": "Chercheur fondamental",
+      "seriousGaming": "Légende du Conseil",
+      "description": "Produit des travaux originaux en recherche IA (algorithmes, architectures, théories). Influence le domaine.",
+      "skills": { "usage": 5, "automatisation": 5, "programmation": 5, "conception": 4, "recherche": 2 }
+    },
+    {
+      "number": 18,
+      "name": "Leader scientifique",
+      "seriousGaming": "Maître des Équilibres",
+      "description": "Ses travaux font autorité à l'échelle internationale. Dirige des équipes de recherche majeures.",
+      "skills": { "usage": 5, "automatisation": 5, "programmation": 5, "conception": 5, "recherche": 3 }
+    },
+    {
+      "number": 19,
+      "name": "Référence mondiale",
+      "seriousGaming": "Avatar de la Force",
+      "description": "A profondément influencé l'évolution de l'IA moderne (concepts, méthodes, cadres théoriques).",
+      "skills": { "usage": 5, "automatisation": 5, "programmation": 5, "conception": 5, "recherche": 4 }
+    },
+    {
+      "number": 20,
+      "name": "Sommité du domaine",
+      "seriousGaming": "Entité de la Force",
+      "description": "Chercheur ou penseur parmi les plus avancés au monde, à l'origine de ruptures scientifiques majeures.",
+      "skills": { "usage": 5, "automatisation": 5, "programmation": 5, "conception": 5, "recherche": 5 }
+    }
+  ]
+}
