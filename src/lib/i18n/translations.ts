@@ -214,6 +214,7 @@ export function buildTranslationsObject(flatTranslations: Record<string, string>
       sortAscending: getValue("tooltip.sortAscending", "Trier par ordre croissant"),
       sortDescending: getValue("tooltip.sortDescending", "Trier par ordre décroissant"),
       siteContentLanguage: getValue("tooltip.siteContentLanguage", "Langue du contenu du site"),
+      viewSite: getValue("tooltip.viewSite", "Voir le site"),
     },
   };
 }
@@ -373,6 +374,7 @@ export interface Translations {
     sortAscending: string;
     sortDescending: string;
     siteContentLanguage: string;
+    viewSite: string;
   };
 }
 
@@ -518,6 +520,7 @@ export const FR: Translations = {
     sortAscending: "Trier par ordre croissant",
     sortDescending: "Trier par ordre décroissant",
     siteContentLanguage: "Langue du contenu du site",
+    viewSite: "Voir le site",
   },
 };
 
@@ -663,6 +666,7 @@ export const EN: Translations = {
     sortAscending: "Sort ascending",
     sortDescending: "Sort descending",
     siteContentLanguage: "Site content language",
+    viewSite: "View site",
   },
 };
 

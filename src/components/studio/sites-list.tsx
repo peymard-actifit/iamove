@@ -175,7 +175,7 @@ export function SitesList({ sites, folders, isAdmin }: SitesListProps) {
                           e.stopPropagation();
                           window.open(`/s/${site.slug}`, '_blank');
                         }}
-                        title={t.tooltip.editSite}
+                        title={t.tooltip.viewSite}
                       >
                         <ExternalLink className="h-3.5 w-3.5" />
                       </Button>

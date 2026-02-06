@@ -9,18 +9,18 @@ interface FlagProps {
 }
 
 export function Flag({ countryCode, size = "md", className = "" }: FlagProps) {
-  // Proportions standard d'un drapeau : ratio 3:2
+  // Drapeaux avec proportions standard ratio 3:2 (largeur:hauteur)
   const sizeClasses = {
-    sm: "w-5 h-[14px]",      // 20x14 (ratio 1.43)
-    md: "w-7 h-[19px]",      // 28x19 (ratio 1.47)
-    lg: "w-9 h-6",           // 36x24 (ratio 1.5)
-    xl: "w-14 h-[38px]",     // 56x38 (ratio 1.47)
-    "2xl": "w-20 h-[54px]",  // 80x54 (ratio 1.48)
+    sm: "w-6 h-4",           // 24x16
+    md: "w-8 h-5",           // 32x20
+    lg: "w-10 h-7",          // 40x28
+    xl: "w-16 h-11",         // 64x44 - pour les sélecteurs
+    "2xl": "w-20 h-14",      // 80x56 - très grand
   };
 
   return (
     <span
-      className={`fi fi-${countryCode.toLowerCase()} ${sizeClasses[size]} inline-block rounded shadow-md ${className}`}
+      className={`fi fi-${countryCode.toLowerCase()} ${sizeClasses[size]} inline-block rounded-sm shadow-md ${className}`}
       style={{ 
         backgroundSize: "cover",
         backgroundPosition: "center",
