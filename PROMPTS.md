@@ -1,0 +1,75 @@
+# Historique des Prompts - iamove
+
+## Prompt #1 - Initialisation du projet
+```
+Je souhaite travailler sur un nouveau projet de nom iamove. J'ai créé un github vierge pour l'instant et en voilà le token que tu peux mémoriser. Je vais ensuite créer un environnement vercel pour pouvoir compiler et déployer. Initialise tout ce qu'il faut en local et sur le github, synchronise bien, pour précéder cette configuration sur vercel.
+```
+
+## Prompt #2 - Configuration Vercel
+```
+Utilise le token VERCEL et le projet iamove dans vercel. Vérifie que tu récupères bien les variables d'environnement dans Vercel pour OPENAI, DEEPL et la base de données.
+```
+
+## Prompt #3 - Session d'initialisation
+```
+Ceci est le prompt d'initialisation de la session de travail sur Cursor. Les commandes suivantes doivent être faites à la suite puis un rapport doit être généré.
+Commandes :
+- Repasse en revue le code pour bien le comprendre
+- Vérifie les tokens Git et Vercel
+- Vérifie la synchronisation worktree/Git
+- Vérifie le script de déploiement
+- Utilise le script pour créer une nouvelle version avec indentation sémantique
+Rapport : LoC, Tokens, API Keys, DB info, Sync status, Version, Limites identifiées
+```
+
+## Prompt #4 - Augmentation des limites
+```
+Essaye déjà d'augmenter toutes les limites connues au maximum pour anticiper les besoins à venir du développement.
+```
+
+## Prompt #5 - Spécification complète du studio
+```
+Je veux réaliser un projet de studio de fabrication de site web, full responsive, utilisable sur pc et sur smartphone, dont l'objectif est de réaliser des sites d'accompagnement des compétences de travail d'entreprises et d'équipes autour des technologies liées à l'IA.
+
+Fonctionnalités principales :
+- Vue de gestion des sites (CRUD, duplication, publication)
+- 5 onglets par site : Liste personnes, Organigramme, Fiche détaillée, Formation IA, Quizz
+- Gestion des utilisateurs studio (standard/admin avec code 1241)
+- Gestion des personnes dans les sites publiés
+- Sauvegarde permanente en base de données
+- Menu paramètres escamotable à droite
+```
+
+## Prompt #6 - Réinitialisation session
+```
+[Même prompt d'initialisation que #3]
+```
+
+## Prompt #7 - Compléter et déployer
+```
+Complète tout et utilise le script pour commit and deploy.
+```
+
+## Prompt #8 - Problème interface login
+```
+Je ne vois que cela, pas d'interface pour se connecter ou créer un compte
+```
+
+## Prompt #9 - Erreur inscription
+```
+[Screenshot montrant erreur 500 sur /api/auth/register]
+```
+
+## Prompt #10 - Variables Vercel
+```
+[Screenshot montrant les variables d'environnement déjà présentes dans Vercel]
+Mais toutes les variables d'environnement sont déjà présentes dans vercel... récupère les
+```
+
+## Prompt #11 - Diagnostic complet
+```
+J'ai déjà dit que les variables d'environnement sont présentes dans Vercel dans le projet. Réexamine tout, vérifie les accès à la base, examine bien les liaisons et dit moi si quelque chose ne fonctionne pas. Mais ne me redemande pas la même chose à laquelle j'ai déjà répondu. Par ailleurs, sauvegarde la liste des prompts en les incrémentant dans un fichier dans le git.
+```
+
+---
+*Dernière mise à jour: 2026-02-06*
