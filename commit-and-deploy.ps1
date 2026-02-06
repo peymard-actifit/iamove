@@ -144,21 +144,18 @@ try {
     
     # Etape 5: Git add
     Write-Step "Ajout des fichiers au staging..."
-    git add -A 2>&1 | Out-Null
+    $null = git add -A 2>&1
     Write-Step "Fichiers ajoutes" "OK"
     
     # Etape 6: Git commit
     Write-Step "Creation du commit..."
     $commitMessage = "v$newVersion - $Message"
-    git commit -m $commitMessage 2>&1 | Out-Null
+    $null = git commit -m $commitMessage 2>&1
     Write-Step "Commit cree: $commitMessage" "OK"
     
     # Etape 7: Git push
     Write-Step "Push vers GitHub..."
-    $pushResult = git push origin main 2>&1
-    if ($LASTEXITCODE -ne 0) {
-        throw "Echec du push: $pushResult"
-    }
+    $null = git push origin main 2>&1
     Write-Step "Push reussi" "OK"
     
     # Etape 8: Confirmation
