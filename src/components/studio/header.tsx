@@ -29,12 +29,14 @@ import {
   ChevronDown,
 } from "lucide-react";
 import type { SessionPayload } from "@/lib/auth";
+import { useHeaderContent } from "./header-context";
 
 interface StudioHeaderProps {
   session: SessionPayload;
 }
 
 export function StudioHeader({ session }: StudioHeaderProps) {
+  const { centerContent, rightActions } = useHeaderContent();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showAdminDialog, setShowAdminDialog] = useState(false);
@@ -72,19 +74,27 @@ export function StudioHeader({ session }: StudioHeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        {/* Logo */}
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600" />
-          <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+      <div className="container mx-auto flex h-14 items-center px-4 gap-4">
+        {/* Logo (gauche) */}
+        <Link href="/dashboard" className="flex items-center gap-2 shrink-0">
+          <div className="h-7 w-7 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600" />
+          <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             iamove
           </span>
-          <span className="text-sm text-gray-500">Studio</span>
-          <span className="text-xs text-gray-400 font-mono">v{process.env.NEXT_PUBLIC_APP_VERSION || "2.1.8"}</span>
+          <span className="text-xs text-gray-500">Studio</span>
+          <span className="text-[10px] text-gray-400 font-mono">v{process.env.NEXT_PUBLIC_APP_VERSION || "2.3.0"}</span>
         </Link>
 
-        {/* Actions */}
-        <div className="flex items-center gap-4">
+        {/* Contenu central (flexible) */}
+        <div className="flex-1 flex items-center justify-center">
+          {centerContent}
+        </div>
+
+        {/* Actions droite */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Actions personnalisées */}
+          {rightActions}
+
           {/* Menu Actions (Admin only) */}
           {session.role === "ADMIN" && (
             <DropdownMenu>

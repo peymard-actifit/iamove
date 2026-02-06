@@ -13,15 +13,9 @@ import {
   DialogDescription,
   DialogFooter,
   Input,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from "@/components/ui";
 import {
   Plus,
-  MoreVertical,
   Edit,
   Copy,
   Trash2,
@@ -29,7 +23,6 @@ import {
   GlobeLock,
   Users,
   ExternalLink,
-  FolderOpen,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
@@ -97,7 +90,9 @@ export function SitesList({ sites, folders, isAdmin }: SitesListProps) {
     }
   };
 
-  const handleDuplicateSite = async (siteId: string) => {
+  const handleDuplicateSite = async (siteId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setIsLoading(true);
     try {
       await fetch(`/api/sites/${siteId}/duplicate`, { method: "POST" });
@@ -107,7 +102,9 @@ export function SitesList({ sites, folders, isAdmin }: SitesListProps) {
     }
   };
 
-  const handlePublishToggle = async (siteId: string, currentStatus: boolean) => {
+  const handlePublishToggle = async (siteId: string, currentStatus: boolean, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     await fetch(`/api/sites/${siteId}/publish`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -117,139 +114,105 @@ export function SitesList({ sites, folders, isAdmin }: SitesListProps) {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Toolbar */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {folders.length > 0 && (
-            <Button variant="outline" size="sm">
-              <FolderOpen className="h-4 w-4 mr-2" />
-              Dossiers ({folders.length})
-            </Button>
-          )}
-        </div>
-        <Button onClick={() => setShowCreateDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nouveau site
-        </Button>
-      </div>
-
+    <div className="space-y-4">
       {/* Sites Grid */}
       {sites.length === 0 ? (
-        <Card className="p-12 text-center">
-          <div className="mx-auto h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center dark:bg-gray-800">
-            <Globe className="h-6 w-6 text-gray-400" />
+        <Card className="p-8 text-center">
+          <div className="mx-auto h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center dark:bg-gray-800">
+            <Globe className="h-5 w-5 text-gray-400" />
           </div>
-          <h3 className="mt-4 text-lg font-semibold">Aucun site</h3>
-          <p className="mt-2 text-gray-500">
+          <h3 className="mt-3 text-base font-semibold">Aucun site</h3>
+          <p className="mt-1 text-sm text-gray-500">
             Créez votre premier site d&apos;accompagnement IA
           </p>
-          <Button className="mt-4" onClick={() => setShowCreateDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" />
+          <Button size="sm" className="mt-3" onClick={() => setShowCreateDialog(true)}>
+            <Plus className="h-4 w-4 mr-1" />
             Créer un site
           </Button>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {sites.map((site) => (
-            <Card key={site.id} className="overflow-hidden">
-              <div className="p-6">
-                <div className="flex items-start justify-between">
+            <Link key={site.id} href={`/studio/${site.id}`}>
+              <Card className="p-4 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer h-full">
+                <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <Link
-                      href={`/studio/${site.id}`}
-                      className="text-lg font-semibold hover:text-blue-600 truncate block"
-                    >
-                      {site.name}
-                    </Link>
-                    <p className="text-sm text-gray-500 mt-1 truncate">
-                      {site.description || "Aucune description"}
+                    <h3 className="font-semibold text-sm truncate">{site.name}</h3>
+                    <p className="text-xs text-gray-500 truncate mt-0.5">
+                      {site.description || "Sans description"}
                     </p>
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="shrink-0">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Link href={`/studio/${site.id}`}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Éditer
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleDuplicateSite(site.id)}>
-                        <Copy className="mr-2 h-4 w-4" />
-                        Dupliquer
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => handlePublishToggle(site.id, site.isPublished)}
-                      >
-                        {site.isPublished ? (
-                          <>
-                            <GlobeLock className="mr-2 h-4 w-4" />
-                            Dépublier
-                          </>
-                        ) : (
-                          <>
-                            <Globe className="mr-2 h-4 w-4" />
-                            Publier
-                          </>
-                        )}
-                      </DropdownMenuItem>
-                      {site.isPublished && (
-                        <DropdownMenuItem asChild>
-                          <a href={`/s/${site.slug}`} target="_blank" rel="noreferrer">
-                            <ExternalLink className="mr-2 h-4 w-4" />
-                            Voir le site
-                          </a>
-                        </DropdownMenuItem>
+                  {/* Icônes d'action */}
+                  <div className="flex items-center gap-0.5 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={(e) => handlePublishToggle(site.id, site.isPublished, e)}
+                      title={site.isPublished ? "Dépublier" : "Publier"}
+                    >
+                      {site.isPublished ? (
+                        <Globe className="h-3.5 w-3.5 text-green-500" />
+                      ) : (
+                        <GlobeLock className="h-3.5 w-3.5 text-gray-400" />
                       )}
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="text-red-600"
-                        onClick={() => setShowDeleteDialog(site.id)}
+                    </Button>
+                    {site.isPublished && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          window.open(`/s/${site.slug}`, '_blank');
+                        }}
+                        title="Voir le site"
                       >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Supprimer
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-
-                <div className="flex items-center gap-4 mt-4 text-sm text-gray-500">
-                  <div className="flex items-center gap-1">
-                    <Users className="h-4 w-4" />
-                    {site._count.persons} personne(s)
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {site.isPublished ? (
-                      <>
-                        <Globe className="h-4 w-4 text-green-500" />
-                        <span className="text-green-600">Publié</span>
-                      </>
-                    ) : (
-                      <>
-                        <GlobeLock className="h-4 w-4" />
-                        <span>Brouillon</span>
-                      </>
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </Button>
                     )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={(e) => handleDuplicateSite(site.id, e)}
+                      title="Dupliquer"
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setShowDeleteDialog(site.id);
+                      }}
+                      title="Supprimer"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
                 </div>
 
-                {isAdmin && (
-                  <p className="mt-2 text-xs text-gray-400">
-                    Par {site.owner.name}
-                  </p>
-                )}
-
-                <p className="mt-2 text-xs text-gray-400">
-                  Modifié le {formatDate(site.updatedAt)}
-                </p>
-              </div>
-            </Card>
+                <div className="flex items-center gap-3 mt-3 text-xs text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <Users className="h-3.5 w-3.5" />
+                    {site._count.persons}
+                  </div>
+                  <span>•</span>
+                  <span>{formatDate(site.updatedAt)}</span>
+                  {isAdmin && (
+                    <>
+                      <span>•</span>
+                      <span className="text-gray-400">{site.owner.name}</span>
+                    </>
+                  )}
+                </div>
+              </Card>
+            </Link>
           ))}
         </div>
       )}
@@ -316,5 +279,70 @@ export function SitesList({ sites, folders, isAdmin }: SitesListProps) {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+// Export du bouton Ajouter pour le header
+export function AddSiteButton() {
+  const [showDialog, setShowDialog] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [newSite, setNewSite] = useState({ name: "", description: "" });
+  const router = useRouter();
+
+  const handleCreate = async () => {
+    if (!newSite.name.trim()) return;
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/sites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newSite),
+      });
+      if (res.ok) {
+        setShowDialog(false);
+        setNewSite({ name: "", description: "" });
+        router.refresh();
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <Button size="sm" onClick={() => setShowDialog(true)}>
+        <Plus className="h-4 w-4 mr-1" />
+        Ajouter un site
+      </Button>
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Créer un nouveau site</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Nom du site *</label>
+              <Input
+                placeholder="Ex: Acme Corporation"
+                value={newSite.name}
+                onChange={(e) => setNewSite({ ...newSite, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Description</label>
+              <Input
+                placeholder="Description optionnelle"
+                value={newSite.description}
+                onChange={(e) => setNewSite({ ...newSite, description: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDialog(false)}>Annuler</Button>
+            <Button onClick={handleCreate} isLoading={isLoading}>Créer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

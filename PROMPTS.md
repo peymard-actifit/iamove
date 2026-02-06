@@ -96,5 +96,10 @@ Je ne sors pas de la fenetre en faisant ajouter
 L'édition des personnes n'est toujours pas possible dans le studio et un site. Quand je clique sur Editer, cela ne fait rien,. Je veux qu'il n'y ait pas de menu avec trois petit points à droite des lignes de personnes, mais directement les icônes les uns à coté des autres, justifiés à droite. Je veux pouvoir éditer directement les valeurs dans la liste en cliquant sur chaque texte. Y compris le niveau que je veux pouvoir ajuster de 0 à 20.
 ```
 
+## Prompt #17 - Réorganisation header et UI
+```
+Dans la page de gestion des sites, met "Ajouter un site" à gauche du menu de l'utilisateur tout en haut. Mets "Mes sites" et le texte en dessous dans la barre du haut au centre de l'espace entre le bouton "Ajouter..." et la version du studio. Garde tout le contenu de la tuile de site en dessous, mais réduit sa taille. Enlèce le menu avec les trois petits points pour mettre les icones à droite du nom du site, côte à côte et en les justifiant à droite. Dans la vue de gestion d'un site dans le studio, remonte le bouton de menu des paramètres du site juste à gauche du menu de l'utilisateur, puis juste à gauche met le statut publié ou non, puis met , entre le statut et la version du studio le titre du site en le centrant entre les deux. réduit la hauteur des lignes de personnes.
+```
+
 ---
 *Dernière mise à jour: 2026-02-06*

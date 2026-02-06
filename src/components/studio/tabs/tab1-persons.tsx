@@ -101,7 +101,7 @@ function EditableCell({
         onChange={(e) => setEditValue(e.target.value)}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
-        className="h-8 text-sm"
+        className="h-7 text-xs"
       />
     );
   }
@@ -112,7 +112,7 @@ function EditableCell({
         e.stopPropagation();
         setIsEditing(true);
       }}
-      className="cursor-text hover:bg-gray-100 dark:hover:bg-gray-800 px-2 py-1 rounded inline-block min-w-[60px]"
+      className="cursor-text hover:bg-gray-100 dark:hover:bg-gray-800 px-1.5 py-0.5 rounded inline-block text-sm"
     >
       {value || <span className="text-gray-400">{placeholder}</span>}
     </span>
@@ -139,11 +139,11 @@ function LevelSelector({
         }}
         onBlur={() => setIsEditing(false)}
         autoFocus
-        className="h-8 px-2 text-sm rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
+        className="h-6 px-1 text-xs rounded border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
       >
         {Array.from({ length: 21 }, (_, i) => (
           <option key={i} value={i}>
-            Niveau {i}
+            {i}
           </option>
         ))}
       </select>
@@ -156,9 +156,9 @@ function LevelSelector({
         e.stopPropagation();
         setIsEditing(true);
       }}
-      className="cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-800 px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+      className="cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-800 px-1.5 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
     >
-      Niveau {value}
+      {value}
     </span>
   );
 }
@@ -188,9 +188,9 @@ function ManagerSelector({
         }}
         onBlur={() => setIsEditing(false)}
         autoFocus
-        className="h-8 px-2 text-sm rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900 max-w-[150px]"
+        className="h-6 px-1 text-xs rounded border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900 max-w-[120px]"
       >
-        <option value="">Aucun</option>
+        <option value="">-</option>
         {persons
           .filter((p) => p.id !== currentPersonId)
           .map((p) => (
@@ -208,7 +208,7 @@ function ManagerSelector({
         e.stopPropagation();
         setIsEditing(true);
       }}
-      className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 px-2 py-1 rounded inline-block min-w-[60px]"
+      className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 px-1.5 py-0.5 rounded text-sm"
     >
       {manager?.name || <span className="text-gray-400">-</span>}
     </span>
@@ -339,51 +339,51 @@ export function Tab1Persons({
         <div className="border rounded-lg overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Nom</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Poste</TableHead>
-                <TableHead>Service</TableHead>
-                <TableHead>Niveau IA</TableHead>
-                <TableHead>Responsable</TableHead>
-                <TableHead className="w-[120px] text-right">Actions</TableHead>
+              <TableRow className="h-9">
+                <TableHead className="text-xs">Nom</TableHead>
+                <TableHead className="text-xs">Email</TableHead>
+                <TableHead className="text-xs">Poste</TableHead>
+                <TableHead className="text-xs">Service</TableHead>
+                <TableHead className="text-xs w-12">Niv.</TableHead>
+                <TableHead className="text-xs">Responsable</TableHead>
+                <TableHead className="w-[90px] text-right text-xs">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {persons.map((person) => (
                 <TableRow key={person.id} className="group">
-                  <TableCell className="font-medium">
+                  <TableCell className="py-1 font-medium">
                     <EditableCell
                       value={person.name}
                       onChange={(v) => updatePerson(person.id, "name", v)}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-1">
                     <EditableCell
                       value={person.email}
                       type="email"
                       onChange={(v) => updatePerson(person.id, "email", v)}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-1">
                     <EditableCell
                       value={person.jobTitle || ""}
                       onChange={(v) => updatePerson(person.id, "jobTitle", v || null)}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-1">
                     <EditableCell
                       value={person.department || ""}
                       onChange={(v) => updatePerson(person.id, "department", v || null)}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-1">
                     <LevelSelector
                       value={person.currentLevel}
                       onChange={(v) => updatePerson(person.id, "currentLevel", v)}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-1">
                     <ManagerSelector
                       value={person.managerId}
                       persons={persons}
@@ -391,34 +391,34 @@ export function Tab1Persons({
                       onChange={(v) => updatePerson(person.id, "managerId", v)}
                     />
                   </TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-end gap-1">
+                  <TableCell className="py-1">
+                    <div className="flex items-center justify-end gap-0.5">
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-6 w-6"
                         onClick={() => onSelectPerson(person.id)}
                         title="Voir le profil"
                       >
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-3.5 w-3.5" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-6 w-6"
                         onClick={() => copyInviteLink(person.id)}
                         title="Copier le lien d'invitation"
                       >
-                        <Copy className={`h-4 w-4 ${copiedId === person.id ? "text-green-500" : ""}`} />
+                        <Copy className={`h-3.5 w-3.5 ${copiedId === person.id ? "text-green-500" : ""}`} />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        className="h-6 w-6 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                         onClick={() => setShowDeleteDialog(person.id)}
                         title="Supprimer"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </TableCell>

@@ -1,6 +1,7 @@
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { SitesList } from "@/components/studio/sites-list";
+import { DashboardHeaderContent } from "@/components/studio/dashboard-header-content";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -30,21 +31,13 @@ export default async function DashboardPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Mes sites</h1>
-          <p className="text-gray-500 mt-1">
-            Gérez vos sites d&apos;accompagnement IA
-          </p>
-        </div>
-      </div>
-
+    <>
+      <DashboardHeaderContent />
       <SitesList 
         sites={sites} 
         folders={folders} 
         isAdmin={session.role === "ADMIN"} 
       />
-    </div>
+    </>
   );
 }

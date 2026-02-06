@@ -2,26 +2,19 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   Tabs,
   TabsList,
   TabsTrigger,
   TabsContent,
-  Button,
-  SaveIndicator,
   useSaveStatus,
 } from "@/components/ui";
 import {
-  ArrowLeft,
   Users,
   Network,
   User,
   GraduationCap,
   ClipboardCheck,
-  Settings,
-  Globe,
-  GlobeLock,
 } from "lucide-react";
 import { Tab1Persons } from "./tabs/tab1-persons";
 import { Tab2Organigramme } from "./tabs/tab2-organigramme";
@@ -29,6 +22,7 @@ import { Tab3Profile } from "./tabs/tab3-profile";
 import { Tab4Formation } from "./tabs/tab4-formation";
 import { Tab5Quiz } from "./tabs/tab5-quiz";
 import { SiteSettingsPanel } from "./site-settings-panel";
+import { SiteHeaderContent } from "./site-header-content";
 
 interface Person {
   id: string;
@@ -98,66 +92,16 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
     tab5Enabled: true,
   };
 
-  const handlePublishToggle = async () => {
-    startSaving();
-    try {
-      await fetch(`/api/sites/${site.id}/publish`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ publish: !site.isPublished }),
-      });
-      saveDone();
-      router.refresh();
-    } catch {
-      saveError();
-    }
-  };
-
   return (
     <div className="relative">
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold">{site.name}</h1>
-            <p className="text-sm text-gray-500">{site.slug}</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <SaveIndicator status={status} />
-          
-          <Button
-            variant={site.isPublished ? "outline" : "default"}
-            onClick={handlePublishToggle}
-          >
-            {site.isPublished ? (
-              <>
-                <Globe className="h-4 w-4 mr-2 text-green-500" />
-                Publié
-              </>
-            ) : (
-              <>
-                <GlobeLock className="h-4 w-4 mr-2" />
-                Publier
-              </>
-            )}
-          </Button>
-
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setShowSettings(!showSettings)}
-          >
-            <Settings className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      {/* Injection du contenu dans le header global */}
+      <SiteHeaderContent
+        siteId={site.id}
+        siteName={site.name}
+        isPublished={site.isPublished}
+        onSettingsClick={() => setShowSettings(!showSettings)}
+        saveStatus={status}
+      />
 
       {/* Main Content */}
       <div className="flex gap-6">
