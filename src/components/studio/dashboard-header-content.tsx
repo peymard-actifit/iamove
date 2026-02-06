@@ -27,12 +27,12 @@ export function DashboardHeaderContent({ isAdmin = false }: DashboardHeaderConte
     setRightActions(
       <div className="flex items-center gap-2">
         {isAdmin && (
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/quizzes">
+          <Link href="/quizzes">
+            <Button variant="outline" size="sm">
               <FileQuestion className="h-4 w-4 mr-1" />
               Quizz
-            </Link>
-          </Button>
+            </Button>
+          </Link>
         )}
         <AddSiteButton />
       </div>
