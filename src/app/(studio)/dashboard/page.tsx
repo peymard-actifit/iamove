@@ -32,7 +32,7 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <DashboardHeaderContent isAdmin={session.role === "ADMIN"} />
+      <DashboardHeaderContent />
       <SitesList 
         sites={sites} 
         folders={folders} 

@@ -27,10 +27,12 @@ import {
   ShieldOff,
   FileQuestion,
   ChevronDown,
+  Scale,
 } from "lucide-react";
 import type { SessionPayload } from "@/lib/auth";
 import { useHeaderContent } from "./header-context";
 import { LanguageSelector } from "./language-selector";
+import { LevelsEditorDialog } from "./levels-editor-dialog";
 import { useI18n } from "@/lib/i18n";
 
 interface StudioHeaderProps {
@@ -43,6 +45,7 @@ export function StudioHeader({ session }: StudioHeaderProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showAdminDialog, setShowAdminDialog] = useState(false);
+  const [showLevelsDialog, setShowLevelsDialog] = useState(false);
   const [adminCode, setAdminCode] = useState("");
   const [adminError, setAdminError] = useState("");
 
@@ -115,6 +118,10 @@ export function StudioHeader({ session }: StudioHeaderProps) {
                     <FileQuestion className="mr-2 h-4 w-4" />
                     {t.nav.manageQuizzes}
                   </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowLevelsDialog(true)}>
+                  <Scale className="mr-2 h-4 w-4" />
+                  Échelle des niveaux
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -206,6 +213,12 @@ export function StudioHeader({ session }: StudioHeaderProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Dialog Échelle des niveaux */}
+      <LevelsEditorDialog
+        open={showLevelsDialog}
+        onOpenChange={setShowLevelsDialog}
+      />
     </header>
   );
 }

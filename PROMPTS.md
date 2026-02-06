@@ -286,5 +286,18 @@ Dans le titre de l'onglet du navigateur dans la vue publiée : met le titre du s
 → Favicon dynamique = icône du niveau de la personne connectée (level-X.png)
 → Restauration du favicon par défaut lors de la déconnexion
 
+## Prompt #37 - Menu Échelle et suppression bouton Quizz
+```
+Finalement, en administrateur, enlève le bouton Quizz, le sous-menu dans le menu action suffit. Rajoute un sous-menu "Echelle" qui permette d'éditer les informations liées aux niveaux dans une fenêtre spécifique.
+```
+→ Suppression du bouton "Quizz" dans le header du dashboard
+→ Le menu Quizz reste dans "Actions > Gérer les quizz"
+→ Ajout du sous-menu "Échelle des niveaux" dans le menu Actions
+→ Création du composant LevelsEditorDialog pour éditer les niveaux
+→ API GET /api/levels pour récupérer tous les niveaux
+→ API PATCH /api/levels/[levelId] pour modifier un niveau (admin only)
+→ Interface d'édition inline : nom, nom Star Wars, description
+→ Icône et numéro du niveau affichés en lecture seule
+
 ---
 *Dernière mise à jour: 2026-02-06*
