@@ -29,7 +29,7 @@ export function getLevelInfo(levelNumber: number): LevelInfo {
 
 // Fonction pour obtenir l'icône/image d'un niveau
 export function getLevelIcon(levelNumber: number, className?: string): ReactNode {
-  const size = className?.includes("h-3") ? 14 : className?.includes("h-5") ? 20 : 16;
+  const size = className?.includes("h-3") ? 14 : className?.includes("h-5") ? 20 : className?.includes("h-12") ? 48 : className?.includes("h-14") ? 56 : 16;
   
   return (
     <Image
@@ -37,8 +37,8 @@ export function getLevelIcon(levelNumber: number, className?: string): ReactNode
       alt={`Niveau ${levelNumber}`}
       width={size}
       height={size}
-      className={className || "h-4 w-4"}
-      style={{ objectFit: "contain" }}
+      className={`${className || "h-4 w-4"} flex-shrink-0 block`}
+      style={{ objectFit: "contain", margin: 0, padding: 0 }}
     />
   );
 }
