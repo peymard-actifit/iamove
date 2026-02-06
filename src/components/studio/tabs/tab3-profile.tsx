@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, Button, Input } from "@/components/ui";
-import { User, Mail, Briefcase, Building, Award, ChevronRight } from "lucide-react";
+import { User, Mail, Briefcase, Building, Award, ChevronRight, Edit, Save, X } from "lucide-react";
 
 interface Person {
   id: string;
@@ -30,6 +31,9 @@ interface Tab3ProfileProps {
   levels: Level[];
   selectedPersonId: string | null;
   onSelectPerson: (id: string) => void;
+  onSaveStart?: () => void;
+  onSaveDone?: () => void;
+  onSaveError?: () => void;
 }
 
 export function Tab3Profile({
@@ -38,8 +42,78 @@ export function Tab3Profile({
   levels,
   selectedPersonId,
   onSelectPerson,
+  onSaveStart,
+  onSaveDone,
+  onSaveError,
 }: Tab3ProfileProps) {
+  const router = useRouter();
   const selectedPerson = persons.find((p) => p.id === selectedPersonId);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    email: "",
+    jobTitle: "",
+    department: "",
+    managerId: "",
+    canViewAll: false,
+  });
+
+  // Mettre à jour le formulaire quand la personne sélectionnée change
+  useEffect(() => {
+    if (selectedPerson) {
+      setEditForm({
+        name: selectedPerson.name,
+        email: selectedPerson.email,
+        jobTitle: selectedPerson.jobTitle || "",
+        department: selectedPerson.department || "",
+        managerId: selectedPerson.managerId || "",
+        canViewAll: selectedPerson.canViewAll,
+      });
+      setIsEditing(false);
+    }
+  }, [selectedPerson]);
+
+  const handleSave = async () => {
+    if (!selectedPerson) return;
+    
+    setIsLoading(true);
+    onSaveStart?.();
+
+    try {
+      const res = await fetch(`/api/sites/${siteId}/persons/${selectedPerson.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editForm),
+      });
+
+      if (res.ok) {
+        setIsEditing(false);
+        onSaveDone?.();
+        router.refresh();
+      } else {
+        onSaveError?.();
+      }
+    } catch {
+      onSaveError?.();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (selectedPerson) {
+      setEditForm({
+        name: selectedPerson.name,
+        email: selectedPerson.email,
+        jobTitle: selectedPerson.jobTitle || "",
+        department: selectedPerson.department || "",
+        managerId: selectedPerson.managerId || "",
+        canViewAll: selectedPerson.canViewAll,
+      });
+    }
+    setIsEditing(false);
+  };
 
   const getLevelInfo = (levelNumber: number) => {
     const level = levels.find((l) => l.number === levelNumber);
@@ -94,13 +168,52 @@ export function Tab3Profile({
         {selectedPerson ? (
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-4">
-                <div className="h-16 w-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
-                  <User className="h-8 w-8 text-white" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="h-16 w-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
+                    <User className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    {isEditing ? (
+                      <Input
+                        value={editForm.name}
+                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                        className="font-bold text-lg"
+                        placeholder="Nom complet"
+                      />
+                    ) : (
+                      <CardTitle>{selectedPerson.name}</CardTitle>
+                    )}
+                    {isEditing ? (
+                      <Input
+                        value={editForm.jobTitle}
+                        onChange={(e) => setEditForm({ ...editForm, jobTitle: e.target.value })}
+                        className="mt-1 text-sm"
+                        placeholder="Poste"
+                      />
+                    ) : (
+                      <p className="text-gray-500">{selectedPerson.jobTitle || "Sans poste"}</p>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <CardTitle>{selectedPerson.name}</CardTitle>
-                  <p className="text-gray-500">{selectedPerson.jobTitle || "Sans poste"}</p>
+                <div className="flex gap-2">
+                  {isEditing ? (
+                    <>
+                      <Button variant="outline" size="sm" onClick={handleCancel}>
+                        <X className="h-4 w-4 mr-1" />
+                        Annuler
+                      </Button>
+                      <Button size="sm" onClick={handleSave} isLoading={isLoading}>
+                        <Save className="h-4 w-4 mr-1" />
+                        Enregistrer
+                      </Button>
+                    </>
+                  ) : (
+                    <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                      <Edit className="h-4 w-4 mr-1" />
+                      Modifier
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardHeader>
@@ -109,23 +222,58 @@ export function Tab3Profile({
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                   <Mail className="h-5 w-5 text-gray-400" />
-                  <div>
+                  <div className="flex-1">
                     <p className="text-xs text-gray-500">Email</p>
-                    <p className="font-medium">{selectedPerson.email}</p>
+                    {isEditing ? (
+                      <Input
+                        type="email"
+                        value={editForm.email}
+                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                        className="mt-1"
+                      />
+                    ) : (
+                      <p className="font-medium">{selectedPerson.email}</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                   <Building className="h-5 w-5 text-gray-400" />
-                  <div>
+                  <div className="flex-1">
                     <p className="text-xs text-gray-500">Service</p>
-                    <p className="font-medium">{selectedPerson.department || "-"}</p>
+                    {isEditing ? (
+                      <Input
+                        value={editForm.department}
+                        onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
+                        className="mt-1"
+                        placeholder="Service"
+                      />
+                    ) : (
+                      <p className="font-medium">{selectedPerson.department || "-"}</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                   <Briefcase className="h-5 w-5 text-gray-400" />
-                  <div>
+                  <div className="flex-1">
                     <p className="text-xs text-gray-500">Responsable</p>
-                    <p className="font-medium">{selectedPerson.manager?.name || "Aucun"}</p>
+                    {isEditing ? (
+                      <select
+                        className="w-full h-10 px-3 mt-1 rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
+                        value={editForm.managerId}
+                        onChange={(e) => setEditForm({ ...editForm, managerId: e.target.value })}
+                      >
+                        <option value="">Aucun (sommet)</option>
+                        {persons
+                          .filter((p) => p.id !== selectedPerson.id)
+                          .map((p) => (
+                            <option key={p.id} value={p.id}>
+                              {p.name}
+                            </option>
+                          ))}
+                      </select>
+                    ) : (
+                      <p className="font-medium">{selectedPerson.manager?.name || "Aucun"}</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
@@ -136,6 +284,22 @@ export function Tab3Profile({
                   </div>
                 </div>
               </div>
+
+              {/* Option vue élargie (en mode édition) */}
+              {isEditing && (
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                  <input
+                    type="checkbox"
+                    id="canViewAll"
+                    checked={editForm.canViewAll}
+                    onChange={(e) => setEditForm({ ...editForm, canViewAll: e.target.checked })}
+                    className="h-4 w-4"
+                  />
+                  <label htmlFor="canViewAll" className="text-sm">
+                    Donner une vue élargie sur tout l&apos;organigramme
+                  </label>
+                </div>
+              )}
 
               {/* Progression IA */}
               <div>

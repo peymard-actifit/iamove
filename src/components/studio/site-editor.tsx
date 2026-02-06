@@ -225,6 +225,9 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
                 levels={levels}
                 selectedPersonId={selectedPersonId}
                 onSelectPerson={setSelectedPersonId}
+                onSaveStart={startSaving}
+                onSaveDone={saveDone}
+                onSaveError={saveError}
               />
             </TabsContent>
 

@@ -76,12 +76,6 @@ export function Tab1Persons({
 
   const handleCreatePerson = async () => {
     if (!newPerson.name || !newPerson.email) return;
-    
-    // Vérifier que si ce n'est pas la première personne, un manager est requis
-    if (persons.length > 0 && !newPerson.managerId) {
-      alert("Vous devez sélectionner un responsable");
-      return;
-    }
 
     setIsLoading(true);
     onSaveStart();
@@ -253,23 +247,21 @@ export function Tab1Persons({
                 onChange={(e) => setNewPerson({ ...newPerson, department: e.target.value })}
               />
             </div>
-            {persons.length > 0 && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Responsable *</label>
-                <select
-                  className="w-full h-10 px-3 rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
-                  value={newPerson.managerId}
-                  onChange={(e) => setNewPerson({ ...newPerson, managerId: e.target.value })}
-                >
-                  <option value="">Sélectionner un responsable</option>
-                  {persons.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} - {p.jobTitle || "Sans poste"}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Responsable</label>
+              <select
+                className="w-full h-10 px-3 rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
+                value={newPerson.managerId}
+                onChange={(e) => setNewPerson({ ...newPerson, managerId: e.target.value })}
+              >
+                <option value="">Aucun (personne au sommet)</option>
+                {persons.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} - {p.jobTitle || "Sans poste"}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCreateDialog(false)}>

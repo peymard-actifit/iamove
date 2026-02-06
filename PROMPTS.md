@@ -76,5 +76,15 @@ J'ai déjà dit que les variables d'environnement sont présentes dans Vercel da
 As-tu commit and deploy avec le script et indenté la version ? Tu dois le faire systématiquement après chaque amélioration
 ```
 
+## Prompt #13 - Déploiement contrôlé
+```
+Je ne veux pas que le build soit lancé automatiquement par le commit entre Github et Vercel, je veux le maitriser depuis le lancement du script avec cursor.
+```
+
+## Prompt #14 - Corrections UI
+```
+A droite de la mention "Studio", il faut rajouter la version du commit du projet. Quand on crée une personne dans un site, il ne faut pas etre obligé de nommer un responsable. Parfois on veu créer le responsable justement. La fonction d'édition d'une personne ne fonctionne pas.
+```
+
 ---
-*Dernière mise à jour: 2026-02-06 - v2.1.5*
+*Dernière mise à jour: 2026-02-06*

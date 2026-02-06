@@ -86,13 +86,14 @@ export async function PATCH(
       where: { id: personId },
       data: {
         name: body.name,
+        email: body.email,
         firstName: body.firstName,
         lastName: body.lastName,
         jobTitle: body.jobTitle,
         department: body.department,
         phone: body.phone,
         canViewAll: body.canViewAll,
-        managerId: body.managerId,
+        managerId: body.managerId || null,
       },
     });
 

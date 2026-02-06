@@ -105,6 +105,20 @@ function Update-PackageVersion {
     [System.IO.File]::WriteAllText("$PWD\package.json", $content, $utf8NoBom)
 }
 
+# Fonction pour mettre a jour le fichier .env avec la version
+function Update-EnvVersion {
+    param(
+        [string]$NewVersion
+    )
+    
+    if (Test-Path ".env") {
+        $content = Get-Content ".env" -Raw -Encoding UTF8
+        $content = $content -replace 'NEXT_PUBLIC_APP_VERSION="[^"]*"', "NEXT_PUBLIC_APP_VERSION=`"$NewVersion`""
+        $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+        [System.IO.File]::WriteAllText("$PWD\.env", $content, $utf8NoBom)
+    }
+}
+
 # =============================================================================
 # DEBUT DU PIPELINE
 # =============================================================================
@@ -145,10 +159,11 @@ try {
     $newVersion = Get-NextVersion -CurrentVersion $currentVersion -Level $Level
     Write-Step "Nouvelle version: $newVersion" "OK"
     
-    # Etape 4: Mise a jour du package.json
-    Write-Step "Mise a jour de package.json..."
+    # Etape 4: Mise a jour du package.json et .env
+    Write-Step "Mise a jour de package.json et .env..."
     Update-PackageVersion -NewVersion $newVersion
-    Write-Step "package.json mis a jour" "OK"
+    Update-EnvVersion -NewVersion $newVersion
+    Write-Step "Fichiers de version mis a jour" "OK"
     
     # Etape 5: Git add
     Write-Step "Ajout des fichiers au staging..."

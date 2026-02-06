@@ -80,6 +80,7 @@ export function StudioHeader({ session }: StudioHeaderProps) {
             iamove
           </span>
           <span className="text-sm text-gray-500">Studio</span>
+          <span className="text-xs text-gray-400 font-mono">v{process.env.NEXT_PUBLIC_APP_VERSION || "2.1.8"}</span>
         </Link>
 
         {/* Actions */}
