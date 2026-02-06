@@ -159,6 +159,7 @@ export function PublishedSiteApp({
               siteId={site.id}
               siteName={site.name}
               persons={visiblePersons}
+              currentUserEmail={currentPerson?.email}
               onSaveStart={() => {}}
               onSaveDone={() => {}}
               onSaveError={() => {}}
