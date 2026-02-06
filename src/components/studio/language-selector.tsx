@@ -33,19 +33,19 @@ export function LanguageSelector() {
       </Button>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle className="text-center">
               {t.common.chooseLanguage || "Choisir la langue"}
             </DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-6 gap-2 py-4">
+          <div className="grid grid-cols-6 gap-3 py-4">
             {availableLanguages.map((lang) => (
               <button
                 key={lang.code}
                 onClick={() => handleSelectLanguage(lang.code)}
                 className={`
-                  flex items-center justify-center p-1 rounded-lg transition-all aspect-[3/2]
+                  flex items-center justify-center p-2 rounded-lg transition-all
                   hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105
                   ${language === lang.code 
                     ? "bg-blue-100 dark:bg-blue-900 ring-2 ring-blue-500 scale-105" 
@@ -54,7 +54,7 @@ export function LanguageSelector() {
                 `}
                 title={lang.nativeName}
               >
-                <Flag countryCode={lang.countryCode} size="2xl" />
+                <Flag countryCode={lang.countryCode} size="xl" />
               </button>
             ))}
           </div>

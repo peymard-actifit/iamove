@@ -69,7 +69,7 @@ export function SiteLanguageSelector({
       </Button>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-w-2xl" onClick={(e) => e.stopPropagation()}>
+        <DialogContent className="max-w-3xl" onClick={(e) => e.stopPropagation()}>
           <DialogHeader>
             <DialogTitle className="text-center">
               {t.common.siteLanguage}
@@ -78,14 +78,14 @@ export function SiteLanguageSelector({
           <p className="text-sm text-gray-500 text-center mb-2">
             {t.common.siteLanguageDescription}
           </p>
-          <div className="grid grid-cols-6 gap-2 py-4">
+          <div className="grid grid-cols-6 gap-3 py-4">
             {SUPPORTED_LANGUAGES.map((lang) => (
               <button
                 key={lang.code}
                 onClick={() => handleSelectLanguage(lang.code)}
                 disabled={isLoading}
                 className={`
-                  flex items-center justify-center p-1 rounded-lg transition-all aspect-[3/2]
+                  flex items-center justify-center p-2 rounded-lg transition-all
                   hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105
                   disabled:opacity-50 disabled:cursor-not-allowed
                   ${currentLanguage === lang.code 
@@ -95,7 +95,7 @@ export function SiteLanguageSelector({
                 `}
                 title={lang.nativeName}
               >
-                <Flag countryCode={lang.countryCode} size="2xl" />
+                <Flag countryCode={lang.countryCode} size="xl" />
               </button>
             ))}
           </div>

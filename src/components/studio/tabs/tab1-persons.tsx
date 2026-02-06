@@ -18,7 +18,7 @@ import {
   DialogFooter,
 } from "@/components/ui";
 import { Trash2, Copy, Eye, ArrowUp, ArrowDown } from "lucide-react";
-import { getLevelIcon } from "@/lib/levels";
+import { getLevelIcon, getLevelInfo } from "@/lib/levels";
 import { useI18n } from "@/lib/i18n";
 
 interface Person {
@@ -121,7 +121,7 @@ function EditableCell({
   );
 }
 
-// Composant sélecteur de niveau
+// Composant sélecteur de niveau avec tooltip (comme l'organigramme)
 function LevelSelector({
   value,
   onChange,
@@ -130,7 +130,16 @@ function LevelSelector({
   onChange: (value: number) => void;
 }) {
   const [isEditing, setIsEditing] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
   const levelIcon = getLevelIcon(value, "h-3.5 w-3.5");
+  const levelInfo = getLevelInfo(value);
+
+  const handleMouseEnter = () => {
+    if (!isEditing) {
+      setShowTooltip(true);
+      setTimeout(() => setShowTooltip(false), 5000);
+    }
+  };
 
   if (isEditing) {
     return (
@@ -154,16 +163,27 @@ function LevelSelector({
   }
 
   return (
-    <span
-      onClick={(e) => {
-        e.stopPropagation();
-        setIsEditing(true);
-      }}
-      className="cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-800 px-1.5 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 flex items-center gap-1"
-    >
-      {value}
-      {levelIcon}
-    </span>
+    <div className="relative inline-block">
+      <span
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsEditing(true);
+        }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={() => setShowTooltip(false)}
+        className="cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-800 px-1.5 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 flex items-center gap-1"
+      >
+        Niv. {value}
+        {levelIcon}
+      </span>
+      {showTooltip && (
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1.5 bg-gray-900 text-white rounded shadow-lg z-50 whitespace-nowrap text-center">
+          <p className="text-[10px] font-medium">{levelInfo.name}</p>
+          <p className="text-[10px] text-gray-300">{levelInfo.seriousGaming}</p>
+          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+        </div>
+      )}
+    </div>
   );
 }
 
