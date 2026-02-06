@@ -44,5 +44,5 @@ export default async function SiteEditorPage({ params }: PageProps) {
     orderBy: { number: "asc" },
   });
 
-  return <SiteEditor site={site} levels={levels} />;
+  return <SiteEditor site={site} levels={levels} currentUserEmail={session.email} />;
 }

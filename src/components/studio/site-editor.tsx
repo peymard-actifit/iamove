@@ -78,9 +78,10 @@ interface Level {
 interface SiteEditorProps {
   site: Site;
   levels: Level[];
+  currentUserEmail?: string;
 }
 
-export function SiteEditor({ site, levels }: SiteEditorProps) {
+export function SiteEditor({ site, levels, currentUserEmail }: SiteEditorProps) {
   const router = useRouter();
   const { t } = useI18n();
   const { status, startSaving, saveDone, saveError } = useSaveStatus();
@@ -211,6 +212,7 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
                 onSaveStart={startSaving}
                 onSaveDone={saveDone}
                 onSaveError={saveError}
+                currentUserEmail={currentUserEmail}
               />
             </TabsContent>
 

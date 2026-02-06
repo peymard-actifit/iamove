@@ -8,6 +8,7 @@ import { getLevelIcon, getLevelInfo } from "@/lib/levels";
 interface Person {
   id: string;
   name: string;
+  email: string;
   jobTitle: string | null;
   department: string | null;
   currentLevel: number;
@@ -21,6 +22,7 @@ interface Tab2OrganigrammeProps {
   onSaveStart: () => void;
   onSaveDone: () => void;
   onSaveError: () => void;
+  currentUserEmail?: string;
 }
 
 interface OrgNode {
@@ -86,16 +88,32 @@ function LevelBadgeWithTooltip({ levelNumber }: { levelNumber: number }) {
   );
 }
 
-function OrgNodeComponent({ node, level = 0 }: { node: OrgNode; level?: number }) {
+function OrgNodeComponent({ 
+  node, 
+  level = 0, 
+  currentUserEmail 
+}: { 
+  node: OrgNode; 
+  level?: number;
+  currentUserEmail?: string;
+}) {
   const hasChildren = node.children.length > 0;
+  const isCurrentUser = currentUserEmail && node.person.email.toLowerCase() === currentUserEmail.toLowerCase();
   
   // Combiner Service / Poste sur une ligne
   const servicePoste = [node.person.department, node.person.jobTitle].filter(Boolean).join(" / ");
 
   return (
     <div className="flex flex-col items-center">
-      <Card className="p-3 min-w-[180px] text-center hover:shadow-md transition-shadow">
-        <h4 className="font-semibold text-sm">{node.person.name}</h4>
+      <Card className={`p-3 min-w-[180px] text-center transition-shadow ${
+        isCurrentUser 
+          ? "ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/30 shadow-lg shadow-blue-200 dark:shadow-blue-900/50" 
+          : "hover:shadow-md"
+      }`}>
+        <h4 className={`font-semibold text-sm ${isCurrentUser ? "text-blue-700 dark:text-blue-300" : ""}`}>
+          {node.person.name}
+          {isCurrentUser && <span className="ml-1 text-xs">(vous)</span>}
+        </h4>
         {servicePoste && (
           <p className="text-xs text-gray-500 mt-0.5">{servicePoste}</p>
         )}
@@ -123,7 +141,7 @@ function OrgNodeComponent({ node, level = 0 }: { node: OrgNode; level?: number }
             {node.children.map((child) => (
               <div key={child.person.id} className="flex flex-col items-center">
                 <div className="w-px h-4 bg-gray-300 dark:bg-gray-700" />
-                <OrgNodeComponent node={child} level={level + 1} />
+                <OrgNodeComponent node={child} level={level + 1} currentUserEmail={currentUserEmail} />
               </div>
             ))}
           </div>
@@ -139,6 +157,7 @@ export function Tab2Organigramme({
   onSaveStart,
   onSaveDone,
   onSaveError,
+  currentUserEmail,
 }: Tab2OrganigrammeProps) {
   const orgTree = useMemo(() => buildOrgTree(persons), [persons]);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -237,7 +256,7 @@ export function Tab2Organigramme({
         >
           <div className="flex justify-center gap-12">
             {orgTree.map((root) => (
-              <OrgNodeComponent key={root.person.id} node={root} />
+              <OrgNodeComponent key={root.person.id} node={root} currentUserEmail={currentUserEmail} />
             ))}
           </div>
         </div>
