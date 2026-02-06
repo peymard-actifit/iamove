@@ -157,9 +157,13 @@ try {
     
     # Etape 7: Git push
     Write-Step "Push vers GitHub..."
-    $pushOutput = git push origin main 2>&1 | Out-String
-    if ($LASTEXITCODE -ne 0) {
-        throw "Git push failed: $pushOutput"
+    $oldErrorAction = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    git push origin main 2>&1 | Out-Null
+    $pushExitCode = $LASTEXITCODE
+    $ErrorActionPreference = $oldErrorAction
+    if ($pushExitCode -ne 0) {
+        throw "Git push failed with exit code $pushExitCode"
     }
     Write-Step "Push reussi" "OK"
     
