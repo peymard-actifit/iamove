@@ -265,5 +265,16 @@ Ne met pas de fond de couleur sous l'icône, laisse la sur un fond blanc. Fait e
 → Icône de profil sur fond blanc (sans gradient)
 → Élargissement du fond bleu du LevelSelector pour couvrir l'icône (pl-2 pr-1 gap-1)
 
+## Prompt #35 - Zoom molette et profil éditable vue publiée
+```
+Quand j'utilise la roulette sur la vue organigramme, je zoome ou je dézoome et cela met à jour la valeur de zoom dans le menu masquable. Dans la vue publiée, il faut que dans l'onglet profil, on retrouve la vue d'édition du profil de la personne connectée en mode éditable afin que la personne puisse tout modifier sauf directement le niveau.
+```
+→ Zoom à la molette sur l'organigramme (incrément 5% par défilement)
+→ Synchronisation automatique avec la valeur affichée dans le menu zoom
+→ Création du composant PersonalProfileEditor pour la vue publiée
+→ Onglet Profil en vue publiée affiche le profil de la personne connectée
+→ Édition possible de tous les champs SAUF le niveau (verrouillé + explication)
+→ Icône du niveau de la personne affichée en grand dans le header du profil
+
 ---
 *Dernière mise à jour: 2026-02-06*

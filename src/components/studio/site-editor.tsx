@@ -208,6 +208,7 @@ export function SiteEditor({ site, levels, currentUserEmail }: SiteEditorProps) 
             <TabsContent value="tab2" className="mt-2">
               <Tab2Organigramme
                 siteId={site.id}
+                siteName={site.name}
                 persons={site.persons}
                 onSaveStart={startSaving}
                 onSaveDone={saveDone}

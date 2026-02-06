@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger, TabsContent, Button } from "@/components/ui";
 import { Network, User, GraduationCap, ClipboardCheck, LogOut } from "lucide-react";
 import { Tab2Organigramme } from "@/components/studio/tabs/tab2-organigramme";
-import { Tab3Profile } from "@/components/studio/tabs/tab3-profile";
 import { Tab4Formation } from "@/components/studio/tabs/tab4-formation";
 import { Tab5Quiz } from "@/components/studio/tabs/tab5-quiz";
+import { PersonalProfileEditor } from "./personal-profile-editor";
 
 interface Person {
   id: string;
@@ -65,9 +64,6 @@ export function PublishedSiteApp({
   isStudioUser: _isStudioUser,
 }: PublishedSiteAppProps) {
   const router = useRouter();
-  const [selectedPersonId, setSelectedPersonId] = useState<string | null>(
-    currentPerson?.id || null
-  );
 
   const settings = site.settings || {
     tab2Title: "Organisation",
@@ -157,6 +153,7 @@ export function PublishedSiteApp({
           <TabsContent value="tab2">
             <Tab2Organigramme
               siteId={site.id}
+              siteName={site.name}
               persons={visiblePersons}
               onSaveStart={() => {}}
               onSaveDone={() => {}}
@@ -165,13 +162,17 @@ export function PublishedSiteApp({
           </TabsContent>
 
           <TabsContent value="tab3">
-            <Tab3Profile
-              siteId={site.id}
-              persons={visiblePersons}
-              levels={levels}
-              selectedPersonId={selectedPersonId}
-              onSelectPerson={setSelectedPersonId}
-            />
+            {currentPerson ? (
+              <PersonalProfileEditor
+                siteId={site.id}
+                person={currentPerson}
+                persons={visiblePersons}
+              />
+            ) : (
+              <div className="text-center py-12 text-gray-500">
+                <p>Vous devez être connecté pour voir votre profil</p>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="tab4">

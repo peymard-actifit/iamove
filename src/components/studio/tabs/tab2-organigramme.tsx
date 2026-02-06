@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useRef, useCallback } from "react";
 import { Card, Button, Input } from "@/components/ui";
-import { ChevronDown, Plus, Minus, Maximize, Minimize, Scan, Printer } from "lucide-react";
+import { ChevronDown, Plus, Minus, Maximize, Minimize, Focus, Printer } from "lucide-react";
 import { getLevelIcon, getLevelInfo } from "@/lib/levels";
 
 interface Person {
@@ -18,6 +18,7 @@ interface Person {
 
 interface Tab2OrganigrammeProps {
   siteId: string;
+  siteName: string;
   persons: Person[];
   onSaveStart: () => void;
   onSaveDone: () => void;
@@ -153,6 +154,7 @@ function OrgNodeComponent({
 
 export function Tab2Organigramme({
   siteId,
+  siteName,
   persons,
   onSaveStart,
   onSaveDone,
@@ -162,6 +164,7 @@ export function Tab2Organigramme({
   const orgTree = useMemo(() => buildOrgTree(persons), [persons]);
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const printRef = useRef<HTMLDivElement>(null);
   
   const [zoom, setZoom] = useState(100);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -185,6 +188,17 @@ export function Tab2Organigramme({
   }, []);
 
   const handlePrint = useCallback(() => {
+    // Ajuster pour tenir sur une page avant d'imprimer
+    if (contentRef.current && printRef.current) {
+      const content = contentRef.current;
+      // Calculer le zoom pour tenir sur une page A4 paysage (environ 1100px x 750px)
+      const pageWidth = 1100;
+      const pageHeight = 700;
+      const scaleX = pageWidth / content.scrollWidth;
+      const scaleY = pageHeight / content.scrollHeight;
+      const printScale = Math.min(scaleX, scaleY, 1) * 100;
+      printRef.current.style.setProperty("--print-zoom", `${printScale}%`);
+    }
     window.print();
   }, []);
 
@@ -225,35 +239,81 @@ export function Tab2Organigramme({
   }
 
   return (
-    <div 
-      className="relative h-[calc(100vh-220px)] min-h-[400px]"
-      onMouseMove={(e) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        const rightEdge = rect.right - e.clientX;
-        setShowZoomMenu(rightEdge < 60);
-      }}
-      onMouseLeave={() => setShowZoomMenu(false)}
-    >
-      {/* Zone de contenu zoomable */}
+    <>
+      {/* Styles d'impression */}
+      <style jsx global>{`
+        @media print {
+          @page {
+            size: landscape;
+            margin: 10mm;
+          }
+          body * {
+            visibility: hidden;
+          }
+          .print-area, .print-area * {
+            visibility: visible;
+          }
+          .print-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+          }
+          .print-title {
+            display: block !important;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+          }
+          .print-content {
+            transform: scale(var(--print-zoom, 100%)) !important;
+            transform-origin: top center !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+        }
+      `}</style>
+      
       <div 
-        ref={containerRef}
-        className="w-full h-full overflow-auto bg-gray-50 dark:bg-gray-900 rounded-lg border"
+        ref={printRef}
+        className="print-area relative h-[calc(100vh-220px)] min-h-[400px]"
+        onMouseMove={(e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          const rightEdge = rect.right - e.clientX;
+          setShowZoomMenu(rightEdge < 60);
+        }}
+        onMouseLeave={() => setShowZoomMenu(false)}
       >
+        {/* Titre visible uniquement à l'impression */}
+        <h1 className="print-title hidden">{siteName} - Organigramme</h1>
+        
+        {/* Zone de contenu zoomable */}
         <div 
-          ref={contentRef}
-          className="p-8 min-w-max"
-          style={{ 
-            transform: `scale(${zoom / 100})`,
-            transformOrigin: "top center",
+          ref={containerRef}
+          className="w-full h-full overflow-auto bg-gray-50 dark:bg-gray-900 rounded-lg border print:border-0 print:bg-white"
+          onWheel={(e) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -5 : 5;
+            setZoom((z) => Math.max(25, Math.min(200, z + delta)));
           }}
         >
-          <div className="flex justify-center gap-12">
-            {orgTree.map((root) => (
-              <OrgNodeComponent key={root.person.id} node={root} currentUserEmail={currentUserEmail} />
-            ))}
+          <div 
+            ref={contentRef}
+            className="print-content p-8 min-w-max"
+            style={{ 
+              transform: `scale(${zoom / 100})`,
+              transformOrigin: "top center",
+            }}
+          >
+            <div className="flex justify-center gap-12">
+              {orgTree.map((root) => (
+                <OrgNodeComponent key={root.person.id} node={root} currentUserEmail={currentUserEmail} />
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Menu de zoom (masqué par défaut, visible au survol droite) */}
       <div 
@@ -325,11 +385,11 @@ export function Tab2Organigramme({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="h-8 w-8 no-print"
             onClick={handleFitToWindow}
             title="Ajuster à la fenêtre"
           >
-            <Scan className="h-4 w-4" />
+            <Focus className="h-4 w-4" />
           </Button>
           
           <Button
@@ -349,7 +409,7 @@ export function Tab2Organigramme({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="h-8 w-8 no-print"
             onClick={handlePrint}
             title="Imprimer (PDF)"
           >
@@ -358,5 +418,6 @@ export function Tab2Organigramme({
         </div>
       </div>
     </div>
+    </>
   );
 }
