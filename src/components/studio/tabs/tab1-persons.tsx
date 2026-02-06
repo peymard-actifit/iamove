@@ -103,7 +103,7 @@ function EditableCell({
         onChange={(e) => setEditValue(e.target.value)}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
-        className="h-7 text-xs"
+        className="h-5 text-xs py-0"
       />
     );
   }
@@ -114,7 +114,7 @@ function EditableCell({
         e.stopPropagation();
         setIsEditing(true);
       }}
-      className="cursor-text hover:bg-gray-100 dark:hover:bg-gray-800 px-1.5 py-0.5 rounded inline-block text-sm"
+      className="cursor-text hover:bg-gray-100 dark:hover:bg-gray-800 px-1 py-0 rounded inline-block text-xs"
     >
       {value || <span className="text-gray-400">{placeholder}</span>}
     </span>
@@ -151,7 +151,7 @@ function LevelSelector({
         }}
         onBlur={() => setIsEditing(false)}
         autoFocus
-        className="h-6 px-1 text-xs rounded border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
+        className="h-5 px-1 text-xs rounded border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
       >
         {Array.from({ length: 21 }, (_, i) => (
           <option key={i} value={i}>
@@ -171,7 +171,7 @@ function LevelSelector({
         }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={() => setShowTooltip(false)}
-        className="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 inline-flex items-center gap-1 cursor-pointer whitespace-nowrap"
+        className="px-1.5 py-0 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 inline-flex items-center gap-0.5 cursor-pointer whitespace-nowrap"
       >
         Niv. {value}
         {levelIcon}
@@ -212,7 +212,7 @@ function ManagerSelector({
         }}
         onBlur={() => setIsEditing(false)}
         autoFocus
-        className="h-6 px-1 text-xs rounded border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900 max-w-[120px]"
+        className="h-5 px-1 text-xs rounded border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900 max-w-[120px]"
       >
         <option value="">-</option>
         {persons
@@ -232,7 +232,7 @@ function ManagerSelector({
         e.stopPropagation();
         setIsEditing(true);
       }}
-      className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 px-1.5 py-0.5 rounded text-sm"
+      className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 px-1 py-0 rounded text-xs"
     >
       {manager?.name || <span className="text-gray-400">-</span>}
     </span>
@@ -366,9 +366,9 @@ export function Tab1Persons({
         <div className="border rounded-lg overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow className="h-7">
+              <TableRow className="h-6">
                 <TableHead 
-                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-1"
+                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-0.5"
                   onClick={() => handleSort("name")}
                   title={sortDirection === "asc" ? t.tooltip.sortDescending : t.tooltip.sortAscending}
                 >
@@ -378,7 +378,7 @@ export function Tab1Persons({
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-1"
+                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-0.5"
                   onClick={() => handleSort("email")}
                   title={sortDirection === "asc" ? t.tooltip.sortDescending : t.tooltip.sortAscending}
                 >
@@ -388,7 +388,7 @@ export function Tab1Persons({
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-1"
+                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-0.5"
                   onClick={() => handleSort("jobTitle")}
                   title={sortDirection === "asc" ? t.tooltip.sortDescending : t.tooltip.sortAscending}
                 >
@@ -398,7 +398,7 @@ export function Tab1Persons({
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-1"
+                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-0.5"
                   onClick={() => handleSort("department")}
                   title={sortDirection === "asc" ? t.tooltip.sortDescending : t.tooltip.sortAscending}
                 >
@@ -408,7 +408,7 @@ export function Tab1Persons({
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-1 w-12"
+                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-0.5 w-20"
                   onClick={() => handleSort("currentLevel")}
                   title={sortDirection === "asc" ? t.tooltip.sortDescending : t.tooltip.sortAscending}
                 >
@@ -418,7 +418,7 @@ export function Tab1Persons({
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-1"
+                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-0.5"
                   onClick={() => handleSort("manager")}
                   title={sortDirection === "asc" ? t.tooltip.sortDescending : t.tooltip.sortAscending}
                 >
@@ -427,44 +427,44 @@ export function Tab1Persons({
                     {sortColumn === "manager" && (sortDirection === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
                   </div>
                 </TableHead>
-                <TableHead className="w-[90px] text-right text-xs py-1">{t.persons.actions}</TableHead>
+                <TableHead className="w-[90px] text-right text-xs py-0.5">{t.persons.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {sortedPersons.map((person) => (
-                <TableRow key={person.id} className="group">
-                  <TableCell className="py-1 font-medium">
+                <TableRow key={person.id} className="group h-6">
+                  <TableCell className="py-0.5 font-medium">
                     <EditableCell
                       value={person.name}
                       onChange={(v) => updatePerson(person.id, "name", v)}
                     />
                   </TableCell>
-                  <TableCell className="py-1">
+                  <TableCell className="py-0.5">
                     <EditableCell
                       value={person.email}
                       type="email"
                       onChange={(v) => updatePerson(person.id, "email", v)}
                     />
                   </TableCell>
-                  <TableCell className="py-1">
+                  <TableCell className="py-0.5">
                     <EditableCell
                       value={person.jobTitle || ""}
                       onChange={(v) => updatePerson(person.id, "jobTitle", v || null)}
                     />
                   </TableCell>
-                  <TableCell className="py-1">
+                  <TableCell className="py-0.5">
                     <EditableCell
                       value={person.department || ""}
                       onChange={(v) => updatePerson(person.id, "department", v || null)}
                     />
                   </TableCell>
-                  <TableCell className="py-1">
+                  <TableCell className="py-0.5">
                     <LevelSelector
                       value={person.currentLevel}
                       onChange={(v) => updatePerson(person.id, "currentLevel", v)}
                     />
                   </TableCell>
-                  <TableCell className="py-1">
+                  <TableCell className="py-0.5">
                     <ManagerSelector
                       value={person.managerId}
                       persons={persons}
@@ -472,34 +472,34 @@ export function Tab1Persons({
                       onChange={(v) => updatePerson(person.id, "managerId", v)}
                     />
                   </TableCell>
-                  <TableCell className="py-1">
+                  <TableCell className="py-0.5">
                     <div className="flex items-center justify-end gap-0.5">
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6"
+                        className="h-5 w-5"
                         onClick={() => onSelectPerson(person.id)}
                         title={t.tooltip.viewProfile}
                       >
-                        <Eye className="h-3.5 w-3.5" />
+                        <Eye className="h-3 w-3" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6"
+                        className="h-5 w-5"
                         onClick={() => copyInviteLink(person.id)}
                         title={t.persons.copyInviteLink}
                       >
-                        <Copy className={`h-3.5 w-3.5 ${copiedId === person.id ? "text-green-500" : ""}`} />
+                        <Copy className={`h-3 w-3 ${copiedId === person.id ? "text-green-500" : ""}`} />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        className="h-5 w-5 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                         onClick={() => setShowDeleteDialog(person.id)}
                         title={t.tooltip.deletePerson}
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   </TableCell>
