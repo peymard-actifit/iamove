@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Card } from "@/components/ui";
-import { ChevronDown } from "lucide-react";
+import { useMemo, useState, useRef, useCallback } from "react";
+import { Card, Button, Input } from "@/components/ui";
+import { ChevronDown, Plus, Minus, Maximize, Minimize, Move, ZoomIn } from "lucide-react";
 import { getLevelIcon, getLevelInfo } from "@/lib/levels";
 
 interface Person {
@@ -88,16 +88,16 @@ function LevelBadgeWithTooltip({ levelNumber }: { levelNumber: number }) {
 
 function OrgNodeComponent({ node, level = 0 }: { node: OrgNode; level?: number }) {
   const hasChildren = node.children.length > 0;
+  
+  // Combiner Service / Poste sur une ligne
+  const servicePoste = [node.person.department, node.person.jobTitle].filter(Boolean).join(" / ");
 
   return (
     <div className="flex flex-col items-center">
       <Card className="p-3 min-w-[180px] text-center hover:shadow-md transition-shadow">
         <h4 className="font-semibold text-sm">{node.person.name}</h4>
-        {node.person.jobTitle && (
-          <p className="text-xs text-gray-500 mt-0.5">{node.person.jobTitle}</p>
-        )}
-        {node.person.department && (
-          <p className="text-xs text-gray-400">{node.person.department}</p>
+        {servicePoste && (
+          <p className="text-xs text-gray-500 mt-0.5">{servicePoste}</p>
         )}
         <div className="mt-1.5 flex items-center justify-center gap-1.5">
           <LevelBadgeWithTooltip levelNumber={node.person.currentLevel} />
@@ -141,6 +141,67 @@ export function Tab2Organigramme({
   onSaveError,
 }: Tab2OrganigrammeProps) {
   const orgTree = useMemo(() => buildOrgTree(persons), [persons]);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  
+  const [zoom, setZoom] = useState(100);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showZoomMenu, setShowZoomMenu] = useState(false);
+  const [editingZoom, setEditingZoom] = useState(false);
+  const [zoomInput, setZoomInput] = useState("100");
+
+  const handleZoomIn = useCallback(() => {
+    setZoom((z) => Math.min(200, z + 10));
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setZoom((z) => Math.max(25, z - 10));
+  }, []);
+
+  const handleZoomChange = useCallback((value: string) => {
+    const num = parseInt(value, 10);
+    if (!isNaN(num) && num >= 25 && num <= 200) {
+      setZoom(num);
+    }
+  }, []);
+
+  const handleCenter = useCallback(() => {
+    if (containerRef.current) {
+      const container = containerRef.current;
+      container.scrollTo({
+        left: (container.scrollWidth - container.clientWidth) / 2,
+        top: (container.scrollHeight - container.clientHeight) / 2,
+        behavior: "smooth",
+      });
+    }
+  }, []);
+
+  const handleFitToWindow = useCallback(() => {
+    if (containerRef.current && contentRef.current) {
+      const container = containerRef.current;
+      const content = contentRef.current;
+      const scaleX = (container.clientWidth - 40) / content.scrollWidth;
+      const scaleY = (container.clientHeight - 40) / content.scrollHeight;
+      const newZoom = Math.min(scaleX, scaleY) * 100;
+      setZoom(Math.max(25, Math.min(200, Math.floor(newZoom))));
+    }
+  }, []);
+
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      containerRef.current?.parentElement?.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  }, []);
+
+  const handleZoomDoubleClick = useCallback(() => {
+    setZoom(100);
+    setZoomInput("100");
+    setEditingZoom(false);
+  }, []);
 
   if (persons.length === 0) {
     return (
@@ -152,14 +213,136 @@ export function Tab2Organigramme({
   }
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Organigramme</h2>
-      
-      <div className="overflow-auto p-8">
-        <div className="flex justify-center gap-12">
-          {orgTree.map((root) => (
-            <OrgNodeComponent key={root.person.id} node={root} />
-          ))}
+    <div 
+      className="relative h-[calc(100vh-220px)] min-h-[400px]"
+      onMouseMove={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const rightEdge = rect.right - e.clientX;
+        setShowZoomMenu(rightEdge < 60);
+      }}
+      onMouseLeave={() => setShowZoomMenu(false)}
+    >
+      {/* Zone de contenu zoomable */}
+      <div 
+        ref={containerRef}
+        className="w-full h-full overflow-auto bg-gray-50 dark:bg-gray-900 rounded-lg border"
+      >
+        <div 
+          ref={contentRef}
+          className="p-8 min-w-max"
+          style={{ 
+            transform: `scale(${zoom / 100})`,
+            transformOrigin: "top center",
+          }}
+        >
+          <div className="flex justify-center gap-12">
+            {orgTree.map((root) => (
+              <OrgNodeComponent key={root.person.id} node={root} />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Menu de zoom (masqué par défaut, visible au survol droite) */}
+      <div 
+        className={`absolute right-0 top-1/2 -translate-y-1/2 transition-all duration-200 ${
+          showZoomMenu ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full pointer-events-none"
+        }`}
+      >
+        <div className="bg-white dark:bg-gray-800 rounded-l-lg shadow-lg border border-r-0 p-2 flex flex-col gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={handleZoomIn}
+            title="Zoomer"
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={handleZoomOut}
+            title="Dézoomer"
+          >
+            <Minus className="h-4 w-4" />
+          </Button>
+          
+          <div 
+            className="relative"
+            onDoubleClick={handleZoomDoubleClick}
+          >
+            {editingZoom ? (
+              <Input
+                type="number"
+                min="25"
+                max="200"
+                value={zoomInput}
+                onChange={(e) => setZoomInput(e.target.value)}
+                onBlur={() => {
+                  handleZoomChange(zoomInput);
+                  setEditingZoom(false);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleZoomChange(zoomInput);
+                    setEditingZoom(false);
+                  }
+                }}
+                className="w-14 h-8 text-xs text-center p-1"
+                autoFocus
+              />
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-14 text-xs"
+                onClick={() => {
+                  setZoomInput(zoom.toString());
+                  setEditingZoom(true);
+                }}
+                title="Double-clic pour 100%"
+              >
+                {zoom}%
+              </Button>
+            )}
+          </div>
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={handleCenter}
+            title="Centrer"
+          >
+            <Move className="h-4 w-4" />
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={handleFitToWindow}
+            title="Ajuster à la fenêtre"
+          >
+            <ZoomIn className="h-4 w-4" />
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={toggleFullscreen}
+            title={isFullscreen ? "Quitter plein écran" : "Plein écran"}
+          >
+            {isFullscreen ? (
+              <Minimize className="h-4 w-4" />
+            ) : (
+              <Maximize className="h-4 w-4" />
+            )}
+          </Button>
         </div>
       </div>
     </div>
