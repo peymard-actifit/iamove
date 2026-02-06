@@ -78,27 +78,24 @@ export function SiteLanguageSelector({
           <p className="text-sm text-gray-500 text-center mb-2">
             {t.common.siteLanguageDescription}
           </p>
-          <div className="grid grid-cols-4 gap-2 py-4">
+          <div className="grid grid-cols-6 gap-3 py-4">
             {SUPPORTED_LANGUAGES.map((lang) => (
               <button
                 key={lang.code}
                 onClick={() => handleSelectLanguage(lang.code)}
                 disabled={isLoading}
                 className={`
-                  flex flex-col items-center gap-2 p-3 rounded-lg transition-all
-                  hover:bg-gray-100 dark:hover:bg-gray-800
+                  flex items-center justify-center p-2 rounded-lg transition-all
+                  hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105
                   disabled:opacity-50 disabled:cursor-not-allowed
                   ${currentLanguage === lang.code 
-                    ? "bg-blue-100 dark:bg-blue-900 ring-2 ring-blue-500" 
+                    ? "bg-blue-100 dark:bg-blue-900 ring-2 ring-blue-500 scale-105" 
                     : "bg-gray-50 dark:bg-gray-900"
                   }
                 `}
-                title={lang.name}
+                title={lang.nativeName}
               >
-                <Flag countryCode={lang.countryCode} size="lg" />
-                <span className="text-[10px] text-gray-600 dark:text-gray-400 truncate w-full text-center">
-                  {lang.nativeName}
-                </span>
+                <Flag countryCode={lang.countryCode} size="xl" />
               </button>
             ))}
           </div>

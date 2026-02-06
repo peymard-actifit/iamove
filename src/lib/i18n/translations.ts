@@ -190,6 +190,31 @@ export function buildTranslationsObject(flatTranslations: Record<string, string>
       daysAgo: getValue("dates.daysAgo", "il y a {n} jours"),
       format: getValue("dates.format", "DD/MM/YYYY"),
     },
+    placeholder: {
+      enterName: getValue("placeholder.enterName", "Entrez le nom..."),
+      enterEmail: getValue("placeholder.enterEmail", "Entrez l'email..."),
+      enterPosition: getValue("placeholder.enterPosition", "Entrez le poste..."),
+      enterDepartment: getValue("placeholder.enterDepartment", "Entrez le service..."),
+      enterSiteName: getValue("placeholder.enterSiteName", "Entrez le nom du site..."),
+      enterDescription: getValue("placeholder.enterDescription", "Entrez une description..."),
+      selectManager: getValue("placeholder.selectManager", "Sélectionnez un responsable..."),
+    },
+    tooltip: {
+      viewProfile: getValue("tooltip.viewProfile", "Voir le profil"),
+      editPerson: getValue("tooltip.editPerson", "Modifier la personne"),
+      deletePerson: getValue("tooltip.deletePerson", "Supprimer la personne"),
+      editSite: getValue("tooltip.editSite", "Modifier le site"),
+      deleteSite: getValue("tooltip.deleteSite", "Supprimer le site"),
+      duplicateSite: getValue("tooltip.duplicateSite", "Dupliquer le site"),
+      publishSite: getValue("tooltip.publishSite", "Publier le site"),
+      unpublishSite: getValue("tooltip.unpublishSite", "Dépublier le site"),
+      siteSettings: getValue("tooltip.siteSettings", "Paramètres du site"),
+      changeLanguage: getValue("tooltip.changeLanguage", "Changer la langue"),
+      userMenu: getValue("tooltip.userMenu", "Menu utilisateur"),
+      sortAscending: getValue("tooltip.sortAscending", "Trier par ordre croissant"),
+      sortDescending: getValue("tooltip.sortDescending", "Trier par ordre décroissant"),
+      siteContentLanguage: getValue("tooltip.siteContentLanguage", "Langue du contenu du site"),
+    },
   };
 }
 
@@ -320,7 +345,34 @@ export interface Translations {
     today: string;
     yesterday: string;
     daysAgo: string;
-    format: string; // Format de date (ex: "DD/MM/YYYY")
+    format: string;
+  };
+  // Placeholders (textes indicatifs dans les champs)
+  placeholder: {
+    enterName: string;
+    enterEmail: string;
+    enterPosition: string;
+    enterDepartment: string;
+    enterSiteName: string;
+    enterDescription: string;
+    selectManager: string;
+  };
+  // Tooltips (informations au survol)
+  tooltip: {
+    viewProfile: string;
+    editPerson: string;
+    deletePerson: string;
+    editSite: string;
+    deleteSite: string;
+    duplicateSite: string;
+    publishSite: string;
+    unpublishSite: string;
+    siteSettings: string;
+    changeLanguage: string;
+    userMenu: string;
+    sortAscending: string;
+    sortDescending: string;
+    siteContentLanguage: string;
   };
 }
 
@@ -442,6 +494,31 @@ export const FR: Translations = {
     daysAgo: "il y a {n} jours",
     format: "DD/MM/YYYY",
   },
+  placeholder: {
+    enterName: "Entrez le nom...",
+    enterEmail: "Entrez l'email...",
+    enterPosition: "Entrez le poste...",
+    enterDepartment: "Entrez le service...",
+    enterSiteName: "Entrez le nom du site...",
+    enterDescription: "Entrez une description...",
+    selectManager: "Sélectionnez un responsable...",
+  },
+  tooltip: {
+    viewProfile: "Voir le profil",
+    editPerson: "Modifier la personne",
+    deletePerson: "Supprimer la personne",
+    editSite: "Modifier le site",
+    deleteSite: "Supprimer le site",
+    duplicateSite: "Dupliquer le site",
+    publishSite: "Publier le site",
+    unpublishSite: "Dépublier le site",
+    siteSettings: "Paramètres du site",
+    changeLanguage: "Changer la langue",
+    userMenu: "Menu utilisateur",
+    sortAscending: "Trier par ordre croissant",
+    sortDescending: "Trier par ordre décroissant",
+    siteContentLanguage: "Langue du contenu du site",
+  },
 };
 
 // Traductions anglaises
@@ -561,6 +638,31 @@ export const EN: Translations = {
     yesterday: "Yesterday",
     daysAgo: "{n} days ago",
     format: "MM/DD/YYYY",
+  },
+  placeholder: {
+    enterName: "Enter name...",
+    enterEmail: "Enter email...",
+    enterPosition: "Enter position...",
+    enterDepartment: "Enter department...",
+    enterSiteName: "Enter site name...",
+    enterDescription: "Enter description...",
+    selectManager: "Select a manager...",
+  },
+  tooltip: {
+    viewProfile: "View profile",
+    editPerson: "Edit person",
+    deletePerson: "Delete person",
+    editSite: "Edit site",
+    deleteSite: "Delete site",
+    duplicateSite: "Duplicate site",
+    publishSite: "Publish site",
+    unpublishSite: "Unpublish site",
+    siteSettings: "Site settings",
+    changeLanguage: "Change language",
+    userMenu: "User menu",
+    sortAscending: "Sort ascending",
+    sortDescending: "Sort descending",
+    siteContentLanguage: "Site content language",
   },
 };
 
