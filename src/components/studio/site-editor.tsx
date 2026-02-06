@@ -207,7 +207,7 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
               </Button>
             </div>
 
-            <TabsContent value="tab1" className="mt-6">
+            <TabsContent value="tab1" className="mt-2">
               <Tab1Persons
                 siteId={site.id}
                 persons={site.persons}
@@ -219,7 +219,7 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
               />
             </TabsContent>
 
-            <TabsContent value="tab2" className="mt-6">
+            <TabsContent value="tab2" className="mt-2">
               <Tab2Organigramme
                 siteId={site.id}
                 persons={site.persons}
@@ -229,7 +229,7 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
               />
             </TabsContent>
 
-            <TabsContent value="tab3" className="mt-6">
+            <TabsContent value="tab3" className="mt-2">
               <Tab3Profile
                 siteId={site.id}
                 persons={site.persons}
@@ -249,7 +249,7 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
               />
             </TabsContent>
 
-            <TabsContent value="tab5" className="mt-6">
+            <TabsContent value="tab5" className="mt-2">
               <Tab5Quiz
                 siteId={site.id}
                 isStudioMode={true}

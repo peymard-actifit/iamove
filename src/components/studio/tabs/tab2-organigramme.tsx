@@ -2,7 +2,8 @@
 
 import { useMemo } from "react";
 import { Card } from "@/components/ui";
-import { User, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import { getLevelIcon } from "@/lib/levels";
 
 interface Person {
   id: string;
@@ -56,25 +57,22 @@ function buildOrgTree(persons: Person[]): OrgNode[] {
 
 function OrgNodeComponent({ node, level = 0 }: { node: OrgNode; level?: number }) {
   const hasChildren = node.children.length > 0;
+  const levelIcon = getLevelIcon(node.person.currentLevel, "h-3.5 w-3.5");
 
   return (
     <div className="flex flex-col items-center">
-      <Card className="p-4 min-w-[200px] text-center hover:shadow-md transition-shadow">
-        <div className="flex items-center justify-center mb-2">
-          <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
-            <User className="h-5 w-5 text-white" />
-          </div>
-        </div>
+      <Card className="p-3 min-w-[180px] text-center hover:shadow-md transition-shadow">
         <h4 className="font-semibold text-sm">{node.person.name}</h4>
         {node.person.jobTitle && (
-          <p className="text-xs text-gray-500 mt-1">{node.person.jobTitle}</p>
+          <p className="text-xs text-gray-500 mt-0.5">{node.person.jobTitle}</p>
         )}
         {node.person.department && (
           <p className="text-xs text-gray-400">{node.person.department}</p>
         )}
-        <div className="mt-2">
-          <span className="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-            Niveau {node.person.currentLevel}
+        <div className="mt-1.5 flex items-center justify-center gap-1.5">
+          <span className="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 flex items-center gap-1">
+            {levelIcon}
+            <span>Niv. {node.person.currentLevel}</span>
           </span>
         </div>
       </Card>

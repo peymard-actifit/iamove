@@ -111,5 +111,10 @@ Le bouton "Ajouter une personne" doit monter dans la barre des onglets du site. 
 Les titres de colonnes de gestion des personnages doivent permettre un tri par ordre alphabétique de la colonne, dans un sens ou dans l'autre. En reclqiuant dessus cela inverse le sens. Il faut réduire la hauteur de la ligne destitres de colonnes à la même hauteur que les lignes de personnages. L'oeil qui permet d'éditer ne lance aucune fenetre.
 ```
 
+## Prompt #20 - Espace onglets et icônes niveaux organigramme
+```
+Il faut enlever l'espace au dessus et en dessous des onglets, qui ne sert à rien. Dans les tuiles d'organigramme, il faut enlever l'icone de photo qui ne sert à rien, en revanche, au meme niveau que le numéro du niveau, il faudra rajouter l'icone correspondante (je joins le fichier a lire pour placer les niveaux et les définitions et icones associées à stocker dans un JSON structuré comme l'excel, par niveau).
+```
+
 ---
 *Dernière mise à jour: 2026-02-06*
