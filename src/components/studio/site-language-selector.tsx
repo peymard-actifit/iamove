@@ -62,7 +62,7 @@ export function SiteLanguageSelector({
           setShowDialog(true);
         }}
         className="h-7 w-7"
-        title={`${t.common.siteLanguage}: ${languageInfo?.nativeName || currentLanguage}`}
+        title={t.tooltip.siteContentLanguage}
         disabled={isLoading}
       >
         <Flag countryCode={languageInfo?.countryCode || "fr"} size="sm" />

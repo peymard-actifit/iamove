@@ -194,5 +194,23 @@ J'ai demandé que les 26 langues soient traitées et que tous les éléments, so
 → Fonction `buildTranslationsObject()` pour construire l'objet de traductions
 → Cache des traductions pour éviter les requêtes répétées
 
+## Prompt #28 - Tooltips, placeholders et drapeaux agrandis
+```
+Les informations au survol ne sont pas traduites, ainsi que les informations à l'intérieur des champs à remplir qui disent avec quoi remplir les champs. Corrige cela dans les 26 langues. Enlève les noms des pays dans la fenêtre de sélection des drapeaux et mets des drapeaux beaucoup plus gros de la taille des cases de la fenêtre. Les drapeaux doivent être parfaitement proportionnés comme les vrais drapeaux.
+```
+→ Ajout de 14 traductions TOOLTIP (viewProfile, editPerson, deletePerson, editSite, deleteSite, duplicateSite, publishSite, unpublishSite, siteSettings, changeLanguage, userMenu, sortAscending, sortDescending, siteContentLanguage)
+→ Ajout de 7 traductions PLACEHOLDER (enterName, enterEmail, enterPosition, enterDepartment, enterSiteName, enterDescription, selectManager)
+→ Toutes les traductions dans les 26 langues (80+ clés → 100+ clés)
+→ Composant Flag amélioré avec 5 tailles : sm, md, lg, xl, 2xl
+→ Proportions de drapeau réalistes (ratio ~3:2)
+→ Sélecteurs de langue (GLOBAL et LOCAL) avec drapeaux XL
+→ Grille 6 colonnes sans noms de pays
+→ Effet de zoom au survol des drapeaux
+→ Mise à jour de sites-list.tsx avec tooltips traduits
+→ Mise à jour de tab1-persons.tsx avec tooltips traduits
+→ Mise à jour de site-editor.tsx avec placeholders traduits
+→ Mise à jour de tab3-profile.tsx avec placeholders et labels traduits
+→ Mise à jour des sélecteurs de langue avec tooltips traduits
+
 ---
 *Dernière mise à jour: 2026-02-06*

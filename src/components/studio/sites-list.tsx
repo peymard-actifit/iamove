@@ -55,6 +55,7 @@ interface SitesListProps {
 
 export function SitesList({ sites, folders, isAdmin }: SitesListProps) {
   const router = useRouter();
+  const { t } = useI18n();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -123,13 +124,13 @@ export function SitesList({ sites, folders, isAdmin }: SitesListProps) {
           <div className="mx-auto h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center dark:bg-gray-800">
             <Globe className="h-5 w-5 text-gray-400" />
           </div>
-          <h3 className="mt-3 text-base font-semibold">Aucun site</h3>
+          <h3 className="mt-3 text-base font-semibold">{t.sites.noSites}</h3>
           <p className="mt-1 text-sm text-gray-500">
-            Créez votre premier site d&apos;accompagnement IA
+            {t.sites.createFirst}
           </p>
           <Button size="sm" className="mt-3" onClick={() => setShowCreateDialog(true)}>
             <Plus className="h-4 w-4 mr-1" />
-            Créer un site
+            {t.sites.createSite}
           </Button>
         </Card>
       ) : (
@@ -156,7 +157,7 @@ export function SitesList({ sites, folders, isAdmin }: SitesListProps) {
                       size="icon"
                       className="h-7 w-7"
                       onClick={(e) => handlePublishToggle(site.id, site.isPublished, e)}
-                      title={site.isPublished ? "Dépublier" : "Publier"}
+                      title={site.isPublished ? t.tooltip.unpublishSite : t.tooltip.publishSite}
                     >
                       {site.isPublished ? (
                         <Globe className="h-3.5 w-3.5 text-green-500" />
@@ -174,7 +175,7 @@ export function SitesList({ sites, folders, isAdmin }: SitesListProps) {
                           e.stopPropagation();
                           window.open(`/s/${site.slug}`, '_blank');
                         }}
-                        title="Voir le site"
+                        title={t.tooltip.editSite}
                       >
                         <ExternalLink className="h-3.5 w-3.5" />
                       </Button>
@@ -184,7 +185,7 @@ export function SitesList({ sites, folders, isAdmin }: SitesListProps) {
                       size="icon"
                       className="h-7 w-7"
                       onClick={(e) => handleDuplicateSite(site.id, e)}
-                      title="Dupliquer"
+                      title={t.tooltip.duplicateSite}
                     >
                       <Copy className="h-3.5 w-3.5" />
                     </Button>
@@ -197,7 +198,7 @@ export function SitesList({ sites, folders, isAdmin }: SitesListProps) {
                         e.stopPropagation();
                         setShowDeleteDialog(site.id);
                       }}
-                      title="Supprimer"
+                      title={t.tooltip.deleteSite}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
@@ -228,24 +229,24 @@ export function SitesList({ sites, folders, isAdmin }: SitesListProps) {
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Créer un nouveau site</DialogTitle>
+            <DialogTitle>{t.sites.createSite}</DialogTitle>
             <DialogDescription>
-              Créez un site d&apos;accompagnement IA pour une entreprise
+              {t.sites.createFirst}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Nom du site *</label>
+              <label className="text-sm font-medium">{t.sites.siteName} *</label>
               <Input
-                placeholder="Ex: Acme Corporation"
+                placeholder={t.placeholder.enterSiteName}
                 value={newSite.name}
                 onChange={(e) => setNewSite({ ...newSite, name: e.target.value })}
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Description</label>
+              <label className="text-sm font-medium">{t.sites.siteDescription}</label>
               <Input
-                placeholder="Description optionnelle"
+                placeholder={t.placeholder.enterDescription}
                 value={newSite.description}
                 onChange={(e) => setNewSite({ ...newSite, description: e.target.value })}
               />
@@ -253,10 +254,10 @@ export function SitesList({ sites, folders, isAdmin }: SitesListProps) {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-              Annuler
+              {t.common.cancel}
             </Button>
             <Button onClick={handleCreateSite} isLoading={isLoading}>
-              Créer le site
+              {t.common.add}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -266,21 +267,21 @@ export function SitesList({ sites, folders, isAdmin }: SitesListProps) {
       <Dialog open={!!showDeleteDialog} onOpenChange={() => setShowDeleteDialog(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Supprimer le site ?</DialogTitle>
+            <DialogTitle>{t.sites.confirmDelete}</DialogTitle>
             <DialogDescription>
-              Cette action est irréversible. Toutes les données du site seront perdues.
+              {t.sites.confirmDeleteMessage}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDeleteDialog(null)}>
-              Annuler
+              {t.common.cancel}
             </Button>
             <Button
               variant="destructive"
               onClick={() => showDeleteDialog && handleDeleteSite(showDeleteDialog)}
               isLoading={isLoading}
             >
-              Supprimer
+              {t.common.delete}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -331,7 +332,7 @@ export function AddSiteButton() {
             <div className="space-y-2">
               <label className="text-sm font-medium">{t.sites.siteName} *</label>
               <Input
-                placeholder="Ex: Acme Corporation"
+                placeholder={t.placeholder.enterSiteName}
                 value={newSite.name}
                 onChange={(e) => setNewSite({ ...newSite, name: e.target.value })}
               />
@@ -339,7 +340,7 @@ export function AddSiteButton() {
             <div className="space-y-2">
               <label className="text-sm font-medium">{t.sites.siteDescription}</label>
               <Input
-                placeholder="Description optionnelle"
+                placeholder={t.placeholder.enterDescription}
                 value={newSite.description}
                 onChange={(e) => setNewSite({ ...newSite, description: e.target.value })}
               />

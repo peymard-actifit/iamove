@@ -19,6 +19,7 @@ import {
 } from "@/components/ui";
 import { Trash2, Copy, Eye, ArrowUp, ArrowDown } from "lucide-react";
 import { getLevelIcon } from "@/lib/levels";
+import { useI18n } from "@/lib/i18n";
 
 interface Person {
   id: string;
@@ -231,6 +232,7 @@ export function Tab1Persons({
   onSelectPerson,
 }: Tab1PersonsProps) {
   const router = useRouter();
+  const { t } = useI18n();
   const [showDeleteDialog, setShowDeleteDialog] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -451,7 +453,7 @@ export function Tab1Persons({
                         size="icon"
                         className="h-6 w-6"
                         onClick={() => onSelectPerson(person.id)}
-                        title="Voir le profil"
+                        title={t.tooltip.viewProfile}
                       >
                         <Eye className="h-3.5 w-3.5" />
                       </Button>
@@ -460,7 +462,7 @@ export function Tab1Persons({
                         size="icon"
                         className="h-6 w-6"
                         onClick={() => copyInviteLink(person.id)}
-                        title="Copier le lien d'invitation"
+                        title={t.persons.copyInviteLink}
                       >
                         <Copy className={`h-3.5 w-3.5 ${copiedId === person.id ? "text-green-500" : ""}`} />
                       </Button>
@@ -469,7 +471,7 @@ export function Tab1Persons({
                         size="icon"
                         className="h-6 w-6 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                         onClick={() => setShowDeleteDialog(person.id)}
-                        title="Supprimer"
+                        title={t.tooltip.deletePerson}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
@@ -486,21 +488,21 @@ export function Tab1Persons({
       <Dialog open={!!showDeleteDialog} onOpenChange={() => setShowDeleteDialog(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Supprimer cette personne ?</DialogTitle>
+            <DialogTitle>{t.persons.confirmDelete}</DialogTitle>
           </DialogHeader>
           <p className="text-gray-500">
-            Cette action est irréversible. Toutes les données de cette personne seront perdues.
+            {t.persons.confirmDeleteMessage}
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDeleteDialog(null)}>
-              Annuler
+              {t.common.cancel}
             </Button>
             <Button
               variant="destructive"
               onClick={() => showDeleteDialog && handleDeletePerson(showDeleteDialog)}
               isLoading={isLoading}
             >
-              Supprimer
+              {t.common.delete}
             </Button>
           </DialogFooter>
         </DialogContent>

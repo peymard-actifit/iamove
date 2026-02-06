@@ -27,7 +27,7 @@ export function LanguageSelector() {
         size="sm"
         onClick={() => setShowDialog(true)}
         className="px-2 h-8"
-        title={languageInfo?.nativeName || "Langue"}
+        title={t.tooltip.changeLanguage}
       >
         <Flag countryCode={languageInfo?.countryCode || "fr"} size="md" />
       </Button>

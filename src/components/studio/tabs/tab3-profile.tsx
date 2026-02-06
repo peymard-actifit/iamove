@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, Button, Input } from "@/components/ui";
 import { User, Mail, Briefcase, Building, Award, ChevronRight, Edit, Save, X } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 interface Person {
   id: string;
@@ -47,6 +48,7 @@ export function Tab3Profile({
   onSaveError,
 }: Tab3ProfileProps) {
   const router = useRouter();
+  const { t } = useI18n();
   const selectedPerson = persons.find((p) => p.id === selectedPersonId);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -179,7 +181,7 @@ export function Tab3Profile({
                         value={editForm.name}
                         onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                         className="font-bold text-lg"
-                        placeholder="Nom complet"
+                        placeholder={t.placeholder.enterName}
                       />
                     ) : (
                       <CardTitle>{selectedPerson.name}</CardTitle>
@@ -189,10 +191,10 @@ export function Tab3Profile({
                         value={editForm.jobTitle}
                         onChange={(e) => setEditForm({ ...editForm, jobTitle: e.target.value })}
                         className="mt-1 text-sm"
-                        placeholder="Poste"
+                        placeholder={t.placeholder.enterPosition}
                       />
                     ) : (
-                      <p className="text-gray-500">{selectedPerson.jobTitle || "Sans poste"}</p>
+                      <p className="text-gray-500">{selectedPerson.jobTitle || "-"}</p>
                     )}
                   </div>
                 </div>
@@ -201,17 +203,17 @@ export function Tab3Profile({
                     <>
                       <Button variant="outline" size="sm" onClick={handleCancel}>
                         <X className="h-4 w-4 mr-1" />
-                        Annuler
+                        {t.common.cancel}
                       </Button>
                       <Button size="sm" onClick={handleSave} isLoading={isLoading}>
                         <Save className="h-4 w-4 mr-1" />
-                        Enregistrer
+                        {t.common.save}
                       </Button>
                     </>
                   ) : (
                     <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
                       <Edit className="h-4 w-4 mr-1" />
-                      Modifier
+                      {t.common.edit}
                     </Button>
                   )}
                 </div>
@@ -223,7 +225,7 @@ export function Tab3Profile({
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                   <Mail className="h-5 w-5 text-gray-400" />
                   <div className="flex-1">
-                    <p className="text-xs text-gray-500">Email</p>
+                    <p className="text-xs text-gray-500">{t.persons.email}</p>
                     {isEditing ? (
                       <Input
                         type="email"
@@ -239,13 +241,13 @@ export function Tab3Profile({
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                   <Building className="h-5 w-5 text-gray-400" />
                   <div className="flex-1">
-                    <p className="text-xs text-gray-500">Service</p>
+                    <p className="text-xs text-gray-500">{t.persons.department}</p>
                     {isEditing ? (
                       <Input
                         value={editForm.department}
                         onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
                         className="mt-1"
-                        placeholder="Service"
+                        placeholder={t.placeholder.enterDepartment}
                       />
                     ) : (
                       <p className="font-medium">{selectedPerson.department || "-"}</p>
@@ -255,7 +257,7 @@ export function Tab3Profile({
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                   <Briefcase className="h-5 w-5 text-gray-400" />
                   <div className="flex-1">
-                    <p className="text-xs text-gray-500">Responsable</p>
+                    <p className="text-xs text-gray-500">{t.persons.manager}</p>
                     {isEditing ? (
                       <select
                         className="w-full h-10 px-3 mt-1 rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"

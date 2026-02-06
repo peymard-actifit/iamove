@@ -290,7 +290,7 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
             <div className="space-y-2">
               <label className="text-sm font-medium">{t.persons.fullName} *</label>
               <Input
-                placeholder="Jean Dupont"
+                placeholder={t.placeholder.enterName}
                 value={newPerson.name}
                 onChange={(e) => setNewPerson({ ...newPerson, name: e.target.value })}
               />
@@ -299,7 +299,7 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
               <label className="text-sm font-medium">{t.persons.email} *</label>
               <Input
                 type="email"
-                placeholder="jean.dupont@entreprise.com"
+                placeholder={t.placeholder.enterEmail}
                 value={newPerson.email}
                 onChange={(e) => setNewPerson({ ...newPerson, email: e.target.value })}
               />
@@ -307,7 +307,7 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
             <div className="space-y-2">
               <label className="text-sm font-medium">{t.persons.position}</label>
               <Input
-                placeholder="Développeur"
+                placeholder={t.placeholder.enterPosition}
                 value={newPerson.jobTitle}
                 onChange={(e) => setNewPerson({ ...newPerson, jobTitle: e.target.value })}
               />
@@ -315,7 +315,7 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
             <div className="space-y-2">
               <label className="text-sm font-medium">{t.persons.department}</label>
               <Input
-                placeholder="IT"
+                placeholder={t.placeholder.enterDepartment}
                 value={newPerson.department}
                 onChange={(e) => setNewPerson({ ...newPerson, department: e.target.value })}
               />
