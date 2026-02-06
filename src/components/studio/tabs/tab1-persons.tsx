@@ -367,9 +367,9 @@ export function Tab1Persons({
         <div className="border rounded-lg overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow className="h-6">
+              <TableRow className="h-5">
                 <TableHead 
-                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-0.5"
+                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-0"
                   onClick={() => handleSort("name")}
                   title={sortDirection === "asc" ? t.tooltip.sortDescending : t.tooltip.sortAscending}
                 >
@@ -379,7 +379,7 @@ export function Tab1Persons({
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-0.5"
+                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-0"
                   onClick={() => handleSort("email")}
                   title={sortDirection === "asc" ? t.tooltip.sortDescending : t.tooltip.sortAscending}
                 >
@@ -389,7 +389,7 @@ export function Tab1Persons({
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-0.5"
+                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-0"
                   onClick={() => handleSort("jobTitle")}
                   title={sortDirection === "asc" ? t.tooltip.sortDescending : t.tooltip.sortAscending}
                 >
@@ -399,7 +399,7 @@ export function Tab1Persons({
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-0.5"
+                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-0"
                   onClick={() => handleSort("department")}
                   title={sortDirection === "asc" ? t.tooltip.sortDescending : t.tooltip.sortAscending}
                 >
@@ -409,7 +409,7 @@ export function Tab1Persons({
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-0.5 w-20"
+                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-0 w-20"
                   onClick={() => handleSort("currentLevel")}
                   title={sortDirection === "asc" ? t.tooltip.sortDescending : t.tooltip.sortAscending}
                 >
@@ -419,7 +419,7 @@ export function Tab1Persons({
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-0.5"
+                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-0"
                   onClick={() => handleSort("manager")}
                   title={sortDirection === "asc" ? t.tooltip.sortDescending : t.tooltip.sortAscending}
                 >
@@ -428,7 +428,7 @@ export function Tab1Persons({
                     {sortColumn === "manager" && (sortDirection === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
                   </div>
                 </TableHead>
-                <TableHead className="w-[90px] text-right text-xs py-0.5">{t.persons.actions}</TableHead>
+                <TableHead className="w-[90px] text-right text-xs py-0">{t.persons.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
