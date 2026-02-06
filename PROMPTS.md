@@ -134,5 +134,13 @@ Prend les icones réels qui sont dans le fichier excel sous forme d'images dans 
 → Renommage en `level-0.png` à `level-20.png`
 → Mise à jour de `src/lib/levels.tsx` pour utiliser les images via `next/image`
 
+## Prompt #23 - Tooltip niveaux et icône liste personnes
+```
+Quand on survole le niveau ou l'icone, sur les tuiles d'organigramme, s'affiche pendant 5 secondes le nom du niveau et le nom star wars, l'un au dessus de l'autre, dans une police plutôt petite. Il faut rajouter l'icone aussi dans la liste des personnes à droite du niveau. Et dans les tuiles d'organigramme, inverser le numéro et l'icone.
+```
+→ Tooltip au survol avec nom du niveau + nom Star Wars (5 sec)
+→ Ordre inversé : "Niv. X" puis icône dans l'organigramme
+→ Icône ajoutée à droite du niveau dans la liste des personnes (Tab1)
+
 ---
 *Dernière mise à jour: 2026-02-06*

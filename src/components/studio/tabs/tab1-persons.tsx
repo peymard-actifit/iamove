@@ -18,6 +18,7 @@ import {
   DialogFooter,
 } from "@/components/ui";
 import { Trash2, Copy, Eye, ArrowUp, ArrowDown } from "lucide-react";
+import { getLevelIcon } from "@/lib/levels";
 
 interface Person {
   id: string;
@@ -128,6 +129,7 @@ function LevelSelector({
   onChange: (value: number) => void;
 }) {
   const [isEditing, setIsEditing] = useState(false);
+  const levelIcon = getLevelIcon(value, "h-3.5 w-3.5");
 
   if (isEditing) {
     return (
@@ -156,9 +158,10 @@ function LevelSelector({
         e.stopPropagation();
         setIsEditing(true);
       }}
-      className="cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-800 px-1.5 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+      className="cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-800 px-1.5 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 flex items-center gap-1"
     >
       {value}
+      {levelIcon}
     </span>
   );
 }

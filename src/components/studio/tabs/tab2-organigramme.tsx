@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card } from "@/components/ui";
 import { ChevronDown } from "lucide-react";
-import { getLevelIcon } from "@/lib/levels";
+import { getLevelIcon, getLevelInfo } from "@/lib/levels";
 
 interface Person {
   id: string;
@@ -55,9 +55,39 @@ function buildOrgTree(persons: Person[]): OrgNode[] {
   return roots;
 }
 
+function LevelBadgeWithTooltip({ levelNumber }: { levelNumber: number }) {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const levelInfo = getLevelInfo(levelNumber);
+  const levelIcon = getLevelIcon(levelNumber, "h-3.5 w-3.5");
+
+  const handleMouseEnter = () => {
+    setShowTooltip(true);
+    setTimeout(() => setShowTooltip(false), 5000);
+  };
+
+  return (
+    <div className="relative inline-block">
+      <span 
+        className="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 flex items-center gap-1 cursor-help"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        <span>Niv. {levelNumber}</span>
+        {levelIcon}
+      </span>
+      {showTooltip && (
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1.5 bg-gray-900 text-white rounded shadow-lg z-50 whitespace-nowrap text-center">
+          <p className="text-[10px] font-medium">{levelInfo.name}</p>
+          <p className="text-[10px] text-gray-300">{levelInfo.seriousGaming}</p>
+          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function OrgNodeComponent({ node, level = 0 }: { node: OrgNode; level?: number }) {
   const hasChildren = node.children.length > 0;
-  const levelIcon = getLevelIcon(node.person.currentLevel, "h-3.5 w-3.5");
 
   return (
     <div className="flex flex-col items-center">
@@ -70,10 +100,7 @@ function OrgNodeComponent({ node, level = 0 }: { node: OrgNode; level?: number }
           <p className="text-xs text-gray-400">{node.person.department}</p>
         )}
         <div className="mt-1.5 flex items-center justify-center gap-1.5">
-          <span className="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 flex items-center gap-1">
-            {levelIcon}
-            <span>Niv. {node.person.currentLevel}</span>
-          </span>
+          <LevelBadgeWithTooltip levelNumber={node.person.currentLevel} />
         </div>
       </Card>
 
