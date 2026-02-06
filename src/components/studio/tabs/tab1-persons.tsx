@@ -17,7 +17,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui";
-import { Trash2, Copy, Eye } from "lucide-react";
+import { Trash2, Copy, Eye, ArrowUp, ArrowDown } from "lucide-react";
 
 interface Person {
   id: string;
@@ -215,6 +215,9 @@ function ManagerSelector({
   );
 }
 
+type SortColumn = "name" | "email" | "jobTitle" | "department" | "currentLevel" | "manager";
+type SortDirection = "asc" | "desc";
+
 export function Tab1Persons({
   siteId,
   persons,
@@ -228,6 +231,58 @@ export function Tab1Persons({
   const [showDeleteDialog, setShowDeleteDialog] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [sortColumn, setSortColumn] = useState<SortColumn>("name");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+
+  // Fonction de tri
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  // Personnes triées
+  const sortedPersons = [...persons].sort((a, b) => {
+    let valueA: string | number;
+    let valueB: string | number;
+
+    switch (sortColumn) {
+      case "name":
+        valueA = a.name.toLowerCase();
+        valueB = b.name.toLowerCase();
+        break;
+      case "email":
+        valueA = a.email.toLowerCase();
+        valueB = b.email.toLowerCase();
+        break;
+      case "jobTitle":
+        valueA = (a.jobTitle || "").toLowerCase();
+        valueB = (b.jobTitle || "").toLowerCase();
+        break;
+      case "department":
+        valueA = (a.department || "").toLowerCase();
+        valueB = (b.department || "").toLowerCase();
+        break;
+      case "currentLevel":
+        valueA = a.currentLevel;
+        valueB = b.currentLevel;
+        break;
+      case "manager":
+        valueA = (a.manager?.name || "").toLowerCase();
+        valueB = (b.manager?.name || "").toLowerCase();
+        break;
+      default:
+        valueA = a.name.toLowerCase();
+        valueB = b.name.toLowerCase();
+    }
+
+    if (valueA < valueB) return sortDirection === "asc" ? -1 : 1;
+    if (valueA > valueB) return sortDirection === "asc" ? 1 : -1;
+    return 0;
+  });
 
   // Fonction de mise à jour d'une personne
   const updatePerson = async (personId: string, field: string, value: string | number | null) => {
@@ -286,18 +341,66 @@ export function Tab1Persons({
         <div className="border rounded-lg overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow className="h-9">
-                <TableHead className="text-xs">Nom</TableHead>
-                <TableHead className="text-xs">Email</TableHead>
-                <TableHead className="text-xs">Poste</TableHead>
-                <TableHead className="text-xs">Service</TableHead>
-                <TableHead className="text-xs w-12">Niv.</TableHead>
-                <TableHead className="text-xs">Responsable</TableHead>
-                <TableHead className="w-[90px] text-right text-xs">Actions</TableHead>
+              <TableRow className="h-7">
+                <TableHead 
+                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-1"
+                  onClick={() => handleSort("name")}
+                >
+                  <div className="flex items-center gap-1">
+                    Nom
+                    {sortColumn === "name" && (sortDirection === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-1"
+                  onClick={() => handleSort("email")}
+                >
+                  <div className="flex items-center gap-1">
+                    Email
+                    {sortColumn === "email" && (sortDirection === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-1"
+                  onClick={() => handleSort("jobTitle")}
+                >
+                  <div className="flex items-center gap-1">
+                    Poste
+                    {sortColumn === "jobTitle" && (sortDirection === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-1"
+                  onClick={() => handleSort("department")}
+                >
+                  <div className="flex items-center gap-1">
+                    Service
+                    {sortColumn === "department" && (sortDirection === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-1 w-12"
+                  onClick={() => handleSort("currentLevel")}
+                >
+                  <div className="flex items-center gap-1">
+                    Niv.
+                    {sortColumn === "currentLevel" && (sortDirection === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-1"
+                  onClick={() => handleSort("manager")}
+                >
+                  <div className="flex items-center gap-1">
+                    Responsable
+                    {sortColumn === "manager" && (sortDirection === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+                  </div>
+                </TableHead>
+                <TableHead className="w-[90px] text-right text-xs py-1">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {persons.map((person) => (
+              {sortedPersons.map((person) => (
                 <TableRow key={person.id} className="group">
                   <TableCell className="py-1 font-medium">
                     <EditableCell

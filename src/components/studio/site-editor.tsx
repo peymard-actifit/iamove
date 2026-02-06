@@ -86,6 +86,7 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
   const { status, startSaving, saveDone, saveError } = useSaveStatus();
   const [showSettings, setShowSettings] = useState(false);
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("tab1");
   const [showAddPersonDialog, setShowAddPersonDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [newPerson, setNewPerson] = useState({
@@ -146,6 +147,12 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
     tab5Enabled: true,
   };
 
+  // Fonction pour voir le profil d'une personne (change d'onglet)
+  const handleViewProfile = (personId: string) => {
+    setSelectedPersonId(personId);
+    setActiveTab("tab3");
+  };
+
   return (
     <div className="relative">
       {/* Injection du contenu dans le header global */}
@@ -160,7 +167,7 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
       {/* Main Content */}
       <div className="flex gap-6">
         <div className={`flex-1 transition-all ${showSettings ? "mr-80" : ""}`}>
-          <Tabs defaultValue="tab1" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="flex items-center justify-between w-full">
               <TabsList className="justify-start">
                 {settings.tab1Enabled && (
@@ -208,7 +215,7 @@ export function SiteEditor({ site, levels }: SiteEditorProps) {
                 onSaveStart={startSaving}
                 onSaveDone={saveDone}
                 onSaveError={saveError}
-                onSelectPerson={setSelectedPersonId}
+                onSelectPerson={handleViewProfile}
               />
             </TabsContent>
 

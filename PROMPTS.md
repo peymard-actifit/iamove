@@ -106,5 +106,10 @@ Dans la page de gestion des sites, met "Ajouter un site" à gauche du menu de l'
 Le bouton "Ajouter une personne" doit monter dans la barre des onglets du site. Le nombre de personnes doit être affiché dans le bouton d'Ajouter une personne en le mettant entre parenthèse à droite de personne. L'affichage à gauche du nombre de personnes doit donc disparaitre. La flèche à gauche du titre dusite doit disparaître puisqu'on peut revenir au menu de gestion des sites en cliquant en haut à gauche de l'écran.
 ```
 
+## Prompt #19 - Tri colonnes et correction œil profil
+```
+Les titres de colonnes de gestion des personnages doivent permettre un tri par ordre alphabétique de la colonne, dans un sens ou dans l'autre. En reclqiuant dessus cela inverse le sens. Il faut réduire la hauteur de la ligne destitres de colonnes à la même hauteur que les lignes de personnages. L'oeil qui permet d'éditer ne lance aucune fenetre.
+```
+
 ---
 *Dernière mise à jour: 2026-02-06*
