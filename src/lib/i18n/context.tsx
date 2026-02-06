@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { 
   SupportedLanguage, 
   Translations, 
@@ -8,6 +8,8 @@ import {
   getLanguageInfo,
   LanguageInfo,
   SUPPORTED_LANGUAGES,
+  loadTranslationsFromDB,
+  buildTranslationsObject,
 } from "./translations";
 
 interface I18nContextType {
@@ -16,6 +18,7 @@ interface I18nContextType {
   t: Translations;
   languageInfo: LanguageInfo | undefined;
   availableLanguages: LanguageInfo[];
+  isLoading: boolean;
 }
 
 const I18nContext = createContext<I18nContextType | null>(null);
@@ -31,20 +34,38 @@ export function I18nProvider({
 }) {
   const [language, setLanguageState] = useState<SupportedLanguage>(initialLanguage);
   const [mounted, setMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [dbTranslations, setDbTranslations] = useState<Record<string, string>>({});
+
+  // Charger les traductions depuis la DB
+  const loadTranslations = useCallback(async (lang: SupportedLanguage) => {
+    setIsLoading(true);
+    try {
+      const translations = await loadTranslationsFromDB(lang);
+      setDbTranslations(translations);
+    } catch (error) {
+      console.error("Error loading translations:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   // Charger la langue depuis le localStorage au montage
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY) as SupportedLanguage | null;
-    if (stored && SUPPORTED_LANGUAGES.some(l => l.code === stored)) {
-      setLanguageState(stored);
-    }
+    const lang = (stored && SUPPORTED_LANGUAGES.some(l => l.code === stored)) ? stored : initialLanguage;
+    setLanguageState(lang);
+    loadTranslations(lang);
     setMounted(true);
-  }, []);
+  }, [initialLanguage, loadTranslations]);
 
   // Sauvegarder et mettre à jour la langue
   const setLanguage = async (lang: SupportedLanguage) => {
     setLanguageState(lang);
     localStorage.setItem(STORAGE_KEY, lang);
+    
+    // Charger les nouvelles traductions
+    await loadTranslations(lang);
     
     // Sauvegarder en base si l'utilisateur est connecté
     try {
@@ -58,7 +79,12 @@ export function I18nProvider({
     }
   };
 
-  const t = getTranslations(language);
+  // Construire l'objet de traductions
+  // Si on a des traductions de la DB, les utiliser, sinon fallback sur les constantes
+  const t = Object.keys(dbTranslations).length > 0
+    ? buildTranslationsObject(dbTranslations)
+    : getTranslations(language);
+  
   const languageInfo = getLanguageInfo(language);
 
   // Éviter le flash de contenu non traduit
@@ -73,6 +99,7 @@ export function I18nProvider({
       t,
       languageInfo,
       availableLanguages: SUPPORTED_LANGUAGES,
+      isLoading,
     }}>
       {children}
     </I18nContext.Provider>

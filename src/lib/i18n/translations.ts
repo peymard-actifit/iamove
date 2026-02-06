@@ -44,6 +44,155 @@ export const SUPPORTED_LANGUAGES: LanguageInfo[] = [
   { code: "ID", name: "Indonesian", nativeName: "Bahasa Indonesia", countryCode: "id" },
 ];
 
+// Cache des traductions chargées depuis la DB
+const translationsCache: Map<string, Record<string, string>> = new Map();
+
+// Charger les traductions depuis l'API (côté client)
+export async function loadTranslationsFromDB(lang: SupportedLanguage): Promise<Record<string, string>> {
+  const cacheKey = `GLOBAL_${lang}`;
+  
+  if (translationsCache.has(cacheKey)) {
+    return translationsCache.get(cacheKey)!;
+  }
+
+  try {
+    const res = await fetch(`/api/translations?lang=${lang}&type=GLOBAL`);
+    if (res.ok) {
+      const data = await res.json();
+      translationsCache.set(cacheKey, data);
+      return data;
+    }
+  } catch (error) {
+    console.error("Error loading translations:", error);
+  }
+  
+  return {};
+}
+
+// Convertir les traductions plates en objet structuré
+export function buildTranslationsObject(flatTranslations: Record<string, string>): Translations {
+  const getValue = (key: string, fallback: string) => flatTranslations[key] || fallback;
+  
+  return {
+    nav: {
+      studio: getValue("nav.studio", "Studio"),
+      dashboard: getValue("nav.dashboard", "Tableau de bord"),
+      settings: getValue("nav.settings", "Paramètres"),
+      logout: getValue("nav.logout", "Se déconnecter"),
+      actions: getValue("nav.actions", "Actions"),
+      manageQuizzes: getValue("nav.manageQuizzes", "Gérer les Quizz"),
+    },
+    header: {
+      mySites: getValue("header.mySites", "Mes sites"),
+      mySitesDescription: getValue("header.mySitesDescription", "Gérez vos sites d'accompagnement IA"),
+      addSite: getValue("header.addSite", "Ajouter un site"),
+      addPerson: getValue("header.addPerson", "Ajouter une personne"),
+    },
+    user: {
+      accountSettings: getValue("user.accountSettings", "Paramètres du compte"),
+      becomeAdmin: getValue("user.becomeAdmin", "Devenir administrateur"),
+      becomeStandard: getValue("user.becomeStandard", "Redevenir standard"),
+      administrator: getValue("user.administrator", "Administrateur"),
+      standardUser: getValue("user.standardUser", "Utilisateur standard"),
+      adminCodeTitle: getValue("user.adminCodeTitle", "Devenir administrateur"),
+      adminCodeDescription: getValue("user.adminCodeDescription", "Entrez le code administrateur pour accéder aux fonctionnalités avancées."),
+      adminCodePlaceholder: getValue("user.adminCodePlaceholder", "Code administrateur"),
+      validate: getValue("user.validate", "Valider"),
+      cancel: getValue("user.cancel", "Annuler"),
+    },
+    sites: {
+      noSites: getValue("sites.noSites", "Aucun site créé"),
+      createFirst: getValue("sites.createFirst", "Créez votre premier site d'accompagnement IA"),
+      createSite: getValue("sites.createSite", "Créer un site"),
+      siteName: getValue("sites.siteName", "Nom du site"),
+      siteDescription: getValue("sites.siteDescription", "Description"),
+      edit: getValue("common.edit", "Modifier"),
+      duplicate: getValue("sites.duplicate", "Dupliquer"),
+      delete: getValue("common.delete", "Supprimer"),
+      publish: getValue("sites.publish", "Publier"),
+      unpublish: getValue("sites.unpublish", "Dépublier"),
+      published: getValue("sites.published", "Publié"),
+      draft: getValue("sites.draft", "Brouillon"),
+      confirmDelete: getValue("sites.confirmDelete", "Supprimer ce site ?"),
+      confirmDeleteMessage: getValue("sites.confirmDeleteMessage", "Cette action est irréversible."),
+      persons: getValue("sites.persons", "personnes"),
+      lastModified: getValue("sites.lastModified", "Modifié"),
+    },
+    tabs: {
+      team: getValue("tabs.team", "Équipe"),
+      organization: getValue("tabs.organization", "Organisation"),
+      profile: getValue("tabs.profile", "Profil"),
+      training: getValue("tabs.training", "Formation"),
+      assessment: getValue("tabs.assessment", "Évaluation"),
+    },
+    persons: {
+      name: getValue("persons.name", "Nom"),
+      email: getValue("persons.email", "Email"),
+      position: getValue("persons.position", "Poste"),
+      department: getValue("persons.department", "Service"),
+      level: getValue("persons.level", "Niv."),
+      manager: getValue("persons.manager", "Responsable"),
+      actions: getValue("persons.actions", "Actions"),
+      addPerson: getValue("persons.addPerson", "Ajouter une personne"),
+      noPerson: getValue("persons.noPerson", "Aucune personne dans ce site"),
+      useAddButton: getValue("persons.useAddButton", "Utilisez le bouton \"Ajouter une personne\" ci-dessus"),
+      fullName: getValue("persons.fullName", "Nom complet"),
+      none: getValue("persons.none", "Aucun"),
+      topLevel: getValue("persons.topLevel", "personne au sommet"),
+      confirmDelete: getValue("persons.confirmDelete", "Supprimer cette personne ?"),
+      confirmDeleteMessage: getValue("persons.confirmDeleteMessage", "Cette action est irréversible."),
+      viewProfile: getValue("persons.viewProfile", "Voir le profil"),
+      copyInviteLink: getValue("persons.copyInviteLink", "Copier le lien d'invitation"),
+    },
+    org: {
+      title: getValue("org.title", "Organigramme"),
+      noPersons: getValue("org.noPersons", "Aucune personne dans l'organigramme"),
+      addPersonsFirst: getValue("org.addPersonsFirst", "Ajoutez des personnes dans l'onglet Équipe"),
+    },
+    profile: {
+      selectPerson: getValue("profile.selectPerson", "Sélectionnez une personne"),
+      noPersonSelected: getValue("profile.noPersonSelected", "Cliquez sur une personne dans la liste pour voir son profil"),
+      edit: getValue("common.edit", "Modifier"),
+      save: getValue("common.save", "Enregistrer"),
+      aiLevel: getValue("profile.aiLevel", "Niveau IA"),
+      progression: getValue("profile.progression", "Progression"),
+      expandedView: getValue("profile.expandedView", "Vue élargie"),
+      expandedViewDescription: getValue("profile.expandedViewDescription", "Donner une vue élargie sur tout l'organigramme"),
+    },
+    levels: {
+      level: getValue("levels.level", "Niveau"),
+    },
+    common: {
+      loading: getValue("common.loading", "Chargement..."),
+      error: getValue("common.error", "Erreur"),
+      success: getValue("common.success", "Succès"),
+      save: getValue("common.save", "Enregistrer"),
+      cancel: getValue("common.cancel", "Annuler"),
+      delete: getValue("common.delete", "Supprimer"),
+      edit: getValue("common.edit", "Modifier"),
+      add: getValue("common.add", "Ajouter"),
+      close: getValue("common.close", "Fermer"),
+      confirm: getValue("common.confirm", "Confirmer"),
+      yes: getValue("common.yes", "Oui"),
+      no: getValue("common.no", "Non"),
+      search: getValue("common.search", "Rechercher"),
+      filter: getValue("common.filter", "Filtrer"),
+      sort: getValue("common.sort", "Trier"),
+      noData: getValue("common.noData", "Aucune donnée"),
+      required: getValue("common.required", "Requis"),
+      chooseLanguage: getValue("common.chooseLanguage", "Choisir la langue"),
+      siteLanguage: getValue("common.siteLanguage", "Langue du contenu"),
+      siteLanguageDescription: getValue("common.siteLanguageDescription", "Langue utilisée pour le contenu de ce site"),
+    },
+    dates: {
+      today: getValue("dates.today", "Aujourd'hui"),
+      yesterday: getValue("dates.yesterday", "Hier"),
+      daysAgo: getValue("dates.daysAgo", "il y a {n} jours"),
+      format: getValue("dates.format", "DD/MM/YYYY"),
+    },
+  };
+}
+
 // Structure des traductions
 export interface Translations {
   // Navigation

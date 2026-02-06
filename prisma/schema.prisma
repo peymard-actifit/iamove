@@ -355,3 +355,39 @@ enum SessionUserType {
   STUDIO_USER
   PERSON
 }
+
+// =============================================================================
+// TRADUCTIONS (i18n)
+// =============================================================================
+
+model Translation {
+  id            String    @id @default(cuid())
+  
+  // Clé de traduction (ex: "nav.studio", "header.mySites")
+  key           String
+  
+  // Langue (code ISO: FR, EN, DE, ES, etc.)
+  language      String
+  
+  // Texte traduit
+  value         String    @db.Text
+  
+  // Type: GLOBAL (studio) ou LOCAL (contenu de site)
+  type          TranslationType @default(GLOBAL)
+  
+  // Pour les traductions LOCAL, lien vers le site
+  siteId        String?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([key, language, type, siteId])
+  @@index([language, type])
+  @@index([siteId, language])
+  @@map("translations")
+}
+
+enum TranslationType {
+  GLOBAL
+  LOCAL
+}
