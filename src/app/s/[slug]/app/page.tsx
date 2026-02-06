@@ -71,6 +71,8 @@ export default async function PublishedSiteAppPage({ params }: PageProps) {
   } else if (session.userType === "STUDIO_USER") {
     // L'utilisateur studio voit tout
     visiblePersons = site.persons;
+    // Chercher si l'utilisateur studio correspond à une personne du site (par email)
+    currentPerson = site.persons.find((p) => p.email === session.email) || null;
   }
 
   const levels = await prisma.level.findMany({

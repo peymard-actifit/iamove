@@ -174,7 +174,8 @@ export function PublishedSiteApp({
               />
             ) : (
               <div className="text-center py-12 text-gray-500">
-                <p>Vous devez être connecté pour voir votre profil</p>
+                <p>Aucun profil associé à votre compte dans ce site</p>
+                <p className="text-sm mt-2">Votre email ne correspond à aucune personne enregistrée</p>
               </div>
             )}
           </TabsContent>
