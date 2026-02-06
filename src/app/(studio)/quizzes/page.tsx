@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { QuizzesManager } from "@/components/studio/quizzes-manager";
+import { QuizzesPageContent } from "@/components/studio/quizzes-page-content";
 
 export default async function QuizzesPage() {
   const session = await getSession();
@@ -26,19 +26,11 @@ export default async function QuizzesPage() {
   const quizCount = await prisma.quiz.count();
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Gestion des Quizz</h1>
-        <p className="text-gray-500 mt-1">
-          {quizCount} question(s) au total
-        </p>
-      </div>
-
-      <QuizzesManager 
-        levels={levels} 
-        initialQuizzes={quizzes}
-        userId={session.userId}
-      />
-    </div>
+    <QuizzesPageContent
+      levels={levels}
+      initialQuizzes={quizzes}
+      quizCount={quizCount}
+      userId={session.userId}
+    />
   );
 }

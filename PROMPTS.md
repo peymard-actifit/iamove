@@ -299,5 +299,15 @@ Finalement, en administrateur, enlève le bouton Quizz, le sous-menu dans le men
 → Interface d'édition inline : nom, nom Star Wars, description
 → Icône et numéro du niveau affichés en lecture seule
 
+## Prompt #38 - Réorganisation header page Quizz
+```
+Dans la vue de gestion des quizz, le bouton nouvelle question doit être remonté dans la barre du haut à côté du menu action. Le titre Gestion des quizz avec le nombre en dessous doit être centré dans la barre du haut comme dans la vue de gestion des sites ou le studio des sites.
+```
+→ Création du composant QuizzesHeaderContent (injection dans le header global)
+→ Création du composant QuizzesPageContent (wrapper pour coordonner header et manager)
+→ Bouton "Nouvelle question" déplacé dans la barre du haut
+→ Titre "Gestion des Quizz" + nombre centré dans la barre du haut
+→ QuizzesManager modifié pour accepter un contrôle externe du dialog
+
 ---
 *Dernière mise à jour: 2026-02-06*

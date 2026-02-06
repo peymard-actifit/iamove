@@ -43,12 +43,24 @@ interface QuizzesManagerProps {
   levels: Level[];
   initialQuizzes: Quiz[];
   userId: string;
+  showCreateDialog?: boolean;
+  onShowCreateDialogChange?: (show: boolean) => void;
 }
 
-export function QuizzesManager({ levels, initialQuizzes, userId }: QuizzesManagerProps) {
+export function QuizzesManager({ 
+  levels, 
+  initialQuizzes, 
+  userId,
+  showCreateDialog: externalShowDialog,
+  onShowCreateDialogChange,
+}: QuizzesManagerProps) {
   const router = useRouter();
   const [quizzes, setQuizzes] = useState(initialQuizzes);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [internalShowDialog, setInternalShowDialog] = useState(false);
+  
+  // Utiliser le state externe si fourni, sinon le state interne
+  const showCreateDialog = externalShowDialog !== undefined ? externalShowDialog : internalShowDialog;
+  const setShowCreateDialog = onShowCreateDialogChange || setInternalShowDialog;
   const [editingQuiz, setEditingQuiz] = useState<Quiz | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -184,34 +196,28 @@ export function QuizzesManager({ levels, initialQuizzes, userId }: QuizzesManage
   return (
     <div className="space-y-6">
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex gap-4 flex-1">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Rechercher une question..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <select
-            className="h-10 px-3 rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
-            value={filterLevel}
-            onChange={(e) => setFilterLevel(e.target.value)}
-          >
-            <option value="">Tous les niveaux</option>
-            {levels.map((level) => (
-              <option key={level.id} value={level.id}>
-                {level.name}
-              </option>
-            ))}
-          </select>
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Rechercher une question..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
         </div>
-        <Button onClick={() => { resetForm(); setShowCreateDialog(true); }}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nouvelle question
-        </Button>
+        <select
+          className="h-10 px-3 rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
+          value={filterLevel}
+          onChange={(e) => setFilterLevel(e.target.value)}
+        >
+          <option value="">Tous les niveaux</option>
+          {levels.map((level) => (
+            <option key={level.id} value={level.id}>
+              {level.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Stats */}
