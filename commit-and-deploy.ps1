@@ -3,7 +3,8 @@
     Script de commit et deploiement automatique pour iamove
 
 .DESCRIPTION
-    Ce script gere le versioning semantique et le deploiement sur Vercel via GitHub.
+    Ce script gere le versioning semantique et le deploiement sur Vercel via API.
+    Le deploiement est controle manuellement (pas de trigger automatique GitHub).
     
     Niveaux de version :
       major (1er niveau) : Modification majeure
@@ -29,6 +30,11 @@ param(
 # Configuration
 $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+# Tokens et configuration Vercel
+$VERCEL_TOKEN = "guslExykaaYwwyrd9ACspjFH"
+$VERCEL_PROJECT = "iamove"
+$GITHUB_REPO = "peymard-actifit/iamove"
 
 # Fonction pour afficher les etapes
 function Write-Step {
@@ -167,17 +173,86 @@ try {
     }
     Write-Step "Push reussi" "OK"
     
-    # Etape 8: Confirmation
-    Write-Step "Deploiement Vercel en cours (automatique via GitHub)..."
+    # Etape 8: Declenchement du deploiement Vercel via API
+    Write-Step "Declenchement du deploiement Vercel..."
     
+    # Recuperer le dernier commit SHA
+    $commitSha = git rev-parse HEAD
+    
+    $headers = @{
+        "Authorization" = "Bearer $VERCEL_TOKEN"
+        "Content-Type" = "application/json"
+    }
+    
+    $deployBody = @{
+        name = $VERCEL_PROJECT
+        project = $VERCEL_PROJECT
+        target = "production"
+        gitSource = @{
+            type = "github"
+            ref = "main"
+            repoId = "1151255766"
+            sha = $commitSha
+        }
+    } | ConvertTo-Json -Depth 5
+    
+    $deployResponse = Invoke-RestMethod -Uri "https://api.vercel.com/v13/deployments" -Headers $headers -Method POST -Body $deployBody
+    $deploymentId = $deployResponse.id
+    $deploymentUrl = $deployResponse.url
+    
+    Write-Step "Deploiement lance: $deploymentId" "OK"
+    
+    # Etape 9: Suivi du deploiement
+    Write-Step "Attente du build Vercel..."
+    
+    $maxAttempts = 60  # 5 minutes max (60 x 5 secondes)
+    $attempt = 0
+    $buildComplete = $false
+    
+    while (-not $buildComplete -and $attempt -lt $maxAttempts) {
+        Start-Sleep -Seconds 5
+        $attempt++
+        
+        $statusResponse = Invoke-RestMethod -Uri "https://api.vercel.com/v13/deployments/$deploymentId" -Headers $headers -Method GET
+        $readyState = $statusResponse.readyState
+        
+        switch ($readyState) {
+            "READY" {
+                $buildComplete = $true
+                Write-Step "Build termine avec succes!" "OK"
+            }
+            "ERROR" {
+                throw "Le build Vercel a echoue. Consultez les logs sur Vercel."
+            }
+            "CANCELED" {
+                throw "Le deploiement a ete annule."
+            }
+            default {
+                # QUEUED, INITIALIZING, BUILDING
+                $elapsed = $attempt * 5
+                Write-Host "`r[$((Get-Date).ToString('HH:mm:ss'))] [..] Build en cours... ($readyState - ${elapsed}s)" -NoNewline -ForegroundColor Cyan
+            }
+        }
+    }
+    
+    Write-Host ""  # Nouvelle ligne apres le suivi
+    
+    if (-not $buildComplete) {
+        Write-Step "Timeout - le build prend plus de 5 minutes" "WARN"
+        Write-Host "Le deploiement continue en arriere-plan. Verifiez sur https://vercel.com" -ForegroundColor Yellow
+    }
+    
+    # Etape 10: Confirmation finale
     Write-Host ""
     Write-Host "=============================================" -ForegroundColor Green
     Write-Host "   DEPLOIEMENT REUSSI!" -ForegroundColor Green
     Write-Host "=============================================" -ForegroundColor Green
     Write-Host ""
-    Write-Host "  Version: $newVersion" -ForegroundColor White
-    Write-Host "  Commit:  $commitMessage" -ForegroundColor White
-    Write-Host "  URL:     https://iamove.vercel.app" -ForegroundColor Cyan
+    Write-Host "  Version:      $newVersion" -ForegroundColor White
+    Write-Host "  Commit:       $commitMessage" -ForegroundColor White
+    Write-Host "  Deployment:   $deploymentId" -ForegroundColor White
+    Write-Host "  URL:          https://iamove.vercel.app" -ForegroundColor Cyan
+    Write-Host "  Preview URL:  https://$deploymentUrl" -ForegroundColor Cyan
     Write-Host ""
     Write-Step "Pipeline termine avec succes" "OK"
     
