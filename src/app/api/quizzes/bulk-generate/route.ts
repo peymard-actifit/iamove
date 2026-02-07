@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import levelsData from "@/data/levels.json";
 
@@ -187,9 +188,15 @@ export async function POST(request: Request) {
     const { searchParams } = new URL(request.url);
     const apiKey = searchParams.get("key");
     
-    // Vérifier la clé API de maintenance
-    if (apiKey !== process.env.MAINTENANCE_KEY) {
-      return NextResponse.json({ error: "Clé API invalide" }, { status: 401 });
+    // Vérifier soit la clé API de maintenance, soit la session admin
+    let session = null;
+    if (apiKey === process.env.MAINTENANCE_KEY) {
+      console.log("[bulk-generate] Authentification par clé API");
+    } else {
+      session = await getSession();
+      if (!session || session.role !== "ADMIN") {
+        return NextResponse.json({ error: "Accès réservé aux administrateurs" }, { status: 403 });
+      }
     }
 
     const body = await request.json();
