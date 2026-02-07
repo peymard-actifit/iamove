@@ -2,10 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger, TabsContent, Button } from "@/components/ui";
-import { Network, User, GraduationCap, ClipboardCheck, LogOut } from "lucide-react";
+import { Network, User, GraduationCap, ClipboardCheck, LogOut, Route } from "lucide-react";
 import { Tab2Organigramme } from "@/components/studio/tabs/tab2-organigramme";
 import { Tab4Formation } from "@/components/studio/tabs/tab4-formation";
 import { Tab5Quiz } from "@/components/studio/tabs/tab5-quiz";
+import { Tab6TrainingPaths } from "@/components/studio/tabs/tab6-training-paths";
 import { PersonalProfileEditor } from "./personal-profile-editor";
 import { DynamicFavicon } from "./dynamic-favicon";
 
@@ -153,6 +154,10 @@ export function PublishedSiteApp({
                 <span className="hidden sm:inline">{settings.tab4Title}</span>
               </TabsTrigger>
             )}
+            <TabsTrigger value="tab6" className="gap-2">
+              <Route className="h-4 w-4" />
+              <span className="hidden sm:inline">Parcours</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="tab2">
@@ -195,6 +200,14 @@ export function PublishedSiteApp({
             <Tab5Quiz
               siteId={site.id}
               isStudioMode={false}
+              personId={currentPerson?.id}
+              currentLevel={currentPerson?.currentLevel || 0}
+            />
+          </TabsContent>
+
+          <TabsContent value="tab6">
+            <Tab6TrainingPaths
+              siteId={site.id}
               personId={currentPerson?.id}
               currentLevel={currentPerson?.currentLevel || 0}
             />
