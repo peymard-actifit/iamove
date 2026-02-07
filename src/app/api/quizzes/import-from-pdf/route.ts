@@ -161,6 +161,8 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     const levelNumberStr = formData.get("levelNumber") as string | null;
+    const replaceExistingStr = formData.get("replaceExisting") as string | null;
+    const replaceExisting = replaceExistingStr === "true";
 
     if (!file) {
       return NextResponse.json(
@@ -225,15 +227,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Supprimer les quizz existants pour ce niveau
-    await prisma.quizTranslation.deleteMany({
-      where: {
-        quiz: { levelId: level.id },
-      },
-    });
-    await prisma.quiz.deleteMany({
-      where: { levelId: level.id },
-    });
+    // Supprimer les quizz existants seulement si l'option "remplacer" est activée
+    if (replaceExisting) {
+      await prisma.quizTranslation.deleteMany({
+        where: {
+          quiz: { levelId: level.id },
+        },
+      });
+      await prisma.quiz.deleteMany({
+        where: { levelId: level.id },
+      });
+    }
 
     // Importer les nouvelles questions
     let importedCount = 0;
@@ -297,6 +301,7 @@ export async function POST(request: NextRequest) {
       imported: importedCount,
       level: levelNumber,
       fileName: file.name,
+      mode: replaceExisting ? "replaced" : "added",
     });
   } catch (error) {
     console.error("Erreur import PDF:", error);

@@ -429,6 +429,18 @@ Quand je clique sur importer des quizz, et sur un niveau, il doit me demander de
 → Traduction automatique en 26 langues via DeepL
 
 ---
+
+### Prompt #54 (2026-02-07)
+```
+Pour les fonctions d'importations, il ne faut pas remplacer systématiquement les anciennes questions par les nouvelles. Il faut avoir une case à cocher pour indiquer s'il faut remplacer ou ajouter.
+```
+→ Ajout d'une case à cocher "Remplacer les questions existantes" dans le dialog d'import
+→ Par défaut : les nouvelles questions sont ajoutées aux existantes
+→ Si coché : les anciennes questions sont supprimées avant l'import
+→ Bouton change de couleur (destructive) si "Remplacer" est actif
+→ Texte du bouton adapté : "Importer" / "Ajouter" / "Remplacer"
+
+---
 *Dernière mise à jour: 2026-02-07*
 ```
 Change l'ordre des onglets dans le site publié, mettre : Profil, Organigramme, Évaluation, Formation

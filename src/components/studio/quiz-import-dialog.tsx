@@ -34,6 +34,7 @@ export function QuizImportDialog({ open, onOpenChange }: QuizImportDialogProps) 
   const [isLoading, setIsLoading] = useState(false);
   const [importingLevel, setImportingLevel] = useState<number | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
+  const [replaceExisting, setReplaceExisting] = useState(false);
   const [importResult, setImportResult] = useState<{ level: number; success: boolean; message: string } | null>(null);
 
   // Charger les niveaux et le nombre de quizz par niveau
@@ -98,6 +99,7 @@ export function QuizImportDialog({ open, onOpenChange }: QuizImportDialogProps) 
       const formData = new FormData();
       formData.append("file", file);
       formData.append("levelNumber", selectedLevel.toString());
+      formData.append("replaceExisting", replaceExisting.toString());
 
       const response = await fetch("/api/quizzes/import-from-pdf", {
         method: "POST",
@@ -107,10 +109,11 @@ export function QuizImportDialog({ open, onOpenChange }: QuizImportDialogProps) 
       const data = await response.json();
       
       if (data.success) {
+        const action = replaceExisting ? "remplacées" : "ajoutées";
         setImportResult({
           level: selectedLevel,
           success: true,
-          message: `${data.imported} questions importées depuis "${file.name}" et traduites en 26 langues`,
+          message: `${data.imported} questions ${action} depuis "${file.name}" et traduites en 26 langues`,
         });
         // Recharger les données
         loadData();
@@ -174,6 +177,25 @@ export function QuizImportDialog({ open, onOpenChange }: QuizImportDialogProps) 
           </div>
         )}
 
+        {/* Option remplacer ou ajouter */}
+        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border">
+          <input
+            type="checkbox"
+            id="replaceExisting"
+            checked={replaceExisting}
+            onChange={(e) => setReplaceExisting(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          />
+          <label htmlFor="replaceExisting" className="text-sm text-gray-700 cursor-pointer">
+            <span className="font-medium">Remplacer les questions existantes</span>
+            <span className="block text-xs text-gray-500">
+              {replaceExisting 
+                ? "Les questions actuelles du niveau seront supprimées avant l'import" 
+                : "Les nouvelles questions seront ajoutées aux questions existantes"}
+            </span>
+          </label>
+        </div>
+
         <div className="py-4">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
@@ -210,7 +232,7 @@ export function QuizImportDialog({ open, onOpenChange }: QuizImportDialogProps) 
                     </p>
                     <Button
                       size="sm"
-                      variant={hasQuestions ? "outline" : "default"}
+                      variant={hasQuestions && replaceExisting ? "destructive" : hasQuestions ? "outline" : "default"}
                       className="w-full h-7 text-xs"
                       onClick={() => handleSelectFile(level.number)}
                       disabled={isImporting}
@@ -220,7 +242,9 @@ export function QuizImportDialog({ open, onOpenChange }: QuizImportDialogProps) 
                       ) : (
                         <>
                           <FileText className="h-3 w-3 mr-1" />
-                          {hasQuestions ? "Remplacer" : "Importer"}
+                          {hasQuestions 
+                            ? (replaceExisting ? "Remplacer" : "Ajouter") 
+                            : "Importer"}
                         </>
                       )}
                     </Button>
