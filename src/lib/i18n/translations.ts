@@ -257,6 +257,24 @@ export function buildTranslationsObject(flatTranslations: Record<string, string>
       secondaryColor: getValue("settings.secondaryColor", "Couleur secondaire"),
       publishedUrl: getValue("settings.publishedUrl", "URL du site publié"),
     },
+    // Mode publié
+    published: {
+      logout: getValue("published.logout", "Déconnexion"),
+      trainingPaths: getValue("published.trainingPaths", "Parcours"),
+      aiCategory: getValue("published.aiCategory", "Catégorie IA"),
+      categoryUpdatedAuto: getValue("published.categoryUpdatedAuto", "La catégorie est mise à jour automatiquement en validant les évaluations."),
+      noProfileAssociated: getValue("published.noProfileAssociated", "Aucun profil associé à votre compte dans ce site"),
+      emailNotMatching: getValue("published.emailNotMatching", "Votre email ne correspond à aucune personne enregistrée"),
+      yourPosition: getValue("published.yourPosition", "Votre poste"),
+      yourDepartment: getValue("published.yourDepartment", "Votre service"),
+      noPosition: getValue("published.noPosition", "Sans poste"),
+      fullName: getValue("published.fullName", "Nom complet"),
+      firstName: getValue("published.firstName", "Prénom"),
+      lastName: getValue("published.lastName", "Nom"),
+      selectLanguage: getValue("published.selectLanguage", "Sélectionner la langue"),
+      languagePreference: getValue("published.languagePreference", "Préférence de langue"),
+      contentLanguage: getValue("published.contentLanguage", "Langue du contenu"),
+    },
   };
 }
 
@@ -460,6 +478,24 @@ export interface Translations {
     secondaryColor: string;
     publishedUrl: string;
   };
+  // Mode publié
+  published: {
+    logout: string;
+    trainingPaths: string;
+    aiCategory: string;
+    categoryUpdatedAuto: string;
+    noProfileAssociated: string;
+    emailNotMatching: string;
+    yourPosition: string;
+    yourDepartment: string;
+    noPosition: string;
+    fullName: string;
+    firstName: string;
+    lastName: string;
+    selectLanguage: string;
+    languagePreference: string;
+    contentLanguage: string;
+  };
 }
 
 // Traductions françaises (par défaut)
@@ -647,6 +683,23 @@ export const FR: Translations = {
     secondaryColor: "Couleur secondaire",
     publishedUrl: "URL du site publié",
   },
+  published: {
+    logout: "Déconnexion",
+    trainingPaths: "Parcours",
+    aiCategory: "Catégorie IA",
+    categoryUpdatedAuto: "La catégorie est mise à jour automatiquement en validant les évaluations.",
+    noProfileAssociated: "Aucun profil associé à votre compte dans ce site",
+    emailNotMatching: "Votre email ne correspond à aucune personne enregistrée",
+    yourPosition: "Votre poste",
+    yourDepartment: "Votre service",
+    noPosition: "Sans poste",
+    fullName: "Nom complet",
+    firstName: "Prénom",
+    lastName: "Nom",
+    selectLanguage: "Sélectionner la langue",
+    languagePreference: "Préférence de langue",
+    contentLanguage: "Langue du contenu",
+  },
 };
 
 // Traductions anglaises
@@ -833,6 +886,23 @@ export const EN: Translations = {
     primaryColor: "Primary color",
     secondaryColor: "Secondary color",
     publishedUrl: "Published site URL",
+  },
+  published: {
+    logout: "Log out",
+    trainingPaths: "Paths",
+    aiCategory: "AI Category",
+    categoryUpdatedAuto: "The category is automatically updated when completing assessments.",
+    noProfileAssociated: "No profile associated with your account in this site",
+    emailNotMatching: "Your email does not match any registered person",
+    yourPosition: "Your position",
+    yourDepartment: "Your department",
+    noPosition: "No position",
+    fullName: "Full name",
+    firstName: "First name",
+    lastName: "Last name",
+    selectLanguage: "Select language",
+    languagePreference: "Language preference",
+    contentLanguage: "Content language",
   },
 };
 

@@ -2,11 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, Button, Input } from "@/components/ui";
+import { Card, CardContent, CardHeader, CardTitle, Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle, Flag } from "@/components/ui";
 import { Mail, Briefcase, Building, Edit, Save, X, User, Globe } from "lucide-react";
 import { getLevelIcon, getLevelInfo } from "@/lib/levels";
-import { useI18n } from "@/lib/i18n";
-import { SUPPORTED_LANGUAGES, SupportedLanguage } from "@/lib/i18n/translations";
+import { useI18n, SupportedLanguage } from "@/lib/i18n";
 
 interface Person {
   id: string;
@@ -35,10 +34,11 @@ export function PersonalProfileEditor({
   persons,
 }: PersonalProfileEditorProps) {
   const router = useRouter();
-  const { language: globalLanguage, setLanguage, t } = useI18n();
+  const { language: globalLanguage, setLanguage, languageInfo, availableLanguages, t } = useI18n();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [savingLanguage, setSavingLanguage] = useState(false);
+  const [showLanguageDialog, setShowLanguageDialog] = useState(false);
   const [editForm, setEditForm] = useState({
     name: person.name,
     email: person.email,
@@ -50,11 +50,12 @@ export function PersonalProfileEditor({
   });
 
   // Sauvegarder la préférence de langue
-  const handleLanguageChange = async (newLang: string) => {
+  const handleLanguageChange = async (newLang: SupportedLanguage) => {
     setSavingLanguage(true);
+    setShowLanguageDialog(false);
     try {
       // Mettre à jour dans le contexte i18n
-      setLanguage(newLang as SupportedLanguage);
+      setLanguage(newLang);
       
       // Sauvegarder en base de données
       await fetch("/api/persons/preferences", {
@@ -121,27 +122,27 @@ export function PersonalProfileEditor({
                       value={editForm.name}
                       onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                       className="font-bold text-lg"
-                      placeholder="Nom complet"
+                      placeholder={t.published.fullName}
                     />
                     <div className="flex gap-2">
                       <Input
                         value={editForm.firstName}
                         onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
                         className="text-sm"
-                        placeholder="Prénom"
+                        placeholder={t.published.firstName}
                       />
                       <Input
                         value={editForm.lastName}
                         onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
                         className="text-sm"
-                        placeholder="Nom"
+                        placeholder={t.published.lastName}
                       />
                     </div>
                   </div>
                 ) : (
                   <>
                     <CardTitle>{person.name}</CardTitle>
-                    <p className="text-gray-500">{person.jobTitle || "Sans poste"}</p>
+                    <p className="text-gray-500">{person.jobTitle || t.published.noPosition}</p>
                   </>
                 )}
               </div>
@@ -151,17 +152,17 @@ export function PersonalProfileEditor({
                 <>
                   <Button variant="outline" size="sm" onClick={handleCancel}>
                     <X className="h-4 w-4 mr-1" />
-                    Annuler
+                    {t.common.cancel}
                   </Button>
                   <Button size="sm" onClick={handleSave} disabled={isLoading}>
                     <Save className="h-4 w-4 mr-1" />
-                    Enregistrer
+                    {t.common.save}
                   </Button>
                 </>
               ) : (
                 <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
                   <Edit className="h-4 w-4 mr-1" />
-                  Modifier
+                  {t.common.edit}
                 </Button>
               )}
             </div>
@@ -173,7 +174,7 @@ export function PersonalProfileEditor({
             <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
               <Mail className="h-5 w-5 text-gray-400" />
               <div className="flex-1">
-                <p className="text-xs text-gray-500">Email</p>
+                <p className="text-xs text-gray-500">{t.persons.email}</p>
                 {isEditing ? (
                   <Input
                     type="email"
@@ -189,13 +190,13 @@ export function PersonalProfileEditor({
             <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
               <Briefcase className="h-5 w-5 text-gray-400" />
               <div className="flex-1">
-                <p className="text-xs text-gray-500">Poste</p>
+                <p className="text-xs text-gray-500">{t.persons.position}</p>
                 {isEditing ? (
                   <Input
                     value={editForm.jobTitle}
                     onChange={(e) => setEditForm({ ...editForm, jobTitle: e.target.value })}
                     className="mt-1"
-                    placeholder="Votre poste"
+                    placeholder={t.published.yourPosition}
                   />
                 ) : (
                   <p className="font-medium">{person.jobTitle || "-"}</p>
@@ -205,13 +206,13 @@ export function PersonalProfileEditor({
             <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
               <Building className="h-5 w-5 text-gray-400" />
               <div className="flex-1">
-                <p className="text-xs text-gray-500">Service</p>
+                <p className="text-xs text-gray-500">{t.persons.department}</p>
                 {isEditing ? (
                   <Input
                     value={editForm.department}
                     onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
                     className="mt-1"
-                    placeholder="Votre service"
+                    placeholder={t.published.yourDepartment}
                   />
                 ) : (
                   <p className="font-medium">{person.department || "-"}</p>
@@ -221,14 +222,14 @@ export function PersonalProfileEditor({
             <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
               <User className="h-5 w-5 text-gray-400" />
               <div className="flex-1">
-                <p className="text-xs text-gray-500">Responsable</p>
+                <p className="text-xs text-gray-500">{t.persons.manager}</p>
                 {isEditing ? (
                   <select
                     className="w-full h-10 px-3 mt-1 rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
                     value={editForm.managerId}
                     onChange={(e) => setEditForm({ ...editForm, managerId: e.target.value })}
                   >
-                    <option value="">Aucun</option>
+                    <option value="">{t.persons.none}</option>
                     {persons
                       .filter((p) => p.id !== person.id)
                       .map((p) => (
@@ -238,7 +239,7 @@ export function PersonalProfileEditor({
                       ))}
                   </select>
                 ) : (
-                  <p className="font-medium">{person.manager?.name || "Aucun"}</p>
+                  <p className="font-medium">{person.manager?.name || t.persons.none}</p>
                 )}
               </div>
             </div>
@@ -251,19 +252,47 @@ export function PersonalProfileEditor({
               <p className="text-sm font-medium text-blue-700 dark:text-blue-300">{t.common.chooseLanguage}</p>
               <p className="text-xs text-gray-500 mt-0.5">{t.common.siteLanguageDescription}</p>
             </div>
-            <select
-              className="h-10 px-3 rounded-md border border-blue-300 bg-white dark:border-blue-700 dark:bg-gray-900 text-sm font-medium"
-              value={globalLanguage}
-              onChange={(e) => handleLanguageChange(e.target.value)}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowLanguageDialog(true)}
               disabled={savingLanguage}
+              className="px-3"
             >
-              {SUPPORTED_LANGUAGES.map((lang) => (
-                <option key={lang.code} value={lang.code}>
-                  {lang.nativeName}
-                </option>
-              ))}
-            </select>
+              <Flag countryCode={languageInfo?.countryCode || "fr"} size="md" />
+              <span className="ml-2">{languageInfo?.nativeName || "Français"}</span>
+            </Button>
           </div>
+
+          {/* Dialog de sélection de langue */}
+          <Dialog open={showLanguageDialog} onOpenChange={setShowLanguageDialog}>
+            <DialogContent className="max-w-3xl">
+              <DialogHeader>
+                <DialogTitle className="text-center">
+                  {t.common.chooseLanguage}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="grid grid-cols-6 gap-3 py-4">
+                {availableLanguages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => handleLanguageChange(lang.code)}
+                    className={`
+                      flex items-center justify-center p-2 rounded-lg transition-all
+                      hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105
+                      ${globalLanguage === lang.code 
+                        ? "bg-blue-100 dark:bg-blue-900 ring-2 ring-blue-500 scale-105" 
+                        : "bg-gray-50 dark:bg-gray-900"
+                      }
+                    `}
+                    title={lang.nativeName}
+                  >
+                    <Flag countryCode={lang.countryCode} size="xl" />
+                  </button>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Catégorie IA (non modifiable) */}
           <div className={`p-4 rounded-lg border ${
@@ -283,7 +312,7 @@ export function PersonalProfileEditor({
                   levelInfo.category === "Technicien" ? "text-purple-700 dark:text-purple-300" :
                   "text-orange-700 dark:text-orange-300"
                 }`}>
-                  Catégorie IA
+                  {t.published.aiCategory}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
                   <span className={`px-3 py-1 rounded-full text-sm font-bold ${
@@ -304,7 +333,7 @@ export function PersonalProfileEditor({
               levelInfo.category === "Technicien" ? "text-purple-600 dark:text-purple-400" :
               "text-orange-600 dark:text-orange-400"
             }`}>
-              La catégorie est mise à jour automatiquement en validant les évaluations.
+              {t.published.categoryUpdatedAuto}
             </p>
           </div>
         </CardContent>

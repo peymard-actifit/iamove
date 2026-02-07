@@ -9,6 +9,8 @@ import { Tab5Quiz } from "@/components/studio/tabs/tab5-quiz";
 import { Tab6TrainingPaths } from "@/components/studio/tabs/tab6-training-paths";
 import { PersonalProfileEditor } from "./personal-profile-editor";
 import { DynamicFavicon } from "./dynamic-favicon";
+import { LanguageSelector } from "@/components/studio/language-selector";
+import { useI18n } from "@/lib/i18n";
 
 interface Person {
   id: string;
@@ -66,15 +68,16 @@ export function PublishedSiteApp({
   isStudioUser: _isStudioUser,
 }: PublishedSiteAppProps) {
   const router = useRouter();
+  const { t } = useI18n();
 
   const settings = site.settings || {
-    tab2Title: "Organisation",
+    tab2Title: t.tabs.organization,
     tab2Enabled: true,
-    tab3Title: "Profil",
+    tab3Title: t.tabs.profile,
     tab3Enabled: true,
-    tab4Title: "Formation",
+    tab4Title: t.tabs.training,
     tab4Enabled: true,
-    tab5Title: "Évaluation",
+    tab5Title: t.tabs.assessment,
     tab5Enabled: true,
   };
 
@@ -112,6 +115,7 @@ export function PublishedSiteApp({
                 {currentPerson.name}
               </span>
             )}
+            <LanguageSelector />
             <Button
               variant="ghost"
               size="sm"
@@ -119,7 +123,7 @@ export function PublishedSiteApp({
               className="text-white hover:bg-white/20"
             >
               <LogOut className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Déconnexion</span>
+              <span className="hidden sm:inline">{t.published.logout}</span>
             </Button>
           </div>
         </div>
@@ -156,7 +160,7 @@ export function PublishedSiteApp({
             )}
             <TabsTrigger value="tab6" className="gap-2">
               <Route className="h-4 w-4" />
-              <span className="hidden sm:inline">Parcours</span>
+              <span className="hidden sm:inline">{t.published.trainingPaths}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -182,8 +186,8 @@ export function PublishedSiteApp({
               />
             ) : (
               <div className="text-center py-12 text-gray-500">
-                <p>Aucun profil associé à votre compte dans ce site</p>
-                <p className="text-sm mt-2">Votre email ne correspond à aucune personne enregistrée</p>
+                <p>{t.published.noProfileAssociated}</p>
+                <p className="text-sm mt-2">{t.published.emailNotMatching}</p>
               </div>
             )}
           </TabsContent>
