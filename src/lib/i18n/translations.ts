@@ -164,6 +164,8 @@ export function buildTranslationsObject(flatTranslations: Record<string, string>
     },
     levels: {
       level: getValue("levels.level", "Niveau"),
+      scaleTitle: getValue("levels.scaleTitle", "Échelle des niveaux IA"),
+      scaleDescription: getValue("levels.scaleDescription", "Éditez les informations de chaque niveau de compétence IA"),
     },
     quiz: {
       title: getValue("quiz.title", "Gestion des Quiz"),
@@ -212,6 +214,8 @@ export function buildTranslationsObject(flatTranslations: Record<string, string>
       chooseLanguage: getValue("common.chooseLanguage", "Choisir la langue"),
       siteLanguage: getValue("common.siteLanguage", "Langue du contenu"),
       siteLanguageDescription: getValue("common.siteLanguageDescription", "Langue utilisée pour le contenu de ce site"),
+      translate: getValue("common.translate", "Traduire"),
+      clickToEdit: getValue("common.clickToEdit", "Cliquez pour modifier"),
     },
     dates: {
       today: getValue("dates.today", "Aujourd'hui"),
@@ -357,6 +361,8 @@ export interface Translations {
   // Niveaux
   levels: {
     level: string;
+    scaleTitle: string;
+    scaleDescription: string;
   };
   // Quiz
   quiz: {
@@ -407,6 +413,8 @@ export interface Translations {
     chooseLanguage: string;
     siteLanguage: string;
     siteLanguageDescription: string;
+    translate: string;
+    clickToEdit: string;
   };
   // Dates
   dates: {
@@ -546,6 +554,8 @@ export const FR: Translations = {
   },
   levels: {
     level: "Niveau",
+    scaleTitle: "Échelle des niveaux IA",
+    scaleDescription: "Éditez les informations de chaque niveau de compétence IA",
   },
   quiz: {
     title: "Gestion des Quiz",
@@ -594,6 +604,8 @@ export const FR: Translations = {
     chooseLanguage: "Choisir la langue",
     siteLanguage: "Langue du contenu",
     siteLanguageDescription: "Langue utilisée pour le contenu de ce site",
+    translate: "Traduire",
+    clickToEdit: "Cliquez pour modifier",
   },
   dates: {
     today: "Aujourd'hui",
@@ -729,6 +741,8 @@ export const EN: Translations = {
   },
   levels: {
     level: "Level",
+    scaleTitle: "AI Levels Scale",
+    scaleDescription: "Edit the information for each AI skill level",
   },
   quiz: {
     title: "Quiz Management",
@@ -777,6 +791,8 @@ export const EN: Translations = {
     chooseLanguage: "Choose language",
     siteLanguage: "Content language",
     siteLanguageDescription: "Language used for this site's content",
+    translate: "Translate",
+    clickToEdit: "Click to edit",
   },
   dates: {
     today: "Today",

@@ -11,6 +11,9 @@ export async function GET() {
 
     const levels = await prisma.level.findMany({
       orderBy: { number: "asc" },
+      include: {
+        translations: true, // Inclure les traductions
+      },
     });
 
     return NextResponse.json(levels);

@@ -10,9 +10,18 @@ import {
   Button,
   Input,
 } from "@/components/ui";
-import { Save, X, Loader2, RefreshCw } from "lucide-react";
-import { getLevelIcon } from "@/lib/levels";
+import { Save, X, Loader2, RefreshCw, Languages } from "lucide-react";
 import Image from "next/image";
+import { useI18n } from "@/lib/i18n";
+
+interface LevelTranslation {
+  id: string;
+  language: string;
+  name: string;
+  category: string;
+  seriousGaming: string;
+  description: string;
+}
 
 interface Level {
   id: string;
@@ -21,6 +30,7 @@ interface Level {
   category: string;
   seriousGaming: string;
   description: string;
+  translations?: LevelTranslation[];
 }
 
 interface LevelsEditorDialogProps {
@@ -29,12 +39,42 @@ interface LevelsEditorDialogProps {
 }
 
 export function LevelsEditorDialog({ open, onOpenChange }: LevelsEditorDialogProps) {
+  const { language: globalLanguage, t } = useI18n();
   const [levels, setLevels] = useState<Level[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [seeding, setSeeding] = useState(false);
+  const [translating, setTranslating] = useState(false);
   const [editingLevel, setEditingLevel] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Level>>({});
+
+  // Obtenir les données traduites d'un niveau
+  const getTranslatedLevel = (level: Level) => {
+    const lang = globalLanguage.toUpperCase();
+    if (lang === "FR" || !level.translations || level.translations.length === 0) {
+      return {
+        name: level.name,
+        category: level.category,
+        seriousGaming: level.seriousGaming,
+        description: level.description,
+      };
+    }
+    const translation = level.translations.find(t => t.language === lang);
+    if (!translation) {
+      return {
+        name: level.name,
+        category: level.category,
+        seriousGaming: level.seriousGaming,
+        description: level.description,
+      };
+    }
+    return {
+      name: translation.name,
+      category: translation.category,
+      seriousGaming: translation.seriousGaming,
+      description: translation.description,
+    };
+  };
 
   // Charger les niveaux depuis la base de données
   useEffect(() => {
@@ -75,6 +115,24 @@ export function LevelsEditorDialog({ open, onOpenChange }: LevelsEditorDialogPro
       // Erreur silencieuse
     } finally {
       setSeeding(false);
+    }
+  };
+
+  // Traduire tous les niveaux dans les 26 langues
+  const translateLevels = async () => {
+    setTranslating(true);
+    try {
+      const res = await fetch("/api/levels/translate", { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        alert(`${data.created} traductions créées`);
+        // Recharger les niveaux avec les traductions
+        await loadLevels();
+      }
+    } catch {
+      alert("Erreur lors de la traduction");
+    } finally {
+      setTranslating(false);
     }
   };
 
@@ -127,25 +185,44 @@ export function LevelsEditorDialog({ open, onOpenChange }: LevelsEditorDialogPro
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2">
-              Échelle des niveaux IA
+              {t.levels.scaleTitle}
+              <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                {globalLanguage.toUpperCase()}
+              </span>
             </DialogTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={seedLevels}
-              disabled={seeding}
-              title="Resynchroniser depuis le fichier de référence"
-            >
-              {seeding ? (
-                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-              ) : (
-                <RefreshCw className="h-4 w-4 mr-1" />
-              )}
-              Sync
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={translateLevels}
+                disabled={translating}
+                title="Traduire dans les 26 langues via DeepL"
+              >
+                {translating ? (
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                ) : (
+                  <Languages className="h-4 w-4 mr-1" />
+                )}
+                {t.common.translate}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={seedLevels}
+                disabled={seeding}
+                title="Resynchroniser depuis le fichier de référence"
+              >
+                {seeding ? (
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4 mr-1" />
+                )}
+                Sync
+              </Button>
+            </div>
           </div>
           <DialogDescription>
-            Éditez les informations de chaque niveau de compétence IA
+            {t.levels.scaleDescription}
           </DialogDescription>
         </DialogHeader>
 
@@ -256,27 +333,34 @@ export function LevelsEditorDialog({ open, onOpenChange }: LevelsEditorDialogPro
                           className="cursor-pointer"
                           onClick={() => handleEdit(level)}
                         >
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                              level.category === "Néophyte" ? "bg-gray-200 text-gray-700" :
-                              level.category === "Utilisateur" ? "bg-blue-200 text-blue-700" :
-                              level.category === "Technicien" ? "bg-purple-200 text-purple-700" :
-                              "bg-orange-200 text-orange-700"
-                            }`}>
-                              {level.category}
-                            </span>
-                            <span className="font-medium">{level.name}</span>
-                            <span className="text-gray-400">•</span>
-                            <span className="text-sm text-gray-500 italic">
-                              {level.seriousGaming}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
-                            {level.description}
-                          </p>
-                          <p className="text-xs text-blue-500 mt-1">
-                            Cliquez pour modifier
-                          </p>
+                          {(() => {
+                            const translated = getTranslatedLevel(level);
+                            return (
+                              <>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                                    level.category === "Néophyte" ? "bg-gray-200 text-gray-700" :
+                                    level.category === "Utilisateur" ? "bg-blue-200 text-blue-700" :
+                                    level.category === "Technicien" ? "bg-purple-200 text-purple-700" :
+                                    "bg-orange-200 text-orange-700"
+                                  }`}>
+                                    {translated.category}
+                                  </span>
+                                  <span className="font-medium">{translated.name}</span>
+                                  <span className="text-gray-400">•</span>
+                                  <span className="text-sm text-gray-500 italic">
+                                    {translated.seriousGaming}
+                                  </span>
+                                </div>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                                  {translated.description}
+                                </p>
+                                <p className="text-xs text-blue-500 mt-1">
+                                  {t.common.clickToEdit}
+                                </p>
+                              </>
+                            );
+                          })()}
                         </div>
                       )}
                     </div>

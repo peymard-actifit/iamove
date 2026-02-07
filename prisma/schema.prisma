@@ -159,6 +159,9 @@ model Person {
   // Niveau IA
   currentLevel      Int       @default(0)
   
+  // Préférences
+  language          String    @default("EN") // Langue préférée (EN par défaut en mode publié)
+  
   // Droits spéciaux
   canViewAll        Boolean   @default(false) // Vue élargie
   
@@ -197,7 +200,7 @@ model Person {
 model Level {
   id            String    @id @default(cuid())
   number        Int       @unique // 0-20 (21 niveaux)
-  name          String    // "Ignorant", "Touriste", etc.
+  name          String    // "Ignorant", "Touriste", etc. (FR par défaut)
   category      String    @default("") // "Néophyte", "Utilisateur", "Technicien", "Chercheur"
   seriousGaming String    @default("") // Nom Star Wars
   description   String    @default("")
@@ -211,8 +214,24 @@ model Level {
   quizzes         Quiz[]
   skills          Skill[]
   trainingModules TrainingModule[]
+  translations    LevelTranslation[]
 
   @@map("levels")
+}
+
+model LevelTranslation {
+  id            String   @id @default(cuid())
+  levelId       String
+  language      String   // EN, DE, ES, IT, etc. (26 langues)
+  name          String   // Nom traduit
+  category      String   // Catégorie traduite
+  seriousGaming String   // Nom serious gaming traduit
+  description   String   // Description traduite
+  
+  level         Level    @relation(fields: [levelId], references: [id], onDelete: Cascade)
+  
+  @@unique([levelId, language])
+  @@map("level_translations")
 }
 
 // =============================================================================
