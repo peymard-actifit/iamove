@@ -255,43 +255,46 @@ export async function POST(request: Request) {
         },
       });
 
-      // Si withTranslations, créer les traductions (en mode synchrone pour fiabilité)
+      // Lancer les traductions en arrière-plan (ne pas bloquer)
       if (withTranslations) {
-        for (const lang of SUPPORTED_LANGUAGES) {
-          if (lang === "FR") continue;
-          try {
-            const translatedQuestion = await translateText(q.question, lang);
-            const translatedAnswers = [];
-            
-            for (const ans of q.answers) {
-              const translatedText = await translateText(ans.text, lang);
-              translatedAnswers.push({
-                text: translatedText,
-                isCorrect: ans.isCorrect,
+        const translateInBackground = async () => {
+          for (const lang of SUPPORTED_LANGUAGES) {
+            if (lang === "FR") continue;
+            try {
+              const translatedQuestion = await translateText(q.question, lang);
+              const translatedAnswers = [];
+              
+              for (const ans of q.answers) {
+                const translatedText = await translateText(ans.text, lang);
+                translatedAnswers.push({
+                  text: translatedText,
+                  isCorrect: ans.isCorrect,
+                });
+              }
+
+              await prisma.quizTranslation.create({
+                data: {
+                  quizId: quiz.id,
+                  language: lang,
+                  question: translatedQuestion,
+                  answers: translatedAnswers,
+                },
+              });
+            } catch (error) {
+              console.error(`Erreur traduction ${lang} pour quiz ${quiz.id}:`, error);
+              // Créer avec texte original si erreur
+              await prisma.quizTranslation.create({
+                data: {
+                  quizId: quiz.id,
+                  language: lang,
+                  question: q.question,
+                  answers: q.answers,
+                },
               });
             }
-
-            await prisma.quizTranslation.create({
-              data: {
-                quizId: quiz.id,
-                language: lang,
-                question: translatedQuestion,
-                answers: translatedAnswers,
-              },
-            });
-          } catch (error) {
-            console.error(`Erreur traduction ${lang}:`, error);
-            // Créer avec texte original si erreur
-            await prisma.quizTranslation.create({
-              data: {
-                quizId: quiz.id,
-                language: lang,
-                question: q.question,
-                answers: q.answers,
-              },
-            });
           }
-        }
+        };
+        translateInBackground().catch(e => console.error("[bulk-generate] Erreur traduction bg:", e));
       }
 
       createdQuizzes.push({
