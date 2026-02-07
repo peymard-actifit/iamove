@@ -10,7 +10,7 @@ import {
   Button,
   Input,
 } from "@/components/ui";
-import { Save, X, Loader2, RefreshCw } from "lucide-react";
+import { Save, X, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useI18n } from "@/lib/i18n";
 
@@ -43,7 +43,6 @@ export function LevelsEditorDialog({ open, onOpenChange }: LevelsEditorDialogPro
   const [levels, setLevels] = useState<Level[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [seeding, setSeeding] = useState(false);
   const [editingLevel, setEditingLevel] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Level>>({});
 
@@ -102,21 +101,6 @@ export function LevelsEditorDialog({ open, onOpenChange }: LevelsEditorDialogPro
     }
   };
 
-  const seedLevels = async () => {
-    setSeeding(true);
-    try {
-      const res = await fetch("/api/levels/seed", { method: "POST" });
-      if (res.ok) {
-        const data = await res.json();
-        setLevels(data.levels);
-      }
-    } catch {
-      // Erreur silencieuse
-    } finally {
-      setSeeding(false);
-    }
-  };
-
   const handleEdit = (level: Level) => {
     setEditingLevel(level.id);
     // Charger les données traduites selon la langue globale
@@ -167,28 +151,12 @@ export function LevelsEditorDialog({ open, onOpenChange }: LevelsEditorDialogPro
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center gap-2">
-              {t.levels.scaleTitle}
-              <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                {globalLanguage.toUpperCase()}
-              </span>
-            </DialogTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={seedLevels}
-              disabled={seeding}
-              title="Resynchroniser depuis le fichier de référence"
-            >
-              {seeding ? (
-                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-              ) : (
-                <RefreshCw className="h-4 w-4 mr-1" />
-              )}
-              Sync
-            </Button>
-          </div>
+          <DialogTitle className="flex items-center gap-2">
+            {t.levels.scaleTitle}
+            <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+              {globalLanguage.toUpperCase()}
+            </span>
+          </DialogTitle>
           <DialogDescription>
             {t.levels.scaleDescription}
           </DialogDescription>
