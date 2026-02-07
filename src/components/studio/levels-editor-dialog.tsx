@@ -10,7 +10,7 @@ import {
   Button,
   Input,
 } from "@/components/ui";
-import { Save, X, Loader2 } from "lucide-react";
+import { Save, X, Loader2, RefreshCw } from "lucide-react";
 import { getLevelIcon } from "@/lib/levels";
 import Image from "next/image";
 
@@ -125,9 +125,25 @@ export function LevelsEditorDialog({ open, onOpenChange }: LevelsEditorDialogPro
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            Échelle des niveaux IA
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="flex items-center gap-2">
+              Échelle des niveaux IA
+            </DialogTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={seedLevels}
+              disabled={seeding}
+              title="Resynchroniser depuis le fichier de référence"
+            >
+              {seeding ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-1" />
+              )}
+              Sync
+            </Button>
+          </div>
           <DialogDescription>
             Éditez les informations de chaque niveau de compétence IA
           </DialogDescription>
