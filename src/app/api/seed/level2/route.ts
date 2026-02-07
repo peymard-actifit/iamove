@@ -146,7 +146,7 @@ export async function POST() {
     const level = await prisma.level.findFirst({ where: { number: 2 } });
     if (!level) return NextResponse.json({ error: "Level 2 not found" }, { status: 404 });
     
-    const admin = await prisma.user.findFirst({ where: { role: "ADMIN" } });
+    const admin = await prisma.studioUser.findFirst({ where: { role: "ADMIN" } });
     if (!admin) return NextResponse.json({ error: "Admin not found" }, { status: 404 });
 
     // Delete existing
