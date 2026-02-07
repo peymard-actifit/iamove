@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, Button, Input } from "@/components/ui";
-import { Mail, Briefcase, Building, Award, Edit, Save, X, User } from "lucide-react";
+import { Mail, Briefcase, Building, Edit, Save, X, User } from "lucide-react";
 import { getLevelIcon, getLevelInfo } from "@/lib/levels";
 
 interface Person {
@@ -219,24 +219,46 @@ export function PersonalProfileEditor({
             </div>
           </div>
 
-          {/* Niveau IA (non modifiable) */}
-          <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+          {/* Catégorie IA (non modifiable) */}
+          <div className={`p-4 rounded-lg border ${
+            levelInfo.category === "Néophyte" ? "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700" :
+            levelInfo.category === "Utilisateur" ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800" :
+            levelInfo.category === "Technicien" ? "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800" :
+            "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800"
+          }`}>
             <div className="flex items-center gap-4">
-              <Award className="h-6 w-6 text-blue-500" />
+              <div className="h-10 w-10 flex items-center justify-center">
+                {getLevelIcon(person.currentLevel, "h-8 w-8")}
+              </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
-                  Niveau IA actuel
+                <p className={`text-sm font-medium ${
+                  levelInfo.category === "Néophyte" ? "text-gray-700 dark:text-gray-300" :
+                  levelInfo.category === "Utilisateur" ? "text-blue-700 dark:text-blue-300" :
+                  levelInfo.category === "Technicien" ? "text-purple-700 dark:text-purple-300" :
+                  "text-orange-700 dark:text-orange-300"
+                }`}>
+                  Catégorie IA
                 </p>
                 <div className="flex items-center gap-2 mt-1">
-                  {getLevelIcon(person.currentLevel, "h-5 w-5")}
-                  <span className="font-bold text-lg">Niveau {person.currentLevel}</span>
-                  <span className="text-gray-500">- {levelInfo.name}</span>
+                  <span className={`px-3 py-1 rounded-full text-sm font-bold ${
+                    levelInfo.category === "Néophyte" ? "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200" :
+                    levelInfo.category === "Utilisateur" ? "bg-blue-200 text-blue-700 dark:bg-blue-800 dark:text-blue-200" :
+                    levelInfo.category === "Technicien" ? "bg-purple-200 text-purple-700 dark:bg-purple-800 dark:text-purple-200" :
+                    "bg-orange-200 text-orange-700 dark:bg-orange-800 dark:text-orange-200"
+                  }`}>
+                    {levelInfo.category}
+                  </span>
                 </div>
-                <p className="text-xs text-gray-500 mt-1 italic">{levelInfo.seriousGaming}</p>
+                <p className="text-xs text-gray-500 mt-2">{levelInfo.name} - {levelInfo.seriousGaming}</p>
               </div>
             </div>
-            <p className="text-xs text-blue-600 dark:text-blue-400 mt-3">
-              Le niveau est mis à jour automatiquement en validant les évaluations.
+            <p className={`text-xs mt-3 ${
+              levelInfo.category === "Néophyte" ? "text-gray-600 dark:text-gray-400" :
+              levelInfo.category === "Utilisateur" ? "text-blue-600 dark:text-blue-400" :
+              levelInfo.category === "Technicien" ? "text-purple-600 dark:text-purple-400" :
+              "text-orange-600 dark:text-orange-400"
+            }`}>
+              La catégorie est mise à jour automatiquement en validant les évaluations.
             </p>
           </div>
         </CardContent>

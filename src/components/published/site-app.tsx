@@ -160,6 +160,7 @@ export function PublishedSiteApp({
               siteName={site.name}
               persons={visiblePersons}
               currentUserEmail={currentPerson?.email}
+              isPublished={true}
               onSaveStart={() => {}}
               onSaveDone={() => {}}
               onSaveError={() => {}}

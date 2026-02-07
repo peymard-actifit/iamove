@@ -24,6 +24,7 @@ interface Tab2OrganigrammeProps {
   onSaveDone: () => void;
   onSaveError: () => void;
   currentUserEmail?: string;
+  isPublished?: boolean; // Mode publié = afficher uniquement à partir de l'utilisateur connecté
 }
 
 interface OrgNode {
@@ -56,6 +57,37 @@ function buildOrgTree(persons: Person[]): OrgNode[] {
   });
 
   return roots;
+}
+
+// Construire l'arbre à partir d'une personne spécifique (pour mode publié)
+function buildOrgTreeFromPerson(persons: Person[], currentUserEmail: string): OrgNode[] {
+  // Trouver la personne connectée
+  const currentPerson = persons.find(p => p.email.toLowerCase() === currentUserEmail.toLowerCase());
+  if (!currentPerson) {
+    return []; // Personne non trouvée
+  }
+
+  const nodeMap = new Map<string, OrgNode>();
+
+  // Créer tous les nœuds
+  persons.forEach((person) => {
+    nodeMap.set(person.id, { person, children: [] });
+  });
+
+  // Construire les relations enfant uniquement
+  persons.forEach((person) => {
+    const node = nodeMap.get(person.id)!;
+    if (person.managerId) {
+      const parent = nodeMap.get(person.managerId);
+      if (parent) {
+        parent.children.push(node);
+      }
+    }
+  });
+
+  // Retourner l'arbre à partir de la personne connectée
+  const currentNode = nodeMap.get(currentPerson.id);
+  return currentNode ? [currentNode] : [];
 }
 
 function LevelBadgeWithTooltip({ levelNumber }: { levelNumber: number }) {
@@ -160,8 +192,15 @@ export function Tab2Organigramme({
   onSaveDone,
   onSaveError,
   currentUserEmail,
+  isPublished = false,
 }: Tab2OrganigrammeProps) {
-  const orgTree = useMemo(() => buildOrgTree(persons), [persons]);
+  // En mode publié avec un utilisateur connecté, afficher uniquement à partir de cet utilisateur
+  const orgTree = useMemo(() => {
+    if (isPublished && currentUserEmail) {
+      return buildOrgTreeFromPerson(persons, currentUserEmail);
+    }
+    return buildOrgTree(persons);
+  }, [persons, isPublished, currentUserEmail]);
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const printRef = useRef<HTMLDivElement>(null);

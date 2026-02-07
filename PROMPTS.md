@@ -337,4 +337,15 @@ Les sous-menus du menu actions doivent être traduit en partie GLOBALE. Ne les o
 → Ajout de `nav.levelsScale` dans le fichier de seed des traductions (26 langues)
 
 ---
+
+### Prompt #46 (2026-02-07)
+```
+Dans la vue du profil en mode publié, il ne faut pas afficher le niveau, mais à la place, dans la même forme, la catégorie. Il faut aussi, dans la vue organigramme, afficher l'organigramme à partir du niveau de l'utilisateur (comme s'il était le plus élevé, avec lui et ses collègues en dessous seulement).
+```
+→ Modification de `personal-profile-editor.tsx` : remplacé l'affichage du niveau par la catégorie (Néophyte/Utilisateur/Technicien/Chercheur) avec couleurs associées
+→ Ajout de la prop `isPublished` dans `Tab2Organigramme`
+→ Création de `buildOrgTreeFromPerson()` pour construire l'arbre à partir de l'utilisateur connecté
+→ En mode publié, l'organigramme affiche uniquement l'utilisateur connecté et ses subordonnés
+
+---
 *Dernière mise à jour: 2026-02-07*
