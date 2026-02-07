@@ -36,34 +36,45 @@ async function translateText(text: string, targetLang: string): Promise<string> 
   return text;
 }
 
-// POST - Traduit automatiquement toutes les questions sans traduction
-// Cette API est appelée automatiquement et tourne en arrière-plan
+// POST - Traduit un batch de questions sans traduction
+// Appelée automatiquement et progressivement
 export async function POST() {
   const startTime = Date.now();
+  const maxDuration = 50000; // 50 secondes max (Vercel timeout à 60s)
   
   try {
-    // Trouver TOUTES les questions sans traduction complète
-    const allQuizzes = await prisma.quiz.findMany({
+    // Trouver les questions sans traduction complète (batch de 20)
+    const quizzesWithTranslations = await prisma.quiz.findMany({
       include: {
         translations: {
           select: { language: true, question: true },
         },
       },
       orderBy: { createdAt: "asc" },
+      take: 100, // Vérifier 100 questions
     });
+
+    // Filtrer celles qui ont besoin de traduction
+    const quizzesToTranslate = quizzesWithTranslations.filter(quiz => {
+      const existingLangs = quiz.translations.map(t => t.language);
+      const missingLangs = TARGET_LANGUAGES.filter(lang => !existingLangs.includes(lang));
+      const untranslatedLangs = quiz.translations
+        .filter(t => t.language !== "FR" && t.question === quiz.question)
+        .map(t => t.language);
+      return missingLangs.length > 0 || untranslatedLangs.length > 0;
+    }).slice(0, 5); // Traiter 5 questions par appel
 
     let translationsCreated = 0;
     let quizzesProcessed = 0;
 
-    for (const quiz of allQuizzes) {
+    for (const quiz of quizzesToTranslate) {
+      if (Date.now() - startTime > maxDuration) break;
+
       const existingLangs = quiz.translations.map(t => t.language);
       const missingLangs = TARGET_LANGUAGES.filter(lang => !existingLangs.includes(lang));
-
-      // Vérifier aussi les traductions qui sont identiques au français (non traduites)
       const untranslatedLangs = quiz.translations
         .filter(t => t.language !== "FR" && t.question === quiz.question)
         .map(t => t.language);
-
       const langsToTranslate = [...new Set([...missingLangs, ...untranslatedLangs])];
 
       if (langsToTranslate.length === 0) continue;
@@ -71,6 +82,8 @@ export async function POST() {
       quizzesProcessed++;
 
       for (const lang of langsToTranslate) {
+        if (Date.now() - startTime > maxDuration) break;
+
         const translatedQuestion = await translateText(quiz.question, lang);
         
         // Ne pas sauvegarder si la traduction est identique (échec DeepL)
@@ -108,6 +121,7 @@ export async function POST() {
       success: true,
       quizzesProcessed,
       translationsCreated,
+      hasMore: quizzesToTranslate.length > 0,
       duration: Date.now() - startTime,
     });
   } catch (error) {

@@ -49,7 +49,7 @@ export function QuizzesPageContent({
     if (translationTriggered.current) return;
     translationTriggered.current = true;
 
-    // Vérifier et traduire en arrière-plan (sans bloquer l'interface)
+    // Traduire en arrière-plan de manière progressive
     const ensureTranslations = async () => {
       try {
         // Vérifier s'il y a des traductions manquantes
@@ -59,16 +59,33 @@ export function QuizzesPageContent({
         const status = await checkRes.json();
         if (status.isComplete) return;
 
-        // Lancer la traduction en arrière-plan
-        console.log(`[Auto-traduction] ${status.missingCount} traductions manquantes, lancement...`);
-        fetch("/api/quizzes/ensure-translations", { method: "POST" })
-          .then(res => res.json())
-          .then(data => {
-            if (data.translationsCreated > 0) {
-              console.log(`[Auto-traduction] ${data.translationsCreated} traductions créées`);
-            }
-          })
-          .catch(() => {});
+        console.log(`[Auto-traduction] ${status.missingCount} traductions manquantes`);
+
+        // Lancer la traduction en boucle jusqu'à ce que tout soit fait
+        let hasMore = true;
+        let totalCreated = 0;
+
+        while (hasMore) {
+          const res = await fetch("/api/quizzes/ensure-translations", { method: "POST" });
+          if (!res.ok) break;
+
+          const data = await res.json();
+          totalCreated += data.translationsCreated || 0;
+          hasMore = data.hasMore && data.translationsCreated > 0;
+
+          if (data.translationsCreated > 0) {
+            console.log(`[Auto-traduction] +${data.translationsCreated} (total: ${totalCreated})`);
+          }
+
+          // Petite pause entre les batches
+          if (hasMore) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
+
+        if (totalCreated > 0) {
+          console.log(`[Auto-traduction] Terminé: ${totalCreated} traductions créées`);
+        }
       } catch {
         // Silencieux
       }
