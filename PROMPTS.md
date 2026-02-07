@@ -466,4 +466,17 @@ Ca fait exactememnt pareil, importe directement les données dans la base et les
 → Questions couvrant : IA grand public, recommandations, reconnaissance vocale/faciale, etc.
 
 ---
+
+### Prompt #57 (2026-02-07)
+```
+L'usage des traductions des questions ne fonctionne pas, ni dans la gestion des quizz (on doit pouvoir voir les quiz dans toutes les langues en changeant le drapeau), ni dans l'exécution d'un quizz. Passe la limite pour passer un niveau à 15/20. Quand la limite est atteinte lors du passage d'un quizz, arrête le quizz et félicite la personne. Créé dans sur chaque tuile des quizz, dans la fenetre de gestion des quizz, deux petits boutons "+1" et "+10" qui doivent permettre une création automatique de un ou dix questions en plus pour le niveau ou on a cliqué.
+```
+→ **Traductions dans l'exécution des quizz** : API `/api/sites/[siteId]/quiz/start` modifiée pour prendre en compte la langue et retourner les traductions
+→ **Sélecteur de langue dans la gestion des quizz** : Ajout d'un bouton drapeau pour changer la langue d'affichage des questions
+→ **Limite de passage à 15/20** : Constante `PASSING_SCORE = 15` dans `tab5-quiz.tsx`
+→ **Arrêt anticipé du quizz** : Détection dans `validateAnswer()` si score >= 15, affichage d'un message de félicitations spécial avec confetti
+→ **Boutons +1 et +10** : Sur chaque tuile de niveau dans la gestion des quizz, boutons avec icône Sparkles pour générer des questions
+→ **API de génération IA** : Création de `/api/quizzes/generate` utilisant OpenAI GPT-4o-mini avec le contexte du niveau et traduction automatique en 26 langues via DeepL
+
+---
 *Dernière mise à jour: 2026-02-07*
