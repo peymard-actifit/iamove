@@ -81,6 +81,7 @@ export function buildTranslationsObject(flatTranslations: Record<string, string>
     logout: getValue("nav.logout", "Se déconnecter"),
     actions: getValue("nav.actions", "Actions"),
     manageQuizzes: getValue("nav.manageQuizzes", "Gérer les Quizz"),
+    manageTraining: getValue("nav.manageTraining", "Gérer les Formations"),
     importQuizzes: getValue("nav.importQuizzes", "Importer des Quizz"),
     levelsScale: getValue("nav.levelsScale", "Échelle des niveaux"),
   },
@@ -265,6 +266,7 @@ export interface Translations {
     logout: string;
     actions: string;
     manageQuizzes: string;
+    manageTraining: string;
     importQuizzes: string;
     levelsScale: string;
   };
@@ -461,6 +463,7 @@ export const FR: Translations = {
     logout: "Se déconnecter",
     actions: "Actions",
     manageQuizzes: "Gérer les Quizz",
+    manageTraining: "Gérer les Formations",
     importQuizzes: "Importer des Quizz",
     levelsScale: "Échelle des niveaux",
   },
@@ -643,6 +646,7 @@ export const EN: Translations = {
     logout: "Log out",
     actions: "Actions",
     manageQuizzes: "Manage Quizzes",
+    manageTraining: "Manage Training",
     importQuizzes: "Import Quizzes",
     levelsScale: "Levels Scale",
   },

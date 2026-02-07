@@ -28,6 +28,7 @@ import {
   ChevronDown,
   Scale,
   FileQuestion,
+  GraduationCap,
 } from "lucide-react";
 import type { SessionPayload } from "@/lib/auth";
 import { useHeaderContent } from "./header-context";
@@ -115,6 +116,12 @@ export function StudioHeader({ session }: StudioHeaderProps) {
                   <Link href="/quizzes">
                     <FileQuestion className="mr-2 h-4 w-4" />
                     {t.nav.manageQuizzes}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/training">
+                    <GraduationCap className="mr-2 h-4 w-4" />
+                    {t.nav.manageTraining}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setShowLevelsDialog(true)}>
