@@ -141,6 +141,7 @@ async function tr(text: string, lang: string): Promise<string> {
   return text;
 }
 
+// POST: Import questions FR only (fast)
 export async function POST() {
   try {
     const level = await prisma.level.findFirst({ where: { number: 2 } });
@@ -153,7 +154,7 @@ export async function POST() {
     await prisma.quizTranslation.deleteMany({ where: { quiz: { levelId: level.id } } });
     await prisma.quiz.deleteMany({ where: { levelId: level.id } });
 
-    let imported = 0, translations = 0;
+    let imported = 0;
     
     for (const item of Q) {
       const answers = item.a.map(a => ({ text: a.t, isCorrect: a.c }));
@@ -161,27 +162,91 @@ export async function POST() {
         data: { question: item.q, answers, levelId: level.id, isActive: true, createdById: admin.id },
       });
 
-      for (const lang of LANGS) {
-        const tq = await tr(item.q, lang);
-        const ta = [];
-        for (const a of item.a) {
-          ta.push({ text: await tr(a.t, lang), isCorrect: a.c });
-        }
-        await prisma.quizTranslation.create({
-          data: { quizId: quiz.id, language: lang, question: tq, answers: ta },
-        });
-        translations++;
-      }
+      // Create only FR translation
+      await prisma.quizTranslation.create({
+        data: { quizId: quiz.id, language: "FR", question: item.q, answers },
+      });
       imported++;
     }
 
-    return NextResponse.json({ success: true, imported, translations, languages: LANGS.length });
+    return NextResponse.json({ success: true, imported, message: "French questions imported. Call PUT to translate." });
   } catch (error) {
     console.error("Import error:", error);
     return NextResponse.json({ error: String(error) }, { status: 500 });
   }
 }
 
+// PUT: Add translations for a batch (call multiple times)
+export async function PUT(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const batch = parseInt(searchParams.get("batch") || "0");
+    const batchSize = 10;
+    
+    const level = await prisma.level.findFirst({ where: { number: 2 } });
+    if (!level) return NextResponse.json({ error: "Level 2 not found" }, { status: 404 });
+
+    const quizzes = await prisma.quiz.findMany({
+      where: { levelId: level.id },
+      skip: batch * batchSize,
+      take: batchSize,
+      orderBy: { createdAt: "asc" },
+    });
+
+    if (quizzes.length === 0) {
+      return NextResponse.json({ success: true, done: true, message: "All batches processed" });
+    }
+
+    let translations = 0;
+    
+    for (const quiz of quizzes) {
+      const answers = quiz.answers as Array<{text: string; isCorrect: boolean}>;
+      
+      for (const lang of LANGS) {
+        if (lang === "FR") continue;
+        
+        // Check if translation exists
+        const existing = await prisma.quizTranslation.findFirst({
+          where: { quizId: quiz.id, language: lang }
+        });
+        if (existing) continue;
+        
+        const tq = await tr(quiz.question, lang);
+        const ta = [];
+        for (const a of answers) {
+          ta.push({ text: await tr(a.text, lang), isCorrect: a.isCorrect });
+        }
+        await prisma.quizTranslation.create({
+          data: { quizId: quiz.id, language: lang, question: tq, answers: ta },
+        });
+        translations++;
+      }
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      batch, 
+      processed: quizzes.length,
+      translations,
+      nextBatch: batch + 1
+    });
+  } catch (error) {
+    console.error("Translation error:", error);
+    return NextResponse.json({ error: String(error) }, { status: 500 });
+  }
+}
+
 export async function GET() {
-  return NextResponse.json({ questions: Q.length, languages: LANGS.length, method: "POST to import" });
+  const level = await prisma.level.findFirst({ where: { number: 2 } });
+  const count = level ? await prisma.quiz.count({ where: { levelId: level.id } }) : 0;
+  const translationCount = level ? await prisma.quizTranslation.count({ where: { quiz: { levelId: level.id } } }) : 0;
+  
+  return NextResponse.json({ 
+    questions: Q.length, 
+    currentInDb: count,
+    translations: translationCount,
+    expectedTranslations: count * LANGS.length,
+    languages: LANGS.length, 
+    method: "POST to import FR, PUT?batch=N to add translations" 
+  });
 }
