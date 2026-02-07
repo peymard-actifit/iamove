@@ -372,4 +372,13 @@ Sur les quizz, il ne peut y avoir que des quizz qui démarrent à 1 comme étant
 → Tooltip niveau 0 : "Niveau de base - pas de quizz disponible"
 
 ---
+
+### Prompt #49 (2026-02-07)
+```
+Change l'ordre des onglets dans le site publié, mettre : Profil, Organigramme, Évaluation, Formation
+```
+→ Nouvel ordre des onglets : Profil → Organigramme → Évaluation → Formation
+→ Onglet par défaut : Profil (tab3)
+
+---
 *Dernière mise à jour: 2026-02-07*

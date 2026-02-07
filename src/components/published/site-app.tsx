@@ -126,30 +126,31 @@ export function PublishedSiteApp({
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
-        <Tabs defaultValue="tab2" className="w-full">
+        <Tabs defaultValue="tab3" className="w-full">
           <TabsList className="w-full justify-start mb-6">
-            {settings.tab2Enabled && (
-              <TabsTrigger value="tab2" className="gap-2">
-                <Network className="h-4 w-4" />
-                <span className="hidden sm:inline">{settings.tab2Title}</span>
-              </TabsTrigger>
-            )}
+            {/* Ordre : Profil, Organigramme, Évaluation, Formation */}
             {settings.tab3Enabled && (
               <TabsTrigger value="tab3" className="gap-2">
                 <User className="h-4 w-4" />
                 <span className="hidden sm:inline">{settings.tab3Title}</span>
               </TabsTrigger>
             )}
-            {settings.tab4Enabled && (
-              <TabsTrigger value="tab4" className="gap-2">
-                <GraduationCap className="h-4 w-4" />
-                <span className="hidden sm:inline">{settings.tab4Title}</span>
+            {settings.tab2Enabled && (
+              <TabsTrigger value="tab2" className="gap-2">
+                <Network className="h-4 w-4" />
+                <span className="hidden sm:inline">{settings.tab2Title}</span>
               </TabsTrigger>
             )}
             {settings.tab5Enabled && (
               <TabsTrigger value="tab5" className="gap-2">
                 <ClipboardCheck className="h-4 w-4" />
                 <span className="hidden sm:inline">{settings.tab5Title}</span>
+              </TabsTrigger>
+            )}
+            {settings.tab4Enabled && (
+              <TabsTrigger value="tab4" className="gap-2">
+                <GraduationCap className="h-4 w-4" />
+                <span className="hidden sm:inline">{settings.tab4Title}</span>
               </TabsTrigger>
             )}
           </TabsList>
