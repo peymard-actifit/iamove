@@ -21,7 +21,7 @@ export default async function QuizzesPage() {
       translations: true, // Inclure les traductions
     },
     orderBy: { createdAt: "desc" },
-    take: 500, // Augmenté pour afficher toutes les questions
+    take: 3000, // Toutes les questions (2400+ actuellement)
   });
 
   const quizCount = await prisma.quiz.count();

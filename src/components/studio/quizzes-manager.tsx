@@ -271,9 +271,9 @@ export function QuizzesManager({
   };
 
   return (
-    <div className="space-y-0">
-      {/* Bandeaux fixes : Recherche + Niveaux */}
-      <div className="sticky top-0 z-10 bg-white dark:bg-gray-950 -mx-4 px-4 pb-2 border-b shadow-sm">
+    <div className="-mt-4">
+      {/* Bandeaux fixes : Recherche + Niveaux - top-14 = sous le header de 56px */}
+      <div className="sticky top-14 z-10 bg-white dark:bg-gray-950 -mx-4 px-4 py-2 border-b shadow-sm">
         {/* Toolbar - Hauteur réduite */}
         <div className="flex flex-row gap-2 items-center py-1.5">
           <div className="relative flex-1 max-w-sm">
