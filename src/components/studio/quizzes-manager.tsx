@@ -311,49 +311,43 @@ export function QuizzesManager({
         </div>
       </div>
 
-      {/* Stats - Bandeau fixe des 20 niveaux */}
-      <div className="sticky top-0 z-10 bg-white dark:bg-gray-950 py-2 -mx-4 px-4 border-b">
-        <div className="flex gap-1 overflow-x-auto pb-1">
+      {/* Stats - Bandeau fixe des 20 niveaux sur 2 lignes */}
+      <div className="sticky top-0 z-10 bg-white dark:bg-gray-950 py-1 -mx-4 px-4 border-b">
+        <div className="grid grid-cols-10 gap-0.5">
           {levels.filter((l) => l.number >= 1).map((level) => {
             const count = quizzes.filter((q) => q.levelId === level.id).length;
             const isGenerating = generatingLevel === level.number;
             return (
               <div 
                 key={level.id} 
-                className={`flex-shrink-0 flex items-center gap-1 px-2 py-1 rounded border cursor-pointer transition-colors ${
+                className={`flex items-center justify-between px-1 py-0.5 rounded text-[10px] cursor-pointer transition-colors ${
                   filterLevel === level.id 
-                    ? "bg-blue-100 dark:bg-blue-900 border-blue-500" 
-                    : "bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    ? "bg-blue-100 dark:bg-blue-900 ring-1 ring-blue-500" 
+                    : "bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
                 }`}
                 onClick={() => setFilterLevel(filterLevel === level.id ? "" : level.id)}
                 title={`Niv. ${level.number} - ${level.name} - ${count} question(s)`}
               >
-                <span className="text-xs font-medium w-4 text-center">{level.number}</span>
-                <span className="text-sm font-bold min-w-[24px] text-center">{count}</span>
+                <span className="font-medium">{level.number}</span>
+                <span className="font-bold">{count}</span>
                 
-                {/* Boutons de génération IA - compacts */}
-                <div className="flex gap-0.5 ml-1 border-l pl-1 border-gray-300 dark:border-gray-600">
+                {/* Boutons +1 +10 */}
+                <div className="flex">
                   <button
-                    className="text-[9px] px-1 py-0.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      generateQuestions(level.number, 1);
-                    }}
+                    className="px-0.5 hover:text-blue-600 disabled:opacity-50"
+                    onClick={(e) => { e.stopPropagation(); generateQuestions(level.number, 1); }}
                     disabled={isGenerating}
-                    title="Générer 1 question avec l'IA"
+                    title="+1 question IA"
                   >
-                    {isGenerating ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Sparkles className="h-2.5 w-2.5 inline" />+1</>}
+                    {isGenerating ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <span className="text-[8px]">+1</span>}
                   </button>
                   <button
-                    className="text-[9px] px-1 py-0.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      generateQuestions(level.number, 10);
-                    }}
+                    className="px-0.5 hover:text-blue-600 disabled:opacity-50"
+                    onClick={(e) => { e.stopPropagation(); generateQuestions(level.number, 10); }}
                     disabled={isGenerating}
-                    title="Générer 10 questions avec l'IA"
+                    title="+10 questions IA"
                   >
-                    {isGenerating ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Sparkles className="h-2.5 w-2.5 inline" />+10</>}
+                    {isGenerating ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <span className="text-[8px]">+10</span>}
                   </button>
                 </div>
               </div>
