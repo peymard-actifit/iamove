@@ -416,6 +416,19 @@ Plutôt que dans le menu action, supprime la fonction importer dans le menu acti
 → Bouton justifié à droite de l'écran
 
 ---
+
+### Prompt #53 (2026-02-07)
+```
+Quand je clique sur importer des quizz, et sur un niveau, il doit me demander de lui fournir un PDF et m'ouvrir une fenetre pour le choisir dans mes fichiers.
+```
+→ Modification du dialog d'import pour demander un fichier PDF
+→ Ajout d'un sélecteur de fichier natif (accept=".pdf")
+→ Création API `/api/quizzes/import-from-pdf` pour parser et importer les questions depuis un PDF
+→ Installation de la librairie `pdf-parse` pour extraire le texte des PDF
+→ Parsing automatique des questions (format numéroté avec réponses A/B/C/D)
+→ Traduction automatique en 26 langues via DeepL
+
+---
 *Dernière mise à jour: 2026-02-07*
 ```
 Change l'ordre des onglets dans le site publié, mettre : Profil, Organigramme, Évaluation, Formation

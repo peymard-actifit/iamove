@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Dialog,
@@ -11,7 +11,7 @@ import {
   DialogFooter,
   Button,
 } from "@/components/ui";
-import { Upload, Loader2, Check, AlertCircle } from "lucide-react";
+import { Upload, Loader2, Check, AlertCircle, FileText } from "lucide-react";
 import { getLevelIcon } from "@/lib/levels";
 
 interface Level {
@@ -28,10 +28,12 @@ interface QuizImportDialogProps {
 
 export function QuizImportDialog({ open, onOpenChange }: QuizImportDialogProps) {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [levels, setLevels] = useState<Level[]>([]);
   const [quizCounts, setQuizCounts] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [importingLevel, setImportingLevel] = useState<number | null>(null);
+  const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
   const [importResult, setImportResult] = useState<{ level: number; success: boolean; message: string } | null>(null);
 
   // Charger les niveaux et le nombre de quizz par niveau
@@ -64,46 +66,85 @@ export function QuizImportDialog({ open, onOpenChange }: QuizImportDialogProps) 
     }
   };
 
-  const handleImport = async (levelNumber: number) => {
-    setImportingLevel(levelNumber);
+  // Ouvre le sélecteur de fichier pour un niveau donné
+  const handleSelectFile = (levelNumber: number) => {
+    setSelectedLevel(levelNumber);
     setImportResult(null);
+    // Réinitialiser l'input pour permettre de sélectionner le même fichier à nouveau
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+      fileInputRef.current.click();
+    }
+  };
+
+  // Gestion du fichier sélectionné
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || selectedLevel === null) return;
+
+    // Vérifier que c'est un PDF
+    if (file.type !== "application/pdf") {
+      setImportResult({
+        level: selectedLevel,
+        success: false,
+        message: "Veuillez sélectionner un fichier PDF",
+      });
+      return;
+    }
+
+    setImportingLevel(selectedLevel);
     
     try {
-      const response = await fetch(`/api/quizzes/import-level/${levelNumber}`, {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("levelNumber", selectedLevel.toString());
+
+      const response = await fetch("/api/quizzes/import-from-pdf", {
         method: "POST",
+        body: formData,
       });
       
       const data = await response.json();
       
       if (data.success) {
         setImportResult({
-          level: levelNumber,
+          level: selectedLevel,
           success: true,
-          message: `${data.imported} questions importées et traduites en 26 langues`,
+          message: `${data.imported} questions importées depuis "${file.name}" et traduites en 26 langues`,
         });
         // Recharger les données
         loadData();
         router.refresh();
       } else {
         setImportResult({
-          level: levelNumber,
+          level: selectedLevel,
           success: false,
           message: data.error || "Erreur d'importation",
         });
       }
     } catch (error) {
       setImportResult({
-        level: levelNumber,
+        level: selectedLevel,
         success: false,
         message: "Erreur de connexion",
       });
     } finally {
       setImportingLevel(null);
+      setSelectedLevel(null);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
+      {/* Input file caché pour sélectionner le PDF */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept=".pdf,application/pdf"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -111,8 +152,8 @@ export function QuizImportDialog({ open, onOpenChange }: QuizImportDialogProps) 
             Importer des Quizz
           </DialogTitle>
           <DialogDescription>
-            Sélectionnez un niveau pour importer des questions de quizz.
-            Les questions seront automatiquement traduites en 26 langues.
+            Sélectionnez un niveau puis choisissez un fichier PDF contenant les questions.
+            Les questions seront automatiquement extraites et traduites en 26 langues.
           </DialogDescription>
         </DialogHeader>
 
@@ -171,15 +212,16 @@ export function QuizImportDialog({ open, onOpenChange }: QuizImportDialogProps) 
                       size="sm"
                       variant={hasQuestions ? "outline" : "default"}
                       className="w-full h-7 text-xs"
-                      onClick={() => handleImport(level.number)}
+                      onClick={() => handleSelectFile(level.number)}
                       disabled={isImporting}
                     >
                       {isImporting ? (
                         <Loader2 className="h-3 w-3 animate-spin" />
-                      ) : hasQuestions ? (
-                        "Remplacer"
                       ) : (
-                        "Importer"
+                        <>
+                          <FileText className="h-3 w-3 mr-1" />
+                          {hasQuestions ? "Remplacer" : "Importer"}
+                        </>
                       )}
                     </Button>
                   </div>
