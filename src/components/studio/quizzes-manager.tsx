@@ -214,15 +214,22 @@ export function QuizzesManager({
       const res = await fetch("/api/quizzes/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ levelNumber, count }),
       });
       
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        console.error("Erreur API:", res.status, errorData);
+        alert(`Erreur ${res.status}: ${errorData.error || "Échec de la génération"}`);
+        return;
+      }
+      
       const data = await res.json();
       
-      if (res.ok && data.success) {
+      if (data.success) {
         router.refresh();
-        // Montrer une notification de succès
-        alert(`${data.created} question(s) créée(s) et traduite(s) en 26 langues !`);
+        alert(`${data.created} question(s) créée(s) ! Les traductions sont en cours...`);
       } else {
         alert(`Erreur: ${data.error || "Échec de la génération"}`);
       }

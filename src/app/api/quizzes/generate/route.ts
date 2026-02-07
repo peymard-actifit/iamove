@@ -258,9 +258,18 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
+  // Vérifier la configuration
+  const hasOpenAI = !!process.env.OPENAI_API_KEY;
+  const hasDeepL = !!process.env.DEEPL_API_KEY;
+  
   return NextResponse.json({
     endpoint: "/api/quizzes/generate",
     method: "POST",
+    status: "ok",
+    config: {
+      openai: hasOpenAI ? "configured" : "MISSING",
+      deepl: hasDeepL ? "configured" : "MISSING",
+    },
     params: {
       levelNumber: "number (1-20)",
       count: "number (1-10, default: 1)",
