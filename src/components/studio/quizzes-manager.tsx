@@ -327,34 +327,35 @@ export function QuizzesManager({
                       : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-blue-300"
                   }`}
                 >
-                  {/* Ligne du haut: numéro et nombre */}
+                  {/* Contenu de la tuile */}
                   <div 
                     className="flex items-center justify-between cursor-pointer"
                     onClick={() => setFilterLevel(filterLevel === level.id ? "" : level.id)}
                     title={`${level.name} - ${count} questions`}
                   >
-                    <span className="text-[8px] font-bold text-gray-600 dark:text-gray-400">{level.number}</span>
-                    <span className="text-[9px] font-bold text-blue-600 dark:text-blue-400">{count}</span>
-                  </div>
-                  
-                  {/* Boutons +1 +10 */}
-                  <div className="flex gap-0.5 justify-center mt-0.5">
-                    <button
-                      className="px-1 py-0 text-[7px] font-medium rounded border border-green-400 bg-green-50 dark:bg-green-900/50 text-green-700 dark:text-green-300 hover:bg-green-100 disabled:opacity-50"
-                      onClick={(e) => { e.stopPropagation(); generateQuestions(level.number, 1); }}
-                      disabled={isGenerating}
-                      title={t.quiz.generate1}
-                    >
-                      {isGenerating ? "..." : "+1"}
-                    </button>
-                    <button
-                      className="px-1 py-0 text-[7px] font-medium rounded border border-purple-400 bg-purple-50 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 hover:bg-purple-100 disabled:opacity-50"
-                      onClick={(e) => { e.stopPropagation(); generateQuestions(level.number, 10); }}
-                      disabled={isGenerating}
-                      title={t.quiz.generate10}
-                    >
-                      {isGenerating ? "..." : "+10"}
-                    </button>
+                    {/* Numéro du niveau - plus visible */}
+                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{level.number}</span>
+                    
+                    {/* Compteur + Boutons à droite */}
+                    <div className="flex items-center gap-1">
+                      <span className="text-[9px] font-bold text-blue-600 dark:text-blue-400">{count}</span>
+                      <button
+                        className="px-1 py-0 text-[7px] font-medium rounded border border-green-400 bg-green-50 dark:bg-green-900/50 text-green-700 dark:text-green-300 hover:bg-green-100 disabled:opacity-50"
+                        onClick={(e) => { e.stopPropagation(); generateQuestions(level.number, 1); }}
+                        disabled={isGenerating}
+                        title={t.quiz.generate1}
+                      >
+                        {isGenerating ? "..." : "+1"}
+                      </button>
+                      <button
+                        className="px-1 py-0 text-[7px] font-medium rounded border border-purple-400 bg-purple-50 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 hover:bg-purple-100 disabled:opacity-50"
+                        onClick={(e) => { e.stopPropagation(); generateQuestions(level.number, 10); }}
+                        disabled={isGenerating}
+                        title={t.quiz.generate10}
+                      >
+                        {isGenerating ? "..." : "+10"}
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
