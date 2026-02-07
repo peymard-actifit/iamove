@@ -326,4 +326,15 @@ Récupère le nouveau fichier excel des niveaux et assure toi de bien sauvegarde
 → Catégories : Néophyte (0-3), Utilisateur (4-10), Technicien (11-15), Chercheur (16-20)
 
 ---
+
+### Prompt #45 (2026-02-07)
+```
+Les sous-menus du menu actions doivent être traduit en partie GLOBALE. Ne les oublie pas.
+```
+→ Ajout de la clé `nav.levelsScale` pour "Échelle des niveaux"
+→ Mise à jour de l'interface Translations et des traductions FR/EN
+→ Mise à jour du header pour utiliser `t.nav.manageQuizzes` et `t.nav.levelsScale`
+→ Ajout de `nav.levelsScale` dans le fichier de seed des traductions (26 langues)
+
+---
 *Dernière mise à jour: 2026-02-07*

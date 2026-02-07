@@ -74,14 +74,15 @@ export function buildTranslationsObject(flatTranslations: Record<string, string>
   const getValue = (key: string, fallback: string) => flatTranslations[key] || fallback;
   
   return {
-    nav: {
-      studio: getValue("nav.studio", "Studio"),
-      dashboard: getValue("nav.dashboard", "Tableau de bord"),
-      settings: getValue("nav.settings", "Paramètres"),
-      logout: getValue("nav.logout", "Se déconnecter"),
-      actions: getValue("nav.actions", "Actions"),
-      manageQuizzes: getValue("nav.manageQuizzes", "Gérer les Quizz"),
-    },
+  nav: {
+    studio: getValue("nav.studio", "Studio"),
+    dashboard: getValue("nav.dashboard", "Tableau de bord"),
+    settings: getValue("nav.settings", "Paramètres"),
+    logout: getValue("nav.logout", "Se déconnecter"),
+    actions: getValue("nav.actions", "Actions"),
+    manageQuizzes: getValue("nav.manageQuizzes", "Gérer les Quizz"),
+    levelsScale: getValue("nav.levelsScale", "Échelle des niveaux"),
+  },
     header: {
       mySites: getValue("header.mySites", "Mes sites"),
       mySitesDescription: getValue("header.mySitesDescription", "Gérez vos sites d'accompagnement IA"),
@@ -237,6 +238,7 @@ export interface Translations {
     logout: string;
     actions: string;
     manageQuizzes: string;
+    levelsScale: string;
   };
   // Header
   header: {
@@ -404,6 +406,7 @@ export const FR: Translations = {
     logout: "Se déconnecter",
     actions: "Actions",
     manageQuizzes: "Gérer les Quizz",
+    levelsScale: "Échelle des niveaux",
   },
   header: {
     mySites: "Mes sites",
@@ -558,6 +561,7 @@ export const EN: Translations = {
     logout: "Log out",
     actions: "Actions",
     manageQuizzes: "Manage Quizzes",
+    levelsScale: "Levels Scale",
   },
   header: {
     mySites: "My sites",
