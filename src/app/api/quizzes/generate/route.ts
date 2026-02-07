@@ -127,22 +127,29 @@ export async function POST(request: Request) {
   console.log("[generate] Début de la requête POST");
   
   try {
-    // Vérifier la session
-    let session;
-    try {
-      session = await getSession();
-      console.log("[generate] Session:", session ? `OK - ${session.email} (${session.role})` : "null");
-    } catch (sessionError) {
-      console.error("[generate] Erreur session:", sessionError);
-      return NextResponse.json({ error: "Erreur lors de la vérification de session" }, { status: 500 });
-    }
+    const { searchParams } = new URL(request.url);
+    const apiKey = searchParams.get("key");
     
-    if (!session) {
-      return NextResponse.json({ error: "Non connecté - veuillez vous reconnecter" }, { status: 401 });
-    }
-    
-    if (session.role !== "ADMIN") {
-      return NextResponse.json({ error: `Accès réservé aux administrateurs (votre rôle: ${session.role})` }, { status: 403 });
+    // Vérifier soit la clé API de maintenance, soit la session admin
+    let session = null;
+    if (apiKey === process.env.MAINTENANCE_KEY) {
+      console.log("[generate] Authentification par clé API");
+    } else {
+      try {
+        session = await getSession();
+        console.log("[generate] Session:", session ? `OK - ${session.email} (${session.role})` : "null");
+      } catch (sessionError) {
+        console.error("[generate] Erreur session:", sessionError);
+        return NextResponse.json({ error: "Erreur lors de la vérification de session" }, { status: 500 });
+      }
+      
+      if (!session) {
+        return NextResponse.json({ error: "Non connecté - veuillez vous reconnecter" }, { status: 401 });
+      }
+      
+      if (session.role !== "ADMIN") {
+        return NextResponse.json({ error: `Accès réservé aux administrateurs (votre rôle: ${session.role})` }, { status: 403 });
+      }
     }
 
     // Parser le body
@@ -176,6 +183,16 @@ export async function POST(request: Request) {
     }
     console.log("[generate] Niveau trouvé:", level.id, level.name);
 
+    // Si pas de session (clé API), trouver un admin pour createdById
+    let creatorId = session?.userId;
+    if (!creatorId) {
+      const admin = await prisma.studioUser.findFirst({ where: { role: "ADMIN" } });
+      creatorId = admin?.id;
+    }
+    if (!creatorId) {
+      return NextResponse.json({ error: "Aucun utilisateur admin trouvé" }, { status: 500 });
+    }
+
     // Générer les questions avec l'IA
     console.log(`[generate] Génération de ${count} question(s) pour le niveau ${levelNumber}...`);
     
@@ -200,7 +217,7 @@ export async function POST(request: Request) {
           answers: q.answers,
           levelId: level.id,
           isActive: true,
-          createdById: session.userId,
+          createdById: creatorId,
         },
       });
 

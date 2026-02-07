@@ -88,12 +88,17 @@ export async function GET() {
 // POST: Relancer les traductions pour un batch de questions
 export async function POST(request: Request) {
   try {
-    const session = await getSession();
-    if (!session || session.role !== "ADMIN") {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    const { searchParams } = new URL(request.url);
+    const apiKey = searchParams.get("key");
+    
+    // Vérifier soit la session admin, soit la clé API de maintenance
+    if (apiKey !== process.env.MAINTENANCE_KEY) {
+      const session = await getSession();
+      if (!session || session.role !== "ADMIN") {
+        return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+      }
     }
 
-    const { searchParams } = new URL(request.url);
     const batch = parseInt(searchParams.get("batch") || "0");
     const batchSize = 5; // 5 questions à la fois pour éviter timeout
     const lang = searchParams.get("lang"); // Langue spécifique ou toutes
