@@ -10,7 +10,7 @@ import {
   Button,
   Input,
 } from "@/components/ui";
-import { Save, X, Loader2, RefreshCw, Languages } from "lucide-react";
+import { Save, X, Loader2, RefreshCw } from "lucide-react";
 import Image from "next/image";
 import { useI18n } from "@/lib/i18n";
 
@@ -44,7 +44,6 @@ export function LevelsEditorDialog({ open, onOpenChange }: LevelsEditorDialogPro
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [seeding, setSeeding] = useState(false);
-  const [translating, setTranslating] = useState(false);
   const [editingLevel, setEditingLevel] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Level>>({});
 
@@ -118,24 +117,6 @@ export function LevelsEditorDialog({ open, onOpenChange }: LevelsEditorDialogPro
     }
   };
 
-  // Traduire tous les niveaux dans les 26 langues
-  const translateLevels = async () => {
-    setTranslating(true);
-    try {
-      const res = await fetch("/api/levels/translate", { method: "POST" });
-      if (res.ok) {
-        const data = await res.json();
-        alert(`${data.created} traductions créées`);
-        // Recharger les niveaux avec les traductions
-        await loadLevels();
-      }
-    } catch {
-      alert("Erreur lors de la traduction");
-    } finally {
-      setTranslating(false);
-    }
-  };
-
   const handleEdit = (level: Level) => {
     setEditingLevel(level.id);
     // Charger les données traduites selon la langue globale
@@ -193,36 +174,20 @@ export function LevelsEditorDialog({ open, onOpenChange }: LevelsEditorDialogPro
                 {globalLanguage.toUpperCase()}
               </span>
             </DialogTitle>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={translateLevels}
-                disabled={translating}
-                title="Traduire dans les 26 langues via DeepL"
-              >
-                {translating ? (
-                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                ) : (
-                  <Languages className="h-4 w-4 mr-1" />
-                )}
-                {t.common.translate}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={seedLevels}
-                disabled={seeding}
-                title="Resynchroniser depuis le fichier de référence"
-              >
-                {seeding ? (
-                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4 mr-1" />
-                )}
-                Sync
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={seedLevels}
+              disabled={seeding}
+              title="Resynchroniser depuis le fichier de référence"
+            >
+              {seeding ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-1" />
+              )}
+              Sync
+            </Button>
           </div>
           <DialogDescription>
             {t.levels.scaleDescription}
