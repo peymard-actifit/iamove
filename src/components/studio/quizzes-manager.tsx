@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Button,
@@ -18,7 +18,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui";
-import { Plus, Trash2, Edit, Search, ChevronUp, ChevronDown, Upload, Sparkles, Loader2 } from "lucide-react";
+import { Plus, Trash2, Edit, Search, ChevronUp, ChevronDown, Upload, Sparkles, Loader2, Globe, Check, AlertCircle } from "lucide-react";
 import { QuizImportDialog } from "./quiz-import-dialog";
 import { useI18n } from "@/lib/i18n";
 
@@ -107,6 +107,24 @@ export function QuizzesManager({
   
   // État pour la génération de questions
   const [generatingLevel, setGeneratingLevel] = useState<number | null>(null);
+
+  // Nombre de langues cibles (25 langues sans FR)
+  const TARGET_LANGUAGES_COUNT = 25;
+
+  // Vérifier si un quiz a toutes ses traductions
+  const hasAllTranslations = (quiz: Quiz): boolean => {
+    if (!quiz.translations) return false;
+    return quiz.translations.length >= TARGET_LANGUAGES_COUNT;
+  };
+
+  // Calcul des stats de traduction globales
+  const translationStats = useMemo(() => {
+    const total = quizzes.length;
+    const fullyTranslated = quizzes.filter(q => hasAllTranslations(q)).length;
+    const partial = total - fullyTranslated;
+    const percentage = total > 0 ? Math.round((fullyTranslated / total) * 100) : 100;
+    return { total, fullyTranslated, partial, percentage };
+  }, [quizzes]);
 
   // Premier niveau valide pour les quizz (niveau 1, pas 0)
   const firstValidLevel = levels.find((l) => l.number >= 1);
@@ -314,8 +332,30 @@ export function QuizzesManager({
             ))}
           </select>
           
-          {/* Bouton Import à droite */}
-          <div className="flex-1 flex justify-end">
+          {/* Indicateur de traduction + Bouton Import à droite */}
+          <div className="flex-1 flex justify-end items-center gap-3">
+            {/* Indicateur global de traduction */}
+            <div 
+              className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-xs ${
+                translationStats.percentage === 100
+                  ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                  : "bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
+              }`}
+              title={`${translationStats.fullyTranslated}/${translationStats.total} questions entièrement traduites (25 langues)`}
+            >
+              <Globe className="h-3.5 w-3.5" />
+              {translationStats.percentage === 100 ? (
+                <>
+                  <Check className="h-3 w-3" />
+                  <span>100%</span>
+                </>
+              ) : (
+                <>
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <span>{translationStats.percentage}%</span>
+                </>
+              )}
+            </div>
             <Button
               variant="outline"
               size="sm"
@@ -409,13 +449,25 @@ export function QuizzesManager({
           </TableHeader>
           <TableBody>
             {filteredQuizzes.map((quiz, index) => {
+              const isFullyTranslated = hasAllTranslations(quiz);
               return (
                 <TableRow key={quiz.id} className="h-8">
                   <TableCell className="font-mono text-gray-500 text-xs py-1">{index + 1}</TableCell>
                   <TableCell className="py-1">
-                    <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                      Niv. {quiz.level.number}
-                    </span>
+                    <div className="flex items-center gap-1">
+                      <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                        Niv. {quiz.level.number}
+                      </span>
+                      {isFullyTranslated ? (
+                        <span title="Toutes les traductions OK">
+                          <Check className="h-3 w-3 text-green-500" />
+                        </span>
+                      ) : (
+                        <span title={`${quiz.translations?.length || 0}/25 langues`}>
+                          <AlertCircle className="h-3 w-3 text-orange-400" />
+                        </span>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell className="max-w-md py-1">
                     <p className="truncate text-sm">{getTranslatedQuestion(quiz)}</p>
