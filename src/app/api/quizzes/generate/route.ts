@@ -124,17 +124,36 @@ Réponds UNIQUEMENT avec un tableau JSON valide, sans markdown, sans explication
 }
 
 export async function POST(request: Request) {
-  console.log("[generate] Début de la requête");
+  console.log("[generate] Début de la requête POST");
   
   try {
-    const session = await getSession();
-    console.log("[generate] Session:", session ? "OK" : "null", session?.role);
+    // Vérifier la session
+    let session;
+    try {
+      session = await getSession();
+      console.log("[generate] Session:", session ? `OK - ${session.email} (${session.role})` : "null");
+    } catch (sessionError) {
+      console.error("[generate] Erreur session:", sessionError);
+      return NextResponse.json({ error: "Erreur lors de la vérification de session" }, { status: 500 });
+    }
     
-    if (!session || session.role !== "ADMIN") {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    if (!session) {
+      return NextResponse.json({ error: "Non connecté - veuillez vous reconnecter" }, { status: 401 });
+    }
+    
+    if (session.role !== "ADMIN") {
+      return NextResponse.json({ error: `Accès réservé aux administrateurs (votre rôle: ${session.role})` }, { status: 403 });
     }
 
-    const body = await request.json();
+    // Parser le body
+    let body;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      console.error("[generate] Erreur parsing body:", parseError);
+      return NextResponse.json({ error: "Corps de requête invalide" }, { status: 400 });
+    }
+    
     const { levelNumber, count = 1 } = body;
     console.log("[generate] Params:", { levelNumber, count });
 
@@ -147,13 +166,15 @@ export async function POST(request: Request) {
     }
 
     // Trouver le niveau dans la base
+    console.log("[generate] Recherche du niveau en base...");
     const level = await prisma.level.findFirst({
       where: { number: levelNumber },
     });
 
     if (!level) {
-      return NextResponse.json({ error: "Niveau non trouvé en base" }, { status: 404 });
+      return NextResponse.json({ error: `Niveau ${levelNumber} non trouvé en base de données` }, { status: 404 });
     }
+    console.log("[generate] Niveau trouvé:", level.id, level.name);
 
     // Générer les questions avec l'IA
     console.log(`[generate] Génération de ${count} question(s) pour le niveau ${levelNumber}...`);
@@ -164,7 +185,8 @@ export async function POST(request: Request) {
       console.log(`[generate] Questions générées:`, generatedQuestions.length);
     } catch (aiError) {
       console.error("[generate] Erreur IA:", aiError);
-      return NextResponse.json({ error: `Erreur IA: ${aiError}` }, { status: 500 });
+      const errorMessage = aiError instanceof Error ? aiError.message : String(aiError);
+      return NextResponse.json({ error: `Erreur OpenAI: ${errorMessage}` }, { status: 500 });
     }
 
     const createdQuizzes = [];
@@ -249,9 +271,10 @@ export async function POST(request: Request) {
       questions: createdQuizzes,
     });
   } catch (error) {
-    console.error("Erreur génération questions:", error);
+    console.error("[generate] Erreur inattendue:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: String(error) },
+      { error: `Erreur serveur: ${errorMessage}` },
       { status: 500 }
     );
   }

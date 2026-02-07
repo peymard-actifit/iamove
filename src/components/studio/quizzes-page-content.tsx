@@ -10,6 +10,12 @@ interface Level {
   name: string;
 }
 
+interface QuizTranslation {
+  language: string;
+  question: string;
+  answers: unknown;
+}
+
 interface Quiz {
   id: string;
   question: string;
@@ -19,6 +25,7 @@ interface Quiz {
   category: string | null;
   isActive: boolean;
   createdBy: { name: string };
+  translations?: QuizTranslation[];
 }
 
 interface QuizzesPageContentProps {
