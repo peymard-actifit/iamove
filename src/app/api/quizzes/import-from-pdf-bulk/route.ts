@@ -1,34 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-
-// Fonction pour extraire le texte d'un PDF avec pdfjs-dist (version legacy pour Node.js)
-async function parsePDF(buffer: Buffer): Promise<string> {
-  try {
-    // Utiliser la version legacy de pdfjs-dist qui fonctionne dans Node.js
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const pdfjsLib = require("pdfjs-dist/legacy/build/pdf.mjs");
-    
-    const uint8Array = new Uint8Array(buffer);
-    const pdf = await pdfjsLib.getDocument({ data: uint8Array }).promise;
-    
-    let fullText = "";
-    
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const textContent = await page.getTextContent();
-      const pageText = textContent.items
-        .map((item: { str?: string }) => (item.str || ""))
-        .join(" ");
-      fullText += pageText + "\n";
-    }
-    
-    return fullText;
-  } catch (error) {
-    console.error("Erreur pdfjs-dist:", error);
-    throw new Error("Impossible de parser le PDF: " + String(error));
-  }
-}
+import { parsePDF } from "@/lib/pdf-parser";
 
 // Les 26 langues supportées
 const SUPPORTED_LANGUAGES = [
@@ -250,16 +223,21 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     
-    let pdfText: string;
-    try {
-      pdfText = await parsePDF(buffer);
-    } catch (error) {
-      console.error("Erreur lecture PDF:", error);
+    const parseResult = await parsePDF(buffer);
+    
+    if (!parseResult.success) {
+      console.error("Erreur lecture PDF:", parseResult.errors);
       return NextResponse.json(
-        { error: "Impossible de lire le fichier PDF" },
+        { 
+          error: "Impossible de lire le fichier PDF",
+          details: parseResult.errors,
+        },
         { status: 400 }
       );
     }
+    
+    const pdfText = parseResult.text;
+    console.log(`PDF parsé avec succès via ${parseResult.method} (${pdfText.length} caractères)`);
     
     // Parser les questions
     const questions = parseQuizQuestionsWithLevel(pdfText);
