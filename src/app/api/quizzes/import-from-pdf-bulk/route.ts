@@ -24,7 +24,7 @@ async function translateText(text: string, targetLang: string): Promise<string> 
   if (!apiKey) return text;
 
   try {
-    const response = await fetch("https://api-free.deepl.com/v2/translate", {
+    const response = await fetch("https://api.deepl.com/v2/translate", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({

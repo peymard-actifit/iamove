@@ -131,7 +131,7 @@ const Q = [
 async function tr(text: string, lang: string): Promise<string> {
   if (!process.env.DEEPL_API_KEY || lang === "FR") return text;
   try {
-    const r = await fetch("https://api-free.deepl.com/v2/translate", {
+    const r = await fetch("https://api.deepl.com/v2/translate", {
       method: "POST",
       headers: { "Authorization": `DeepL-Auth-Key ${process.env.DEEPL_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({ text: [text], source_lang: "FR", target_lang: lang === "EN" ? "EN-US" : lang }),
