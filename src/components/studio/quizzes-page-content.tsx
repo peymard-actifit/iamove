@@ -22,7 +22,6 @@ interface Quiz {
   answers: unknown;
   levelId: string;
   level: Level;
-  category: string | null;
   isActive: boolean;
   createdBy: { name: string };
   translations?: QuizTranslation[];
