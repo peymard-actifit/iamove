@@ -138,32 +138,35 @@ export function LevelsEditorDialog({ open, onOpenChange }: LevelsEditorDialogPro
 
   const handleEdit = (level: Level) => {
     setEditingLevel(level.id);
+    // Charger les données traduites selon la langue globale
+    const translated = getTranslatedLevel(level);
     setEditForm({
-      name: level.name,
-      category: level.category,
-      seriousGaming: level.seriousGaming,
-      description: level.description,
+      name: translated.name,
+      category: translated.category,
+      seriousGaming: translated.seriousGaming,
+      description: translated.description,
     });
   };
 
   const handleSave = async (levelId: string) => {
     setSaving(true);
+    const lang = globalLanguage.toUpperCase();
+    
     try {
+      // Si on est en français, on modifie le niveau principal
+      // Sinon, on modifie la traduction de la langue courante
       const res = await fetch(`/api/levels/${levelId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editForm),
+        body: JSON.stringify({
+          ...editForm,
+          language: lang, // Indiquer la langue pour sauvegarder au bon endroit
+        }),
       });
 
       if (res.ok) {
-        // Mettre à jour localement
-        setLevels((prev) =>
-          prev.map((l) =>
-            l.id === levelId
-              ? { ...l, ...editForm } as Level
-              : l
-          )
-        );
+        // Recharger les niveaux pour avoir les données à jour
+        await loadLevels();
         setEditingLevel(null);
         setEditForm({});
       }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Button,
@@ -18,7 +18,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui";
-import { Plus, Trash2, Edit, Search, ChevronUp, ChevronDown, Upload, Sparkles, Loader2 } from "lucide-react";
+import { Plus, Trash2, Edit, Search, ChevronUp, ChevronDown, Upload, Sparkles, Loader2, Languages } from "lucide-react";
 import { QuizImportDialog } from "./quiz-import-dialog";
 import { useI18n } from "@/lib/i18n";
 
@@ -85,6 +85,21 @@ export function QuizzesManager({
   
   // État pour la génération de questions
   const [generatingLevel, setGeneratingLevel] = useState<number | null>(null);
+  
+  // État pour la traduction de masse
+  const [translating, setTranslating] = useState(false);
+  const [translationProgress, setTranslationProgress] = useState<{ batch: number; total: number } | null>(null);
+  
+  // Calculer le nombre de questions sans traduction dans la langue courante
+  const untranslatedCount = useMemo(() => {
+    const lang = globalLanguage.toUpperCase();
+    if (lang === "FR") return 0;
+    return quizzes.filter(q => {
+      if (!q.translations || q.translations.length === 0) return true;
+      const translation = q.translations.find(t => t.language === lang);
+      return !translation || translation.question === q.question;
+    }).length;
+  }, [quizzes, globalLanguage]);
 
   // Premier niveau valide pour les quizz (niveau 1, pas 0)
   const firstValidLevel = levels.find((l) => l.number >= 1);
@@ -239,6 +254,54 @@ export function QuizzesManager({
     }
   };
 
+  // Traduire toutes les questions sans traduction
+  const translateAllQuizzes = async () => {
+    const lang = globalLanguage.toUpperCase();
+    if (lang === "FR") return;
+    
+    setTranslating(true);
+    setTranslationProgress({ batch: 0, total: Math.ceil(quizzes.length / 5) });
+    
+    try {
+      let batch = 0;
+      let hasMore = true;
+      
+      while (hasMore) {
+        const res = await fetch(`/api/quizzes/retranslate?batch=${batch}&lang=${lang}`, {
+          method: "POST",
+          credentials: "include",
+        });
+        
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          alert(`Erreur ${res.status}: ${errorData.error || "Échec de la traduction"}`);
+          break;
+        }
+        
+        const data = await res.json();
+        setTranslationProgress({ batch: batch + 1, total: Math.ceil(quizzes.length / 5) });
+        
+        if (data.processed === 0) {
+          hasMore = false;
+        } else {
+          batch++;
+          // Petite pause entre les batches pour ne pas surcharger l'API
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
+      
+      // Rafraîchir pour avoir les nouvelles traductions
+      router.refresh();
+      alert("Traduction terminée !");
+    } catch (error) {
+      console.error("Erreur traduction:", error);
+      alert("Erreur lors de la traduction");
+    } finally {
+      setTranslating(false);
+      setTranslationProgress(null);
+    }
+  };
+
   const filteredQuizzes = quizzes
     .filter((q) => {
       const matchesSearch = q.question.toLowerCase().includes(searchTerm.toLowerCase());
@@ -292,8 +355,31 @@ export function QuizzesManager({
             ))}
           </select>
           
-          {/* Bouton Import à droite */}
-          <div className="flex-1 flex justify-end">
+          {/* Boutons Import et Traduire à droite */}
+          <div className="flex-1 flex justify-end gap-2">
+            {/* Bouton Traduire - visible si des questions ne sont pas traduites */}
+            {globalLanguage.toUpperCase() !== "FR" && untranslatedCount > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={translateAllQuizzes}
+                disabled={translating}
+                className="h-8"
+                title={`${untranslatedCount} questions à traduire en ${globalLanguage.toUpperCase()}`}
+              >
+                {translating ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                    {translationProgress ? `${translationProgress.batch}/${translationProgress.total}` : "..."}
+                  </>
+                ) : (
+                  <>
+                    <Languages className="h-3.5 w-3.5 mr-1.5" />
+                    {t.common.translate} ({untranslatedCount})
+                  </>
+                )}
+              </Button>
+            )}
             <Button
               variant="outline"
               size="sm"

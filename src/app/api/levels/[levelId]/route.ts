@@ -42,7 +42,7 @@ interface RouteParams {
   params: Promise<{ levelId: string }>;
 }
 
-// PATCH - Modifier un niveau (+ retraduction automatique)
+// PATCH - Modifier un niveau ou sa traduction
 export async function PATCH(request: Request, { params }: RouteParams) {
   try {
     const session = await getSession();
@@ -55,8 +55,35 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     const { levelId } = await params;
     const body = await request.json();
-    const { name, category, seriousGaming, description } = body;
+    const { name, category, seriousGaming, description, language } = body;
 
+    // Si la langue est spécifiée et n'est pas FR, on modifie la traduction
+    if (language && language !== "FR") {
+      // Mettre à jour ou créer la traduction pour cette langue
+      const translation = await prisma.levelTranslation.upsert({
+        where: {
+          levelId_language: { levelId, language },
+        },
+        update: {
+          ...(name && { name }),
+          ...(category !== undefined && { category }),
+          ...(seriousGaming !== undefined && { seriousGaming }),
+          ...(description !== undefined && { description }),
+        },
+        create: {
+          levelId,
+          language,
+          name: name || "",
+          category: category || "",
+          seriousGaming: seriousGaming || "",
+          description: description || "",
+        },
+      });
+
+      return NextResponse.json(translation);
+    }
+
+    // Sinon, on modifie le niveau principal (FR) et on retraduit
     // Récupérer l'ancien niveau pour comparer
     const oldLevel = await prisma.level.findUnique({
       where: { id: levelId },
@@ -81,7 +108,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       (seriousGaming !== undefined && oldLevel?.seriousGaming !== seriousGaming) ||
       (description !== undefined && oldLevel?.description !== description);
 
-    // Si le contenu a changé, retraduire en arrière-plan
+    // Si le contenu FR a changé, retraduire toutes les langues en arrière-plan
     if (contentChanged) {
       const finalName = name || oldLevel?.name || "";
       const finalCategory = category !== undefined ? category : (oldLevel?.category || "");
