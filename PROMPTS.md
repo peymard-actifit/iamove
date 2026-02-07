@@ -348,4 +348,15 @@ Dans la vue du profil en mode publié, il ne faut pas afficher le niveau, mais �
 → En mode publié, l'organigramme affiche uniquement l'utilisateur connecté et ses subordonnés
 
 ---
+
+### Prompt #47 (2026-02-07)
+```
+Dans la gestion des quizz, réduit la taille des tuiles de nombre de quizz par niveau de manière à les afficher facilement sur la fenêtre standard.
+```
+→ Tuiles compactes : padding réduit (p-1.5), texte plus petit (text-[10px], text-sm)
+→ Grille adaptative : 7 colonnes mobile, 11 tablette, 21 colonnes desktop (pour les 21 niveaux)
+→ Clic sur une tuile = filtrer par ce niveau (toggle)
+→ Tooltip au survol avec nom du niveau et nombre de questions
+
+---
 *Dernière mise à jour: 2026-02-07*

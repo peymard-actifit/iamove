@@ -220,15 +220,21 @@ export function QuizzesManager({
         </select>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      {/* Stats - Tuiles compactes pour 21 niveaux */}
+      <div className="grid grid-cols-7 sm:grid-cols-11 lg:grid-cols-21 gap-1.5">
         {levels.map((level) => {
           const count = quizzes.filter((q) => q.levelId === level.id).length;
           return (
-            <Card key={level.id} className="p-4">
-              <p className="text-sm text-gray-500">{level.name}</p>
-              <p className="text-2xl font-bold">{count}</p>
-              <p className="text-xs text-gray-400">questions</p>
+            <Card 
+              key={level.id} 
+              className={`p-1.5 text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
+                filterLevel === level.id ? "ring-2 ring-blue-500" : ""
+              }`}
+              onClick={() => setFilterLevel(filterLevel === level.id ? "" : level.id)}
+              title={`${level.name} - ${count} question(s)`}
+            >
+              <p className="text-[10px] text-gray-500 truncate">{level.number}</p>
+              <p className="text-sm font-bold">{count}</p>
             </Card>
           );
         })}
