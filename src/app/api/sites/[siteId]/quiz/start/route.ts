@@ -14,7 +14,7 @@ export async function POST(
 
     const { siteId: _siteId } = await params;
     const body = await request.json();
-    const { personId, targetLevel } = body;
+    const { personId, targetLevel, language = "FR" } = body;
 
     if (!targetLevel) {
       return NextResponse.json({ error: "Niveau cible requis" }, { status: 400 });
@@ -39,12 +39,17 @@ export async function POST(
         ).map((a) => a.quizId)
       : [];
 
-    // Récupérer 20 questions non répondues pour ce niveau
+    // Récupérer 20 questions non répondues pour ce niveau avec leurs traductions
     const questions = await prisma.quiz.findMany({
       where: {
         levelId: level.id,
         isActive: true,
         id: { notIn: answeredQuizIds },
+      },
+      include: {
+        translations: {
+          where: { language: language.toUpperCase() },
+        },
       },
       take: 20,
       orderBy: { createdAt: "asc" },
@@ -57,15 +62,22 @@ export async function POST(
       );
     }
 
-    // Formater les questions pour le frontend
-    const formattedQuestions = questions.map((q) => ({
-      id: q.id,
-      question: q.question,
-      answers: (q.answers as { text: string; isCorrect: boolean }[]).map((a) => ({
-        text: a.text,
-        isCorrect: a.isCorrect,
-      })),
-    }));
+    // Formater les questions pour le frontend avec les traductions
+    const formattedQuestions = questions.map((q) => {
+      // Utiliser la traduction si disponible, sinon le texte original
+      const translation = q.translations[0];
+      const questionText = translation?.question || q.question;
+      const answers = translation?.answers || q.answers;
+      
+      return {
+        id: q.id,
+        question: questionText,
+        answers: (answers as { text: string; isCorrect: boolean }[]).map((a) => ({
+          text: a.text,
+          isCorrect: a.isCorrect,
+        })),
+      };
+    });
 
     return NextResponse.json({ questions: formattedQuestions });
   } catch (error) {

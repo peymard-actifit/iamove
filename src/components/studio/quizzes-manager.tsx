@@ -17,14 +17,22 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  Flag,
 } from "@/components/ui";
-import { Plus, Trash2, Edit, Search, ChevronUp, ChevronDown, Upload } from "lucide-react";
+import { Plus, Trash2, Edit, Search, ChevronUp, ChevronDown, Upload, Sparkles, Loader2 } from "lucide-react";
 import { QuizImportDialog } from "./quiz-import-dialog";
+import { useI18n, SUPPORTED_LANGUAGES } from "@/lib/i18n";
 
 interface Level {
   id: string;
   number: number;
   name: string;
+}
+
+interface QuizTranslation {
+  language: string;
+  question: string;
+  answers: unknown;
 }
 
 interface Quiz {
@@ -36,6 +44,7 @@ interface Quiz {
   category: string | null;
   isActive: boolean;
   createdBy: { name: string };
+  translations?: QuizTranslation[];
 }
 
 type QuizAnswer = { text: string; isCorrect: boolean };
@@ -56,6 +65,7 @@ export function QuizzesManager({
   onShowCreateDialogChange,
 }: QuizzesManagerProps) {
   const router = useRouter();
+  const { language: globalLanguage, languageInfo } = useI18n();
   const [quizzes, setQuizzes] = useState(initialQuizzes);
   const [internalShowDialog, setInternalShowDialog] = useState(false);
   
@@ -69,6 +79,13 @@ export function QuizzesManager({
   const [sortField, setSortField] = useState<"question" | "level" | "category">("level");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [showImportDialog, setShowImportDialog] = useState(false);
+  
+  // État pour le sélecteur de langue dans la gestion des quizz
+  const [displayLanguage, setDisplayLanguage] = useState(globalLanguage);
+  const [showLanguageDialog, setShowLanguageDialog] = useState(false);
+  
+  // État pour la génération de questions
+  const [generatingLevel, setGeneratingLevel] = useState<number | null>(null);
 
   // Premier niveau valide pour les quizz (niveau 1, pas 0)
   const firstValidLevel = levels.find((l) => l.number >= 1);
@@ -171,6 +188,52 @@ export function QuizzesManager({
     }
   };
 
+  // Obtenir le texte traduit d'une question
+  const getTranslatedQuestion = (quiz: Quiz): string => {
+    if (displayLanguage === "FR" || !quiz.translations) {
+      return quiz.question;
+    }
+    const translation = quiz.translations.find(t => t.language === displayLanguage);
+    return translation?.question || quiz.question;
+  };
+
+  // Obtenir les réponses traduites
+  const getTranslatedAnswers = (quiz: Quiz): QuizAnswer[] => {
+    const originalAnswers = quiz.answers as QuizAnswer[];
+    if (displayLanguage === "FR" || !quiz.translations) {
+      return originalAnswers;
+    }
+    const translation = quiz.translations.find(t => t.language === displayLanguage);
+    return (translation?.answers as QuizAnswer[]) || originalAnswers;
+  };
+
+  // Générer des questions avec l'IA
+  const generateQuestions = async (levelNumber: number, count: number) => {
+    setGeneratingLevel(levelNumber);
+    try {
+      const res = await fetch("/api/quizzes/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ levelNumber, count }),
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok && data.success) {
+        router.refresh();
+        // Montrer une notification de succès
+        alert(`${data.created} question(s) créée(s) et traduite(s) en 26 langues !`);
+      } else {
+        alert(`Erreur: ${data.error || "Échec de la génération"}`);
+      }
+    } catch (error) {
+      console.error("Erreur génération:", error);
+      alert("Erreur lors de la génération des questions");
+    } finally {
+      setGeneratingLevel(null);
+    }
+  };
+
   const filteredQuizzes = quizzes
     .filter((q) => {
       const matchesSearch = q.question.toLowerCase().includes(searchTerm.toLowerCase());
@@ -224,6 +287,18 @@ export function QuizzesManager({
           ))}
         </select>
         
+        {/* Sélecteur de langue pour voir les traductions */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowLanguageDialog(true)}
+          className="px-2 h-10"
+          title="Changer la langue d'affichage des questions"
+        >
+          <Flag countryCode={SUPPORTED_LANGUAGES.find(l => l.code === displayLanguage)?.countryCode || "fr"} size="md" />
+          <span className="ml-2 text-xs">{displayLanguage}</span>
+        </Button>
+        
         {/* Bouton Import à droite */}
         <div className="flex-1 flex justify-end">
           <Button
@@ -237,20 +312,69 @@ export function QuizzesManager({
       </div>
 
       {/* Stats - Tuiles compactes pour 20 niveaux (1-20, pas de quizz pour le niveau 0) */}
-      <div className="grid grid-cols-5 sm:grid-cols-10 lg:grid-cols-20 gap-1.5">
+      <div className="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-10 gap-2">
         {levels.filter((l) => l.number >= 1).map((level) => {
           const count = quizzes.filter((q) => q.levelId === level.id).length;
+          const isGenerating = generatingLevel === level.number;
           return (
             <Card 
               key={level.id} 
-              className={`p-1.5 text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
+              className={`p-2 transition-colors ${
                 filterLevel === level.id ? "ring-2 ring-blue-500" : ""
               }`}
-              onClick={() => setFilterLevel(filterLevel === level.id ? "" : level.id)}
               title={`Niv. ${level.number} - ${level.name} - ${count} question(s)`}
             >
-              <p className="text-[10px] text-gray-500 truncate">{level.number}</p>
-              <p className="text-sm font-bold">{count}</p>
+              <div 
+                className="text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded p-1"
+                onClick={() => setFilterLevel(filterLevel === level.id ? "" : level.id)}
+              >
+                <p className="text-[10px] text-gray-500 truncate">Niv. {level.number}</p>
+                <p className="text-lg font-bold">{count}</p>
+              </div>
+              
+              {/* Boutons de génération IA */}
+              <div className="flex gap-1 mt-1 justify-center">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-1.5 text-[10px]"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    generateQuestions(level.number, 1);
+                  }}
+                  disabled={isGenerating}
+                  title="Générer 1 question avec l'IA"
+                >
+                  {isGenerating ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <>
+                      <Sparkles className="h-3 w-3 mr-0.5" />
+                      +1
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-1.5 text-[10px]"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    generateQuestions(level.number, 10);
+                  }}
+                  disabled={isGenerating}
+                  title="Générer 10 questions avec l'IA"
+                >
+                  {isGenerating ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <>
+                      <Sparkles className="h-3 w-3 mr-0.5" />
+                      +10
+                    </>
+                  )}
+                </Button>
+              </div>
             </Card>
           );
         })}
@@ -286,7 +410,6 @@ export function QuizzesManager({
           </TableHeader>
           <TableBody>
             {filteredQuizzes.map((quiz, index) => {
-              const answers = quiz.answers as QuizAnswer[];
               return (
                 <TableRow key={quiz.id}>
                   <TableCell className="font-mono text-gray-500">{index + 1}</TableCell>
@@ -296,11 +419,11 @@ export function QuizzesManager({
                     </span>
                   </TableCell>
                   <TableCell className="max-w-md">
-                    <p className="truncate font-medium">{quiz.question}</p>
+                    <p className="truncate font-medium">{getTranslatedQuestion(quiz)}</p>
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
-                      {answers?.map((a, i) => (
+                      {getTranslatedAnswers(quiz)?.map((a, i) => (
                         <span
                           key={i}
                           className={`px-1.5 py-0.5 rounded text-[10px] ${
@@ -431,6 +554,42 @@ export function QuizzesManager({
         open={showImportDialog}
         onOpenChange={setShowImportDialog}
       />
+
+      {/* Dialog Sélection de langue */}
+      <Dialog open={showLanguageDialog} onOpenChange={setShowLanguageDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-center">
+              Langue d&apos;affichage des questions
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-gray-500 text-center mb-4">
+            Sélectionnez une langue pour voir les questions traduites
+          </p>
+          <div className="grid grid-cols-6 gap-3 py-4">
+            {SUPPORTED_LANGUAGES.map((lang) => (
+              <button
+                key={lang.code}
+                onClick={() => {
+                  setDisplayLanguage(lang.code);
+                  setShowLanguageDialog(false);
+                }}
+                className={`
+                  flex items-center justify-center p-2 rounded-lg transition-all
+                  hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105
+                  ${displayLanguage === lang.code 
+                    ? "bg-blue-100 dark:bg-blue-900 ring-2 ring-blue-500 scale-105" 
+                    : "bg-gray-50 dark:bg-gray-900"
+                  }
+                `}
+                title={lang.nativeName}
+              >
+                <Flag countryCode={lang.countryCode} size="xl" />
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

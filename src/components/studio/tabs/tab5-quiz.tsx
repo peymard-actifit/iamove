@@ -2,8 +2,12 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, Button } from "@/components/ui";
-import { ClipboardCheck, CheckCircle, XCircle, ArrowRight, Trophy, Play } from "lucide-react";
+import { ClipboardCheck, CheckCircle, XCircle, ArrowRight, Trophy, Play, PartyPopper } from "lucide-react";
 import { getLevelIcon, LEVELS } from "@/lib/levels";
+import { useI18n } from "@/lib/i18n";
+
+// Limite de bonnes réponses pour valider un niveau
+const PASSING_SCORE = 15;
 
 interface Tab5QuizProps {
   siteId: string;
@@ -122,6 +126,7 @@ interface QuizQuestion {
 }
 
 export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: Tab5QuizProps) {
+  const { language } = useI18n();
   const [currentQuiz, setCurrentQuiz] = useState<QuizQuestion[] | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
@@ -131,17 +136,19 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
   const [isLoading, setIsLoading] = useState(false);
   const [targetLevel, setTargetLevel] = useState<number | null>(null);
   const [quizFinished, setQuizFinished] = useState(false);
+  const [passedEarly, setPassedEarly] = useState(false);
 
   const startQuiz = async (level?: number) => {
     const levelToUse = level ?? currentLevel + 1;
     setTargetLevel(levelToUse);
     setIsLoading(true);
     setQuizFinished(false);
+    setPassedEarly(false);
     try {
       const res = await fetch(`/api/sites/${siteId}/quiz/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ personId, targetLevel: levelToUse }),
+        body: JSON.stringify({ personId, targetLevel: levelToUse, language }),
       });
       const data = await res.json();
       if (data.questions && data.questions.length > 0) {
@@ -185,8 +192,15 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
     setIsCorrect(isAnswerCorrect);
     setShowResult(true);
     
+    const newScore = isAnswerCorrect ? score + 1 : score;
     if (isAnswerCorrect) {
-      setScore((prev) => prev + 1);
+      setScore(newScore);
+    }
+
+    // Vérifier si le score de passage est atteint (15/20)
+    if (newScore >= PASSING_SCORE) {
+      setPassedEarly(true);
+      setQuizFinished(true);
     }
 
     // Sauvegarder la réponse
@@ -236,7 +250,8 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
               <p className="text-sm font-medium mb-2">Règles :</p>
               <ul className="text-xs space-y-1">
                 <li>• 20 questions par niveau</li>
-                <li>• 10 bonnes réponses minimum pour valider</li>
+                <li>• {PASSING_SCORE} bonnes réponses minimum pour valider</li>
+                <li>• Le quiz s&apos;arrête dès que vous atteignez {PASSING_SCORE}/20</li>
                 <li>• 1 à 4 réponses possibles par question</li>
               </ul>
             </div>
@@ -275,25 +290,37 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
 
     // Quiz terminé
     if (quizFinished && currentQuiz) {
-      const passed = score >= 10;
+      const passed = score >= PASSING_SCORE;
+      const questionsAnswered = currentQuestionIndex + (showResult ? 1 : 0);
       return (
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="text-center">
             {passed ? (
-              <Trophy className="h-20 w-20 mx-auto mb-4 text-yellow-500" />
+              <div className="relative">
+                <Trophy className="h-20 w-20 mx-auto mb-4 text-yellow-500" />
+                {passedEarly && (
+                  <PartyPopper className="h-8 w-8 absolute -top-2 -right-2 text-purple-500 animate-bounce" />
+                )}
+              </div>
             ) : (
               <XCircle className="h-20 w-20 mx-auto mb-4 text-red-400" />
             )}
             <h3 className="text-2xl font-bold mb-2">
-              {passed ? "Félicitations !" : "Dommage..."}
+              {passed ? (passedEarly ? "Bravo ! Niveau validé !" : "Félicitations !") : "Dommage..."}
             </h3>
             <p className="text-4xl font-bold mb-4">
-              {score} / {currentQuiz.length}
+              {score} / {questionsAnswered}
+              {passedEarly && <span className="text-lg text-green-500 ml-2">({PASSING_SCORE} atteint !)</span>}
             </p>
+            {passedEarly && (
+              <p className="text-lg mb-2 text-purple-600">
+                Vous avez atteint le score de {PASSING_SCORE} bonnes réponses en seulement {questionsAnswered} questions !
+              </p>
+            )}
             <p className={`text-lg mb-6 ${passed ? "text-green-600" : "text-red-600"}`}>
               {passed 
                 ? `Niveau ${targetLevel} validé !` 
-                : `Il faut 10/20 minimum pour valider le niveau ${targetLevel}`
+                : `Il faut ${PASSING_SCORE}/20 minimum pour valider le niveau ${targetLevel}`
               }
             </p>
             <div className="flex gap-4 justify-center">
@@ -461,7 +488,7 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
               Commencer le quiz
             </Button>
             <p className="text-xs text-gray-400">
-              20 questions • 10 bonnes réponses requises pour valider
+              20 questions • {PASSING_SCORE} bonnes réponses requises pour valider
             </p>
           </div>
 
@@ -469,10 +496,10 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
             <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <p className="text-sm">
                 Dernier score : <strong>{score}/20</strong>
-                {score >= 10 ? (
+                {score >= PASSING_SCORE ? (
                   <span className="text-green-600 ml-2">✓ Niveau validé !</span>
                 ) : (
-                  <span className="text-orange-600 ml-2">Encore {10 - score} points nécessaires</span>
+                  <span className="text-orange-600 ml-2">Encore {PASSING_SCORE - score} points nécessaires</span>
                 )}
               </p>
             </div>

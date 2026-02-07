@@ -18,6 +18,7 @@ export default async function QuizzesPage() {
     include: {
       level: true,
       createdBy: { select: { name: true } },
+      translations: true, // Inclure les traductions
     },
     orderBy: { createdAt: "desc" },
     take: 500, // Augmenté pour afficher toutes les questions
