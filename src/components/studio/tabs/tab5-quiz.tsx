@@ -48,8 +48,13 @@ function LevelScale({ onStartQuiz, selectedLevel }: LevelScaleProps) {
                     : hoveredLevel === level.number 
                     ? "bg-blue-100 dark:bg-blue-900/30" 
                     : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                } ${onStartQuiz ? "cursor-pointer" : "cursor-help"}`}
-                onDoubleClick={() => onStartQuiz?.(level.number)}
+                } ${onStartQuiz && level.number >= 1 ? "cursor-pointer" : level.number === 0 ? "cursor-not-allowed opacity-60" : "cursor-help"}`}
+                onDoubleClick={() => {
+                  // Pas de quizz pour le niveau 0
+                  if (level.number >= 1) {
+                    onStartQuiz?.(level.number);
+                  }
+                }}
               >
                 <span className="w-4 text-[10px] font-bold text-gray-500 text-right flex-shrink-0">
                   {level.number}
@@ -93,10 +98,15 @@ function LevelScale({ onStartQuiz, selectedLevel }: LevelScaleProps) {
           <p className="text-[10px] leading-relaxed text-gray-200">
             {hoveredLevelInfo.description}
           </p>
-          {onStartQuiz && (
+          {onStartQuiz && hoveredLevelInfo.number >= 1 && (
             <p className="text-[9px] text-blue-300 mt-2 flex items-center gap-1">
               <Play className="h-3 w-3" />
               Double-cliquez pour lancer le quizz
+            </p>
+          )}
+          {onStartQuiz && hoveredLevelInfo.number === 0 && (
+            <p className="text-[9px] text-gray-400 mt-2">
+              Niveau de base - pas de quizz disponible
             </p>
           )}
         </div>

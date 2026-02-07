@@ -359,4 +359,17 @@ Dans la gestion des quizz, réduit la taille des tuiles de nombre de quizz par n
 → Tooltip au survol avec nom du niveau et nombre de questions
 
 ---
+
+### Prompt #48 (2026-02-07)
+```
+Sur les quizz, il ne peut y avoir que des quizz qui démarrent à 1 comme étant la cible. Il y a donc vingt niveaux sur les quizz commençant par le niveau 1. Du coup, il faut revoir la liste dans la vue de gestion des quizz, et il faut empêcher le double clic sur le niveau 0 dans les vues d'évaluation en mode studio.
+```
+→ Gestion des quizz : filtrage pour n'afficher que les niveaux 1-20 (pas le niveau 0)
+→ Grille des tuiles : 5/10/20 colonnes (au lieu de 7/11/21)
+→ Formulaire création : niveau par défaut = niveau 1
+→ Vue évaluation : niveau 0 grisé (opacity-60, cursor-not-allowed)
+→ Double-clic désactivé sur le niveau 0
+→ Tooltip niveau 0 : "Niveau de base - pas de quizz disponible"
+
+---
 *Dernière mise à jour: 2026-02-07*

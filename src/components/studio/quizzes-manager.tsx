@@ -68,9 +68,12 @@ export function QuizzesManager({
   const [sortField, setSortField] = useState<"question" | "level" | "category">("level");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
+  // Premier niveau valide pour les quizz (niveau 1, pas 0)
+  const firstValidLevel = levels.find((l) => l.number >= 1);
+  
   const [formData, setFormData] = useState({
     question: "",
-    levelId: levels[0]?.id || "",
+    levelId: firstValidLevel?.id || "",
     category: "",
     answers: [
       { text: "", isCorrect: false },
@@ -83,7 +86,7 @@ export function QuizzesManager({
   const resetForm = () => {
     setFormData({
       question: "",
-      levelId: levels[0]?.id || "",
+      levelId: firstValidLevel?.id || "",
       category: "",
       answers: [
         { text: "", isCorrect: false },
@@ -212,17 +215,17 @@ export function QuizzesManager({
           onChange={(e) => setFilterLevel(e.target.value)}
         >
           <option value="">Tous les niveaux</option>
-          {levels.map((level) => (
+          {levels.filter((l) => l.number >= 1).map((level) => (
             <option key={level.id} value={level.id}>
-              {level.name}
+              Niv. {level.number} - {level.name}
             </option>
           ))}
         </select>
       </div>
 
-      {/* Stats - Tuiles compactes pour 21 niveaux */}
-      <div className="grid grid-cols-7 sm:grid-cols-11 lg:grid-cols-21 gap-1.5">
-        {levels.map((level) => {
+      {/* Stats - Tuiles compactes pour 20 niveaux (1-20, pas de quizz pour le niveau 0) */}
+      <div className="grid grid-cols-5 sm:grid-cols-10 lg:grid-cols-20 gap-1.5">
+        {levels.filter((l) => l.number >= 1).map((level) => {
           const count = quizzes.filter((q) => q.levelId === level.id).length;
           return (
             <Card 
@@ -231,7 +234,7 @@ export function QuizzesManager({
                 filterLevel === level.id ? "ring-2 ring-blue-500" : ""
               }`}
               onClick={() => setFilterLevel(filterLevel === level.id ? "" : level.id)}
-              title={`${level.name} - ${count} question(s)`}
+              title={`Niv. ${level.number} - ${level.name} - ${count} question(s)`}
             >
               <p className="text-[10px] text-gray-500 truncate">{level.number}</p>
               <p className="text-sm font-bold">{count}</p>
@@ -347,15 +350,15 @@ export function QuizzesManager({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Niveau *</label>
+                <label className="text-sm font-medium">Niveau cible (1-20) *</label>
                 <select
                   className="w-full h-10 px-3 rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
                   value={formData.levelId}
                   onChange={(e) => setFormData({ ...formData, levelId: e.target.value })}
                 >
-                  {levels.map((level) => (
+                  {levels.filter((l) => l.number >= 1).map((level) => (
                     <option key={level.id} value={level.id}>
-                      {level.name}
+                      Niv. {level.number} - {level.name}
                     </option>
                   ))}
                 </select>
