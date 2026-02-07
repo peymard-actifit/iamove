@@ -11,7 +11,7 @@ import {
   DialogFooter,
   Button,
 } from "@/components/ui";
-import { Upload, Loader2, Check, AlertCircle, FileText } from "lucide-react";
+import { Upload, Loader2, Check, AlertCircle, FileText, Shuffle } from "lucide-react";
 import { getLevelIcon } from "@/lib/levels";
 
 interface Level {
@@ -29,13 +29,15 @@ interface QuizImportDialogProps {
 export function QuizImportDialog({ open, onOpenChange }: QuizImportDialogProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bulkFileInputRef = useRef<HTMLInputElement>(null);
   const [levels, setLevels] = useState<Level[]>([]);
   const [quizCounts, setQuizCounts] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [importingLevel, setImportingLevel] = useState<number | null>(null);
+  const [isBulkImporting, setIsBulkImporting] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
   const [replaceExisting, setReplaceExisting] = useState(false);
-  const [importResult, setImportResult] = useState<{ level: number; success: boolean; message: string } | null>(null);
+  const [importResult, setImportResult] = useState<{ level: number | string; success: boolean; message: string } | null>(null);
 
   // Charger les niveaux et le nombre de quizz par niveau
   useEffect(() => {
@@ -75,6 +77,73 @@ export function QuizImportDialog({ open, onOpenChange }: QuizImportDialogProps) 
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
       fileInputRef.current.click();
+    }
+  };
+
+  // Ouvre le sélecteur de fichier pour l'import vrac
+  const handleSelectBulkFile = () => {
+    setImportResult(null);
+    if (bulkFileInputRef.current) {
+      bulkFileInputRef.current.value = "";
+      bulkFileInputRef.current.click();
+    }
+  };
+
+  // Gestion du fichier pour import vrac
+  const handleBulkFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      setImportResult({
+        level: "vrac",
+        success: false,
+        message: "Veuillez sélectionner un fichier PDF",
+      });
+      return;
+    }
+
+    setIsBulkImporting(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/quizzes/import-from-pdf-bulk", {
+        method: "POST",
+        body: formData,
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        const levelDetails = data.byLevel 
+          ? Object.entries(data.byLevel as Record<number, number>)
+              .map(([lvl, count]) => `Niv.${lvl}: ${count}`)
+              .join(", ")
+          : "";
+        setImportResult({
+          level: "vrac",
+          success: true,
+          message: `${data.imported} questions importées depuis "${file.name}" (${levelDetails})`,
+        });
+        loadData();
+        router.refresh();
+      } else {
+        setImportResult({
+          level: "vrac",
+          success: false,
+          message: data.error || "Erreur d'importation",
+        });
+      }
+    } catch {
+      setImportResult({
+        level: "vrac",
+        success: false,
+        message: "Erreur de connexion",
+      });
+    } finally {
+      setIsBulkImporting(false);
     }
   };
 
@@ -139,13 +208,21 @@ export function QuizImportDialog({ open, onOpenChange }: QuizImportDialogProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {/* Input file caché pour sélectionner le PDF */}
+      {/* Input file caché pour sélectionner le PDF (par niveau) */}
       <input
         type="file"
         ref={fileInputRef}
         accept=".pdf,application/pdf"
         className="hidden"
         onChange={handleFileChange}
+      />
+      {/* Input file caché pour import vrac */}
+      <input
+        type="file"
+        ref={bulkFileInputRef}
+        accept=".pdf,application/pdf"
+        className="hidden"
+        onChange={handleBulkFileChange}
       />
 
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -155,10 +232,40 @@ export function QuizImportDialog({ open, onOpenChange }: QuizImportDialogProps) 
             Importer des Quizz
           </DialogTitle>
           <DialogDescription>
-            Sélectionnez un niveau puis choisissez un fichier PDF contenant les questions.
-            Les questions seront automatiquement extraites et traduites en 26 langues.
+            Sélectionnez un niveau ou utilisez l&apos;import Vrac pour que le système
+            détermine automatiquement le niveau de chaque question.
           </DialogDescription>
         </DialogHeader>
+
+        {/* Bouton Import Vrac */}
+        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="flex items-start gap-3">
+            <Shuffle className="h-5 w-5 text-blue-600 mt-0.5" />
+            <div className="flex-1">
+              <h4 className="font-medium text-blue-900">Import Vrac (multi-niveaux)</h4>
+              <p className="text-xs text-blue-700 mt-1">
+                Le système détecte automatiquement le niveau de chaque question 
+                (soit indiqué dans le PDF, soit analysé par IA selon la complexité).
+              </p>
+            </div>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={handleSelectBulkFile}
+              disabled={isBulkImporting}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {isBulkImporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Import Vrac
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
 
         {importResult && (
           <div

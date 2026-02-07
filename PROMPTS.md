@@ -441,6 +441,19 @@ Pour les fonctions d'importations, il ne faut pas remplacer systématiquement le
 → Texte du bouton adapté : "Importer" / "Ajouter" / "Remplacer"
 
 ---
+
+### Prompt #55 (2026-02-07)
+```
+Dans la meme fenetre il me faut aussi un bouton d'importation "Vrac" qui, soit reconnait que des niveaux sont associés aux quizz à importer, soit doit trouver tout seul, par rapport à la question posée, à quel niveau elle correspond.
+```
+→ Ajout du bouton "Import Vrac" en haut du dialog d'import
+→ Création API `/api/quizzes/import-from-pdf-bulk` pour import multi-niveaux
+→ Détection automatique du niveau dans le PDF (patterns: "Niveau X", "Niv. X", etc.)
+→ Si niveau non détecté : utilisation de l'IA (OpenAI GPT-4o-mini) pour analyser la complexité
+→ L'IA reçoit la description de chaque niveau pour déterminer le niveau approprié
+→ Affichage du résumé par niveau après import (ex: "Niv.1: 50, Niv.2: 30")
+
+---
 *Dernière mise à jour: 2026-02-07*
 ```
 Change l'ordre des onglets dans le site publié, mettre : Profil, Organigramme, Évaluation, Formation
