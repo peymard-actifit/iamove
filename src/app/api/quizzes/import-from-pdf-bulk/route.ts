@@ -1,16 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import * as pdfjsLib from "pdfjs-dist";
 
-// Import dynamique de pdf-parse pour éviter les erreurs de build
+// Fonction pour extraire le texte d'un PDF avec pdfjs-dist
 async function parsePDF(buffer: Buffer): Promise<string> {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const pdfParse = require("pdf-parse");
-    const data = await pdfParse(buffer);
-    return data.text;
+    const uint8Array = new Uint8Array(buffer);
+    const pdf = await pdfjsLib.getDocument({ data: uint8Array }).promise;
+    
+    let fullText = "";
+    
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items
+        .map((item) => ("str" in item ? item.str : ""))
+        .join(" ");
+      fullText += pageText + "\n";
+    }
+    
+    return fullText;
   } catch (error) {
-    console.error("Erreur pdf-parse:", error);
+    console.error("Erreur pdfjs-dist:", error);
     throw new Error("Impossible de parser le PDF");
   }
 }
