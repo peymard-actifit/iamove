@@ -6,12 +6,11 @@ import { I18nProvider, useI18n } from "@/lib/i18n";
 
 // Wrapper interne pour avoir accès au contexte I18n
 function InnerProviders({ children }: { children: ReactNode }) {
-  const { language } = useI18n();
-  
-  // La clé force le re-mount du HeaderProvider quand la langue change
-  // Cela garantit que tous les contenus sont recalculés avec les nouvelles traductions
+  // Ne plus utiliser key={language} car cela remonte tous les composants
+  // et réinitialise leurs états (filtres, recherche, etc.)
+  // Les composants se mettent à jour automatiquement via useI18n()
   return (
-    <HeaderProvider key={language}>
+    <HeaderProvider>
       {children}
     </HeaderProvider>
   );

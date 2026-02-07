@@ -391,7 +391,10 @@ export function QuizzesManager({
         <div className="border border-gray-200 dark:border-gray-700 rounded-md p-1.5 bg-gray-50 dark:bg-gray-900 mt-1">
           <div className="flex gap-1">
             {levels.filter((l) => l.number >= 1).map((level) => {
-              const count = quizzes.filter((q) => q.levelId === level.id).length;
+              const levelQuizzes = quizzes.filter((q) => q.levelId === level.id);
+              const count = levelQuizzes.length;
+              const fullyTranslatedCount = levelQuizzes.filter(q => hasAllTranslations(q)).length;
+              const levelFullyTranslated = count > 0 && fullyTranslatedCount === count;
               const isGenerating = generatingLevel === level.number;
               return (
                 <div 
@@ -402,14 +405,23 @@ export function QuizzesManager({
                       : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-blue-300"
                   }`}
                 >
-                  {/* Ligne du haut: numéro et compteur */}
+                  {/* Ligne du haut: numéro, indicateur traduction et compteur */}
                   <div 
                     className="flex items-center justify-between cursor-pointer"
                     onClick={() => setFilterLevel(filterLevel === level.id ? "" : level.id)}
-                    title={`${level.name} - ${count} questions`}
+                    title={`${level.name} - ${count} questions (${fullyTranslatedCount}/${count} traduites)`}
                   >
                     <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{level.number}</span>
-                    <span className="text-[9px] font-bold text-blue-600 dark:text-blue-400">{count}</span>
+                    <div className="flex items-center gap-0.5">
+                      {count > 0 && (
+                        levelFullyTranslated ? (
+                          <Check className="h-2.5 w-2.5 text-green-500" />
+                        ) : (
+                          <AlertCircle className="h-2.5 w-2.5 text-orange-400" />
+                        )
+                      )}
+                      <span className="text-[9px] font-bold text-blue-600 dark:text-blue-400">{count}</span>
+                    </div>
                   </div>
                   
                   {/* Boutons +1 +10 à droite */}
