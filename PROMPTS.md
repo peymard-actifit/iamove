@@ -381,4 +381,23 @@ Change l'ordre des onglets dans le site publié, mettre : Profil, Organigramme, 
 → Onglet par défaut : Profil (tab3)
 
 ---
+
+### Prompt #50 (2026-02-07)
+```
+Je veux importer les questions (120) qui servent à passer en niveau 1 et qui sont dans le PDF joint
+```
+→ Lecture et parsing du PDF avec 120 questions niveau 1
+→ Création de l'API /api/quizzes/import-level1 (POST pour importer, GET pour vérifier)
+→ Script scripts/import-quizzes-level1.js créé
+→ 120 questions importées pour le niveau 1
+
+---
+*Dernière mise à jour: 2026-02-07*
+```
+Change l'ordre des onglets dans le site publié, mettre : Profil, Organigramme, Évaluation, Formation
+```
+→ Nouvel ordre des onglets : Profil → Organigramme → Évaluation → Formation
+→ Onglet par défaut : Profil (tab3)
+
+---
 *Dernière mise à jour: 2026-02-07*
