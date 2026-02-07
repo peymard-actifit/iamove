@@ -23,15 +23,25 @@ export async function POST(
       );
     }
 
-    // Sauvegarder la tentative
-    await prisma.quizAttempt.create({
-      data: {
+    // Vérifier si cette question a déjà été répondue par cette personne
+    const existingAttempt = await prisma.quizAttempt.findFirst({
+      where: {
         personId,
         quizId: questionId,
-        selectedAnswers,
-        isCorrect,
       },
     });
+
+    // Ne créer une tentative que si elle n'existe pas déjà (éviter les doublons)
+    if (!existingAttempt) {
+      await prisma.quizAttempt.create({
+        data: {
+          personId,
+          quizId: questionId,
+          selectedAnswers,
+          isCorrect,
+        },
+      });
+    }
 
     // Si correct, vérifier si le niveau est atteint
     if (isCorrect) {

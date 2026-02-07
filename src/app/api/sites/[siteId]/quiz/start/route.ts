@@ -39,7 +39,7 @@ export async function POST(
       return NextResponse.json({ error: "Niveau non trouvé" }, { status: 404 });
     }
 
-    // Récupérer les questions déjà répondues par cette personne pour ce niveau
+    // Récupérer les questions déjà répondues par cette personne pour ce niveau (IDs uniques)
     const answeredQuizIds = personId
       ? (
           await prisma.quizAttempt.findMany({
@@ -48,6 +48,7 @@ export async function POST(
               quiz: { levelId: level.id }
             },
             select: { quizId: true },
+            distinct: ['quizId'], // Éviter les doublons si la personne a répondu plusieurs fois
           })
         ).map((a) => a.quizId)
       : [];
