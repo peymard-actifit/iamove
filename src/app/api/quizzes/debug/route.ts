@@ -6,10 +6,12 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const lang = searchParams.get("lang") || "IT";
   const skip = parseInt(searchParams.get("skip") || "0");
+  const levelNum = searchParams.get("level");
   
   try {
     // Récupérer un quiz avec ses traductions
     const quiz = await prisma.quiz.findFirst({
+      where: levelNum ? { level: { number: parseInt(levelNum) } } : undefined,
       include: {
         translations: true,
         level: true,
