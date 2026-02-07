@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Button,
@@ -67,6 +67,11 @@ export function QuizzesManager({
   const { language: globalLanguage } = useI18n();
   const [quizzes, setQuizzes] = useState(initialQuizzes);
   const [internalShowDialog, setInternalShowDialog] = useState(false);
+  
+  // Synchroniser quizzes quand initialQuizzes change (après router.refresh())
+  useEffect(() => {
+    setQuizzes(initialQuizzes);
+  }, [initialQuizzes]);
   
   // Utiliser le state externe si fourni, sinon le state interne
   const showCreateDialog = externalShowDialog !== undefined ? externalShowDialog : internalShowDialog;
