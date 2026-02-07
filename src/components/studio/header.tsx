@@ -28,11 +28,13 @@ import {
   ChevronDown,
   Scale,
   FileQuestion,
+  Upload,
 } from "lucide-react";
 import type { SessionPayload } from "@/lib/auth";
 import { useHeaderContent } from "./header-context";
 import { LanguageSelector } from "./language-selector";
 import { LevelsEditorDialog } from "./levels-editor-dialog";
+import { QuizImportDialog } from "./quiz-import-dialog";
 import { useI18n } from "@/lib/i18n";
 
 interface StudioHeaderProps {
@@ -46,6 +48,7 @@ export function StudioHeader({ session }: StudioHeaderProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showAdminDialog, setShowAdminDialog] = useState(false);
   const [showLevelsDialog, setShowLevelsDialog] = useState(false);
+  const [showQuizImportDialog, setShowQuizImportDialog] = useState(false);
   const [adminCode, setAdminCode] = useState("");
   const [adminError, setAdminError] = useState("");
 
@@ -116,6 +119,10 @@ export function StudioHeader({ session }: StudioHeaderProps) {
                     <FileQuestion className="mr-2 h-4 w-4" />
                     {t.nav.manageQuizzes}
                   </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowQuizImportDialog(true)}>
+                  <Upload className="mr-2 h-4 w-4" />
+                  {t.nav.importQuizzes}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setShowLevelsDialog(true)}>
                   <Scale className="mr-2 h-4 w-4" />
@@ -216,6 +223,12 @@ export function StudioHeader({ session }: StudioHeaderProps) {
       <LevelsEditorDialog
         open={showLevelsDialog}
         onOpenChange={setShowLevelsDialog}
+      />
+
+      {/* Dialog Import Quizz */}
+      <QuizImportDialog
+        open={showQuizImportDialog}
+        onOpenChange={setShowQuizImportDialog}
       />
     </header>
   );

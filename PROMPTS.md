@@ -392,6 +392,20 @@ Je veux importer les questions (120) qui servent à passer en niveau 1 et qui so
 → 120 questions importées pour le niveau 1
 
 ---
+
+### Prompt #51 (2026-02-07)
+```
+La prochaine fois je veux que tu les importes directement dans la gestion des quizz et je veux qu'elles soient bien stockées dans la base. Il faut gérer aussi les traductions en 26 langues de ces questions afin d'avoir toujours les traductions disponibles pour les questions des quizz. Enleve moi ce bouton d'importation de quizz de niveau 1, qui ne sert à rien et remplace le pas un sous-menu d'importation de quizz, pour tous les niveaux.
+```
+→ Suppression du bouton "Import Niv.1" dans la vue quizz
+→ Ajout sous-menu "Importer des Quizz" dans le menu Actions (admin)
+→ Nouveau modèle QuizTranslation pour stocker les traductions en 26 langues
+→ Dialog d'importation par niveau avec visualisation des questions existantes
+→ API /api/quizzes/import-level/[levelNumber] avec traduction automatique DeepL
+→ API /api/quizzes/counts-by-level pour le compte par niveau
+→ Traduction "nav.importQuizzes" ajoutée en 26 langues
+
+---
 *Dernière mise à jour: 2026-02-07*
 ```
 Change l'ordre des onglets dans le site publié, mettre : Profil, Organigramme, Évaluation, Formation

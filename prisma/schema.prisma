@@ -258,7 +258,7 @@ model PersonSkill {
 
 model Quiz {
   id            String    @id @default(cuid())
-  question      String    @db.Text
+  question      String    @db.Text // Question en français (langue par défaut)
   
   // Réponses (JSON array: [{text: string, isCorrect: boolean}])
   answers       Json      // Max 4 réponses
@@ -277,8 +277,40 @@ model Quiz {
   createdBy     StudioUser @relation(fields: [createdById], references: [id])
   createdById   String
   attempts      QuizAttempt[]
+  translations  QuizTranslation[]
 
   @@map("quizzes")
+}
+
+// =============================================================================
+// TRADUCTIONS QUIZZ (26 langues)
+// =============================================================================
+
+model QuizTranslation {
+  id            String    @id @default(cuid())
+  
+  // Langue (code ISO: FR, EN, DE, ES, etc.)
+  language      String
+  
+  // Question traduite
+  question      String    @db.Text
+  
+  // Réponses traduites (JSON array: [{text: string, isCorrect: boolean}])
+  answers       Json
+  
+  // Explication traduite
+  explanation   String?   @db.Text
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  quiz          Quiz      @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizId        String
+
+  @@unique([quizId, language])
+  @@index([language])
+  @@map("quiz_translations")
 }
 
 // =============================================================================
