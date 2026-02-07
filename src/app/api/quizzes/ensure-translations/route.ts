@@ -43,7 +43,8 @@ export async function POST() {
   const maxDuration = 50000; // 50 secondes max (Vercel timeout à 60s)
   
   try {
-    // Trouver les questions sans traduction complète (batch de 20)
+    // Trouver directement les questions avec moins de 25 traductions
+    // Utilise une sous-requête pour compter les traductions
     const quizzesWithTranslations = await prisma.quiz.findMany({
       include: {
         translations: {
@@ -51,10 +52,9 @@ export async function POST() {
         },
       },
       orderBy: { createdAt: "asc" },
-      take: 100, // Vérifier 100 questions
     });
 
-    // Filtrer celles qui ont besoin de traduction
+    // Filtrer celles qui ont besoin de traduction (moins de 25 traductions ou traductions identiques au français)
     const quizzesToTranslate = quizzesWithTranslations.filter(quiz => {
       const existingLangs = quiz.translations.map(t => t.language);
       const missingLangs = TARGET_LANGUAGES.filter(lang => !existingLangs.includes(lang));
