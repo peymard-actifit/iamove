@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import * as pdfjsLib from "pdfjs-dist";
 
-// Fonction pour extraire le texte d'un PDF avec pdfjs-dist
+// Fonction pour extraire le texte d'un PDF avec pdfjs-dist (version legacy pour Node.js)
 async function parsePDF(buffer: Buffer): Promise<string> {
   try {
+    // Utiliser la version legacy de pdfjs-dist qui fonctionne dans Node.js
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const pdfjsLib = require("pdfjs-dist/legacy/build/pdf.mjs");
+    
     const uint8Array = new Uint8Array(buffer);
     const pdf = await pdfjsLib.getDocument({ data: uint8Array }).promise;
     
@@ -15,7 +18,7 @@ async function parsePDF(buffer: Buffer): Promise<string> {
       const page = await pdf.getPage(i);
       const textContent = await page.getTextContent();
       const pageText = textContent.items
-        .map((item) => ("str" in item ? item.str : ""))
+        .map((item: { str?: string }) => (item.str || ""))
         .join(" ");
       fullText += pageText + "\n";
     }
@@ -23,7 +26,7 @@ async function parsePDF(buffer: Buffer): Promise<string> {
     return fullText;
   } catch (error) {
     console.error("Erreur pdfjs-dist:", error);
-    throw new Error("Impossible de parser le PDF");
+    throw new Error("Impossible de parser le PDF: " + String(error));
   }
 }
 
