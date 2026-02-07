@@ -8,28 +8,7 @@ type ParseMethod = {
   parse: (buffer: Buffer) => Promise<string>;
 };
 
-// Méthode 1: pdfjs-dist legacy
-async function parsePdfJsLegacy(buffer: Buffer): Promise<string> {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const pdfjsLib = require("pdfjs-dist/legacy/build/pdf.mjs");
-  
-  const uint8Array = new Uint8Array(buffer);
-  const pdf = await pdfjsLib.getDocument({ data: uint8Array }).promise;
-  
-  let fullText = "";
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const textContent = await page.getTextContent();
-    const pageText = textContent.items
-      .map((item: { str?: string }) => item.str || "")
-      .join(" ");
-    fullText += pageText + "\n";
-  }
-  
-  return fullText;
-}
-
-// Méthode 2: pdf-parse
+// Méthode 1: pdf-parse (le plus fiable sur Vercel)
 async function parsePdfParse(buffer: Buffer): Promise<string> {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const pdfParse = require("pdf-parse");
@@ -37,20 +16,24 @@ async function parsePdfParse(buffer: Buffer): Promise<string> {
   return data.text;
 }
 
-// Méthode 3: pdfjs-dist standard
-async function parsePdfJsStandard(buffer: Buffer): Promise<string> {
+// Méthode 2: pdfjs-dist legacy
+async function parsePdfJsLegacy(buffer: Buffer): Promise<string> {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const pdfjsLib = require("pdfjs-dist");
+  const pdfjsLib = require("pdfjs-dist/legacy/build/pdf.mjs");
   
   const uint8Array = new Uint8Array(buffer);
-  const pdf = await pdfjsLib.getDocument({ data: uint8Array }).promise;
+  const loadingTask = pdfjsLib.getDocument({ data: uint8Array });
+  const pdf = await loadingTask.promise;
   
   let fullText = "";
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
     const textContent = await page.getTextContent();
     const pageText = textContent.items
-      .map((item: { str?: string }) => item.str || "")
+      .map((item: unknown) => {
+        const textItem = item as { str?: string };
+        return textItem.str || "";
+      })
       .join(" ");
     fullText += pageText + "\n";
   }
@@ -58,7 +41,7 @@ async function parsePdfJsStandard(buffer: Buffer): Promise<string> {
   return fullText;
 }
 
-// Méthode 4: Extraction basique via regex sur le contenu brut
+// Méthode 3: Extraction basique via regex sur le contenu brut
 async function parseBasicExtraction(buffer: Buffer): Promise<string> {
   const content = buffer.toString("latin1");
   
@@ -109,12 +92,28 @@ async function parseBasicExtraction(buffer: Buffer): Promise<string> {
   return decodedText;
 }
 
+// Méthode 4: Extraction de texte brut (dernier recours)
+async function parseRawText(buffer: Buffer): Promise<string> {
+  // Convertir en string et extraire tout ce qui ressemble à du texte lisible
+  const content = buffer.toString("utf8", 0, buffer.length);
+  
+  // Trouver les séquences de texte lisible (lettres, chiffres, ponctuation)
+  const textPattern = /[A-Za-zÀ-ÿ0-9\s,.;:!?'"()-]{10,}/g;
+  const matches = content.match(textPattern) || [];
+  
+  if (matches.length === 0) {
+    throw new Error("Aucun texte lisible trouvé");
+  }
+  
+  return matches.join(" ");
+}
+
 // Liste des méthodes à essayer dans l'ordre
 const parseMethods: ParseMethod[] = [
-  { name: "pdfjs-dist-legacy", parse: parsePdfJsLegacy },
   { name: "pdf-parse", parse: parsePdfParse },
-  { name: "pdfjs-dist-standard", parse: parsePdfJsStandard },
+  { name: "pdfjs-dist-legacy", parse: parsePdfJsLegacy },
   { name: "basic-extraction", parse: parseBasicExtraction },
+  { name: "raw-text", parse: parseRawText },
 ];
 
 export interface ParseResult {
@@ -122,6 +121,7 @@ export interface ParseResult {
   text: string;
   method: string;
   errors: string[];
+  bufferSize: number;
 }
 
 /**
@@ -129,6 +129,31 @@ export interface ParseResult {
  */
 export async function parsePDF(buffer: Buffer): Promise<ParseResult> {
   const errors: string[] = [];
+  const bufferSize = buffer.length;
+  
+  console.log(`[PDF Parser] Début du parsing, taille du buffer: ${bufferSize} bytes`);
+  
+  if (bufferSize === 0) {
+    return {
+      success: false,
+      text: "",
+      method: "none",
+      errors: ["Le fichier PDF est vide (0 bytes)"],
+      bufferSize: 0,
+    };
+  }
+  
+  // Vérifier que c'est bien un PDF
+  const header = buffer.toString("utf8", 0, Math.min(10, bufferSize));
+  if (!header.startsWith("%PDF")) {
+    return {
+      success: false,
+      text: "",
+      method: "none",
+      errors: [`Le fichier ne semble pas être un PDF valide (header: ${header.substring(0, 10)})`],
+      bufferSize,
+    };
+  }
   
   for (const method of parseMethods) {
     try {
@@ -143,6 +168,7 @@ export async function parsePDF(buffer: Buffer): Promise<ParseResult> {
           text: text,
           method: method.name,
           errors: errors,
+          bufferSize,
         };
       } else {
         const error = `${method.name}: texte vide retourné`;
@@ -150,7 +176,7 @@ export async function parsePDF(buffer: Buffer): Promise<ParseResult> {
         errors.push(error);
       }
     } catch (error) {
-      const errorMsg = `${method.name}: ${String(error)}`;
+      const errorMsg = `${method.name}: ${error instanceof Error ? error.message : String(error)}`;
       console.log(`[PDF Parser] Erreur: ${errorMsg}`);
       errors.push(errorMsg);
     }
@@ -162,21 +188,6 @@ export async function parsePDF(buffer: Buffer): Promise<ParseResult> {
     text: "",
     method: "none",
     errors: errors,
+    bufferSize,
   };
-}
-
-/**
- * Parse un PDF et retourne le texte ou lance une erreur
- */
-export async function parsePDFOrThrow(buffer: Buffer): Promise<string> {
-  const result = await parsePDF(buffer);
-  
-  if (!result.success) {
-    throw new Error(
-      `Impossible de lire le PDF après avoir essayé ${parseMethods.length} méthodes:\n` +
-      result.errors.join("\n")
-    );
-  }
-  
-  return result.text;
 }

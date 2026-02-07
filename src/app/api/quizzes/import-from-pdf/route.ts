@@ -207,8 +207,14 @@ export async function POST(request: NextRequest) {
       console.error("Erreur lecture PDF:", parseResult.errors);
       return NextResponse.json(
         { 
-          error: "Impossible de lire le fichier PDF",
+          error: `Impossible de lire le fichier PDF (${parseResult.bufferSize} bytes reçus)`,
           details: parseResult.errors,
+          fileInfo: {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            bufferSize: parseResult.bufferSize,
+          }
         },
         { status: 400 }
       );

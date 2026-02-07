@@ -188,10 +188,15 @@ export function QuizImportDialog({ open, onOpenChange }: QuizImportDialogProps) 
         loadData();
         router.refresh();
       } else {
+        // Afficher les détails des erreurs si disponibles
+        let errorMessage = data.error || "Erreur d'importation";
+        if (data.details && Array.isArray(data.details)) {
+          errorMessage += "\n\nDétails:\n" + data.details.join("\n");
+        }
         setImportResult({
           level: selectedLevel,
           success: false,
-          message: data.error || "Erreur d'importation",
+          message: errorMessage,
         });
       }
     } catch (error) {
