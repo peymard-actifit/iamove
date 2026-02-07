@@ -17,11 +17,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  Flag,
 } from "@/components/ui";
 import { Plus, Trash2, Edit, Search, ChevronUp, ChevronDown, Upload, Sparkles, Loader2 } from "lucide-react";
 import { QuizImportDialog } from "./quiz-import-dialog";
-import { useI18n, SUPPORTED_LANGUAGES } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n";
 
 interface Level {
   id: string;
@@ -65,7 +64,7 @@ export function QuizzesManager({
   onShowCreateDialogChange,
 }: QuizzesManagerProps) {
   const router = useRouter();
-  const { language: globalLanguage, languageInfo } = useI18n();
+  const { language: globalLanguage } = useI18n();
   const [quizzes, setQuizzes] = useState(initialQuizzes);
   const [internalShowDialog, setInternalShowDialog] = useState(false);
   
@@ -79,10 +78,6 @@ export function QuizzesManager({
   const [sortField, setSortField] = useState<"question" | "level" | "category">("level");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [showImportDialog, setShowImportDialog] = useState(false);
-  
-  // État pour le sélecteur de langue dans la gestion des quizz
-  const [displayLanguage, setDisplayLanguage] = useState(globalLanguage);
-  const [showLanguageDialog, setShowLanguageDialog] = useState(false);
   
   // État pour la génération de questions
   const [generatingLevel, setGeneratingLevel] = useState<number | null>(null);
@@ -188,22 +183,24 @@ export function QuizzesManager({
     }
   };
 
-  // Obtenir le texte traduit d'une question
+  // Obtenir le texte traduit d'une question (utilise la langue globale)
   const getTranslatedQuestion = (quiz: Quiz): string => {
-    if (displayLanguage === "FR" || !quiz.translations) {
+    const lang = globalLanguage.toUpperCase();
+    if (lang === "FR" || !quiz.translations || quiz.translations.length === 0) {
       return quiz.question;
     }
-    const translation = quiz.translations.find(t => t.language === displayLanguage);
+    const translation = quiz.translations.find(t => t.language === lang);
     return translation?.question || quiz.question;
   };
 
-  // Obtenir les réponses traduites
+  // Obtenir les réponses traduites (utilise la langue globale)
   const getTranslatedAnswers = (quiz: Quiz): QuizAnswer[] => {
     const originalAnswers = quiz.answers as QuizAnswer[];
-    if (displayLanguage === "FR" || !quiz.translations) {
+    const lang = globalLanguage.toUpperCase();
+    if (lang === "FR" || !quiz.translations || quiz.translations.length === 0) {
       return originalAnswers;
     }
-    const translation = quiz.translations.find(t => t.language === displayLanguage);
+    const translation = quiz.translations.find(t => t.language === lang);
     return (translation?.answers as QuizAnswer[]) || originalAnswers;
   };
 
@@ -293,18 +290,6 @@ export function QuizzesManager({
             </option>
           ))}
         </select>
-        
-        {/* Sélecteur de langue pour voir les traductions */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowLanguageDialog(true)}
-          className="px-2 h-10"
-          title="Changer la langue d'affichage des questions"
-        >
-          <Flag countryCode={SUPPORTED_LANGUAGES.find(l => l.code === displayLanguage)?.countryCode || "fr"} size="md" />
-          <span className="ml-2 text-xs">{displayLanguage}</span>
-        </Button>
         
         {/* Bouton Import à droite */}
         <div className="flex-1 flex justify-end">
@@ -549,41 +534,6 @@ export function QuizzesManager({
         onOpenChange={setShowImportDialog}
       />
 
-      {/* Dialog Sélection de langue */}
-      <Dialog open={showLanguageDialog} onOpenChange={setShowLanguageDialog}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle className="text-center">
-              Langue d&apos;affichage des questions
-            </DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-gray-500 text-center mb-4">
-            Sélectionnez une langue pour voir les questions traduites
-          </p>
-          <div className="grid grid-cols-6 gap-3 py-4">
-            {SUPPORTED_LANGUAGES.map((lang) => (
-              <button
-                key={lang.code}
-                onClick={() => {
-                  setDisplayLanguage(lang.code);
-                  setShowLanguageDialog(false);
-                }}
-                className={`
-                  flex items-center justify-center p-2 rounded-lg transition-all
-                  hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105
-                  ${displayLanguage === lang.code 
-                    ? "bg-blue-100 dark:bg-blue-900 ring-2 ring-blue-500 scale-105" 
-                    : "bg-gray-50 dark:bg-gray-900"
-                  }
-                `}
-                title={lang.nativeName}
-              >
-                <Flag countryCode={lang.countryCode} size="xl" />
-              </button>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
