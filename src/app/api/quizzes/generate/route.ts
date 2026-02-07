@@ -13,11 +13,10 @@ interface LevelInfo {
 }
 const LEVELS: LevelInfo[] = levelsData.levels;
 
-// Les 26 langues supportées
-const SUPPORTED_LANGUAGES = [
-  "FR", "EN", "DE", "ES", "IT", "PT", "NL", "PL", "RU", "JA", "ZH", "KO",
-  "AR", "TR", "SV", "DA", "FI", "NO", "CS", "EL", "HU", "RO", "SK", "BG", "UK", "ID"
-];
+import { TARGET_LANGUAGES, getDeepLLanguageCode } from "@/lib/deepl";
+
+// Les 26 langues supportées (FR + les 25 langues cibles)
+const SUPPORTED_LANGUAGES = ["FR", ...TARGET_LANGUAGES];
 
 // Traduction via DeepL
 async function translateText(text: string, targetLang: string): Promise<string> {
@@ -33,7 +32,7 @@ async function translateText(text: string, targetLang: string): Promise<string> 
       body: JSON.stringify({
         text: [text],
         source_lang: "FR",
-        target_lang: targetLang === "EN" ? "EN-US" : targetLang,
+        target_lang: getDeepLLanguageCode(targetLang),
       }),
     });
 

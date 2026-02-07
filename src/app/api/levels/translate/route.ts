@@ -2,49 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 
-// Les 26 langues supportées (sans FR qui est la langue source)
-const TARGET_LANGUAGES = [
-  "EN", "DE", "ES", "IT", "PT", "NL", "PL", "RU", "JA", "ZH",
-  "KO", "AR", "TR", "SV", "DA", "FI", "NO", "CS", "EL", "HU",
-  "RO", "SK", "UK", "BG", "HR"
-];
-
-// Fonction pour traduire un texte via DeepL
-async function translateText(text: string, targetLang: string): Promise<string> {
-  if (!text || text.trim() === "") return "";
-  
-  const DEEPL_API_KEY = process.env.DEEPL_API_KEY;
-  if (!DEEPL_API_KEY) {
-    console.warn("DEEPL_API_KEY not configured");
-    return text;
-  }
-
-  try {
-    const response = await fetch("https://api.deepl.com/v2/translate", {
-      method: "POST",
-      headers: {
-        "Authorization": `DeepL-Auth-Key ${DEEPL_API_KEY}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        text: text,
-        source_lang: "FR",
-        target_lang: targetLang,
-      }),
-    });
-
-    if (!response.ok) {
-      console.error(`DeepL error for ${targetLang}:`, response.status);
-      return text;
-    }
-
-    const data = await response.json();
-    return data.translations?.[0]?.text || text;
-  } catch (error) {
-    console.error(`Translation error for ${targetLang}:`, error);
-    return text;
-  }
-}
+import { TARGET_LANGUAGES, translateText } from "@/lib/deepl";
 
 // GET : Récupérer les stats des traductions
 export async function GET(request: Request) {

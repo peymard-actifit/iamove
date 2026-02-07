@@ -1,15 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-
-// Les 25 langues cibles (sans FR qui est la source)
-const TARGET_LANGUAGES = [
-  "EN", "DE", "ES", "IT", "PT", "NL", "PL", "RU", "JA", "ZH",
-  "KO", "AR", "TR", "SV", "DA", "FI", "NO", "CS", "EL", "HU",
-  "RO", "SK", "UK", "BG", "HR"
-];
+import { TARGET_LANGUAGES, getDeepLLanguageCode } from "@/lib/deepl";
 
 // Traduction via DeepL avec retry
-async function translateText(text: string, targetLang: string, retries = 3): Promise<string | null> {
+async function translateTextWithRetry(text: string, targetLang: string, retries = 3): Promise<string | null> {
   if (!process.env.DEEPL_API_KEY || !text || text.trim() === "") return null;
 
   for (let attempt = 0; attempt < retries; attempt++) {
@@ -23,7 +17,7 @@ async function translateText(text: string, targetLang: string, retries = 3): Pro
         body: JSON.stringify({
           text: [text],
           source_lang: "FR",
-          target_lang: targetLang === "EN" ? "EN-US" : targetLang,
+          target_lang: getDeepLLanguageCode(targetLang),
         }),
       });
 
@@ -104,7 +98,7 @@ export async function POST() {
       for (const lang of langsToTranslate) {
         if (Date.now() - startTime > maxDuration) break;
 
-        const translatedQuestion = await translateText(quiz.question, lang);
+        const translatedQuestion = await translateTextWithRetry(quiz.question, lang);
         
         // Passer à la langue suivante si la traduction a échoué
         if (!translatedQuestion) continue;
@@ -113,7 +107,7 @@ export async function POST() {
         const translatedAnswers = [];
 
         for (const ans of originalAnswers) {
-          const translatedText = await translateText(ans.text, lang);
+          const translatedText = await translateTextWithRetry(ans.text, lang);
           // Si une réponse échoue, utiliser l'original pour cette réponse
           translatedAnswers.push({ 
             text: translatedText || ans.text, 

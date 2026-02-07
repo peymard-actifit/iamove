@@ -2,41 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-// Les 26 langues cibles (sans FR)
-const TARGET_LANGUAGES = [
-  "EN", "DE", "ES", "IT", "PT", "NL", "PL", "RU", "JA", "ZH",
-  "KO", "AR", "TR", "SV", "DA", "FI", "NO", "CS", "EL", "HU",
-  "RO", "SK", "UK", "BG", "HR"
-];
-
-// Fonction pour traduire via DeepL
-async function translateText(text: string, targetLang: string): Promise<string> {
-  if (!text || text.trim() === "") return "";
-  
-  const DEEPL_API_KEY = process.env.DEEPL_API_KEY;
-  if (!DEEPL_API_KEY) return text;
-
-  try {
-    const response = await fetch("https://api.deepl.com/v2/translate", {
-      method: "POST",
-      headers: {
-        "Authorization": `DeepL-Auth-Key ${DEEPL_API_KEY}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        text,
-        source_lang: "FR",
-        target_lang: targetLang,
-      }),
-    });
-
-    if (!response.ok) return text;
-    const data = await response.json();
-    return data.translations?.[0]?.text || text;
-  } catch {
-    return text;
-  }
-}
+import { TARGET_LANGUAGES, translateText } from "@/lib/deepl";
 
 // Traduire les réponses
 async function translateAnswers(answers: { text: string; isCorrect: boolean }[], targetLang: string) {
