@@ -1,7 +1,17 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { LEVELS } from "@/lib/levels";
+import levelsData from "@/data/levels.json";
+
+// Structure des niveaux pour l'API
+interface LevelInfo {
+  number: number;
+  name: string;
+  category: string;
+  seriousGaming: string;
+  description: string;
+}
+const LEVELS: LevelInfo[] = levelsData.levels;
 
 // Les 26 langues supportées
 const SUPPORTED_LANGUAGES = [
