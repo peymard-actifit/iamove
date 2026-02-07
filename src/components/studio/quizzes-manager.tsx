@@ -40,7 +40,6 @@ interface Quiz {
   answers: unknown; // JsonValue from Prisma
   levelId: string;
   level: Level;
-  category: string | null;
   isActive: boolean;
   createdBy: { name: string };
   translations?: QuizTranslation[];
@@ -80,7 +79,7 @@ export function QuizzesManager({
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterLevel, setFilterLevel] = useState<string>("");
-  const [sortField, setSortField] = useState<"question" | "level" | "category">("level");
+  const [sortField, setSortField] = useState<"question" | "level">("level");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [showImportDialog, setShowImportDialog] = useState(false);
   
@@ -93,7 +92,6 @@ export function QuizzesManager({
   const [formData, setFormData] = useState({
     question: "",
     levelId: firstValidLevel?.id || "",
-    category: "",
     answers: [
       { text: "", isCorrect: false },
       { text: "", isCorrect: false },
@@ -106,7 +104,6 @@ export function QuizzesManager({
     setFormData({
       question: "",
       levelId: firstValidLevel?.id || "",
-      category: "",
       answers: [
         { text: "", isCorrect: false },
         { text: "", isCorrect: false },
@@ -169,7 +166,6 @@ export function QuizzesManager({
     setFormData({
       question: quiz.question,
       levelId: quiz.levelId,
-      category: quiz.category || "",
       answers: [
         ...quizAnswers,
         ...Array(4 - quizAnswers.length).fill({ text: "", isCorrect: false }),
@@ -255,8 +251,6 @@ export function QuizzesManager({
         comparison = a.question.localeCompare(b.question);
       } else if (sortField === "level") {
         comparison = a.level.number - b.level.number;
-      } else if (sortField === "category") {
-        comparison = (a.category || "").localeCompare(b.category || "");
       }
       return sortOrder === "asc" ? comparison : -comparison;
     });
@@ -469,29 +463,19 @@ export function QuizzesManager({
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">{t.quiz.targetLevel} *</label>
-                <select
-                  className="w-full h-10 px-3 rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
-                  value={formData.levelId}
-                  onChange={(e) => setFormData({ ...formData, levelId: e.target.value })}
-                >
-                  {levels.filter((l) => l.number >= 1).map((level) => (
-                    <option key={level.id} value={level.id}>
-                      {t.quiz.levelLabel} {level.number} - {level.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">{t.quiz.category}</label>
-                <Input
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  placeholder="Ex: Prompt Engineering"
-                />
-              </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t.quiz.targetLevel} *</label>
+              <select
+                className="w-full h-10 px-3 rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
+                value={formData.levelId}
+                onChange={(e) => setFormData({ ...formData, levelId: e.target.value })}
+              >
+                {levels.filter((l) => l.number >= 1).map((level) => (
+                  <option key={level.id} value={level.id}>
+                    {t.quiz.levelLabel} {level.number} - {level.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="space-y-3">
