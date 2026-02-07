@@ -18,7 +18,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui";
-import { Plus, Trash2, Edit, Search, ChevronUp, ChevronDown } from "lucide-react";
+import { Plus, Trash2, Edit, Search, ChevronUp, ChevronDown, Upload } from "lucide-react";
+import { QuizImportDialog } from "./quiz-import-dialog";
 
 interface Level {
   id: string;
@@ -67,6 +68,7 @@ export function QuizzesManager({
   const [filterLevel, setFilterLevel] = useState<string>("");
   const [sortField, setSortField] = useState<"question" | "level" | "category">("level");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [showImportDialog, setShowImportDialog] = useState(false);
 
   // Premier niveau valide pour les quizz (niveau 1, pas 0)
   const firstValidLevel = levels.find((l) => l.number >= 1);
@@ -221,6 +223,17 @@ export function QuizzesManager({
             </option>
           ))}
         </select>
+        
+        {/* Bouton Import à droite */}
+        <div className="flex-1 flex justify-end">
+          <Button
+            variant="outline"
+            onClick={() => setShowImportDialog(true)}
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            Importer
+          </Button>
+        </div>
       </div>
 
       {/* Stats - Tuiles compactes pour 20 niveaux (1-20, pas de quizz pour le niveau 0) */}
@@ -412,6 +425,12 @@ export function QuizzesManager({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Dialog Import Quizz */}
+      <QuizImportDialog
+        open={showImportDialog}
+        onOpenChange={setShowImportDialog}
+      />
     </div>
   );
 }

@@ -406,6 +406,16 @@ La prochaine fois je veux que tu les importes directement dans la gestion des qu
 → Traduction "nav.importQuizzes" ajoutée en 26 langues
 
 ---
+
+### Prompt #52 (2026-02-07)
+```
+Plutôt que dans le menu action, supprime la fonction importer dans le menu action et met un bouton au même niveau que les filtres. Le bouton qui est dans la meme barre que les filtres doit être justifié à droite sur l'écran.
+```
+→ Suppression du sous-menu "Importer des Quizz" du menu Actions
+→ Ajout bouton "Importer" dans la barre des filtres (vue gestion des quizz)
+→ Bouton justifié à droite de l'écran
+
+---
 *Dernière mise à jour: 2026-02-07*
 ```
 Change l'ordre des onglets dans le site publié, mettre : Profil, Organigramme, Évaluation, Formation
