@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-// GET - Liste des quizz
+// GET - Liste des quizz avec traductions
 export async function GET() {
   try {
     const session = await getSession();
@@ -14,8 +14,10 @@ export async function GET() {
       include: {
         level: true,
         createdBy: { select: { name: true } },
+        translations: true,
       },
       orderBy: { createdAt: "desc" },
+      take: 3000,
     });
 
     return NextResponse.json(quizzes);

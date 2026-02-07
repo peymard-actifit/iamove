@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { QuizzesManager } from "./quizzes-manager";
 import { QuizzesHeaderContent } from "./quizzes-header-content";
 
@@ -42,9 +41,14 @@ export function QuizzesPageContent({
   quizCount,
   userId 
 }: QuizzesPageContentProps) {
-  const router = useRouter();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [quizzes, setQuizzes] = useState(initialQuizzes);
   const translationTriggered = useRef(false);
+
+  // Synchroniser avec initialQuizzes si elles changent
+  useEffect(() => {
+    setQuizzes(initialQuizzes);
+  }, [initialQuizzes]);
 
   // Déclencher la traduction automatique des questions manquantes
   useEffect(() => {
@@ -81,9 +85,13 @@ export function QuizzesPageContent({
             console.log(`[Auto-traduction] +${data.translationsCreated} (total: ${totalCreated})`);
           }
 
-          // Rafraîchir les données toutes les 10 batches pour voir les traductions
+          // Recharger les quizzes via API toutes les 10 batches (sans rafraîchir la page)
           if (batchCount % 10 === 0 && totalCreated > 0) {
-            router.refresh();
+            const quizzesRes = await fetch("/api/quizzes");
+            if (quizzesRes.ok) {
+              const updatedQuizzes = await quizzesRes.json();
+              setQuizzes(updatedQuizzes);
+            }
           }
 
           // Petite pause entre les batches
@@ -92,10 +100,14 @@ export function QuizzesPageContent({
           }
         }
 
-        // Rafraîchir à la fin pour afficher toutes les nouvelles traductions
+        // Recharger à la fin pour afficher toutes les nouvelles traductions
         if (totalCreated > 0) {
           console.log(`[Auto-traduction] Terminé: ${totalCreated} traductions créées`);
-          router.refresh();
+          const quizzesRes = await fetch("/api/quizzes");
+          if (quizzesRes.ok) {
+            const updatedQuizzes = await quizzesRes.json();
+            setQuizzes(updatedQuizzes);
+          }
         }
       } catch {
         // Silencieux
@@ -103,7 +115,7 @@ export function QuizzesPageContent({
     };
 
     ensureTranslations();
-  }, [router]);
+  }, []);
 
   const handleNewQuestion = useCallback(() => {
     setShowCreateDialog(true);
@@ -117,10 +129,11 @@ export function QuizzesPageContent({
       />
       <QuizzesManager
         levels={levels}
-        initialQuizzes={initialQuizzes}
+        initialQuizzes={quizzes}
         userId={userId}
         showCreateDialog={showCreateDialog}
         onShowCreateDialogChange={setShowCreateDialog}
+        onQuizzesChange={setQuizzes}
       />
     </>
   );

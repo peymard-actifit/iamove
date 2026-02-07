@@ -53,6 +53,7 @@ interface QuizzesManagerProps {
   userId: string;
   showCreateDialog?: boolean;
   onShowCreateDialogChange?: (show: boolean) => void;
+  onQuizzesChange?: (quizzes: Quiz[]) => void;
 }
 
 export function QuizzesManager({ 
@@ -61,18 +62,29 @@ export function QuizzesManager({
   userId,
   showCreateDialog: externalShowDialog,
   onShowCreateDialogChange,
+  onQuizzesChange,
 }: QuizzesManagerProps) {
   const router = useRouter();
   const { language: globalLanguage, t } = useI18n();
-  const [quizzes, setQuizzes] = useState(initialQuizzes);
+  const [quizzes, setQuizzesLocal] = useState(initialQuizzes);
   const [internalShowDialog, setInternalShowDialog] = useState(false);
   
-  // Synchroniser quizzes quand initialQuizzes change (après router.refresh())
+  // Wrapper pour mettre à jour les quizzes localement et notifier le parent
+  const setQuizzes = (newQuizzes: Quiz[] | ((prev: Quiz[]) => Quiz[])) => {
+    setQuizzesLocal(prev => {
+      const updated = typeof newQuizzes === 'function' ? newQuizzes(prev) : newQuizzes;
+      if (onQuizzesChange) onQuizzesChange(updated);
+      return updated;
+    });
+  };
+  
+  // Synchroniser quizzes quand initialQuizzes change
   useEffect(() => {
-    setQuizzes(initialQuizzes);
+    setQuizzesLocal(initialQuizzes);
   }, [initialQuizzes]);
 
   // Quand la langue change, vérifier et créer les traductions manquantes
+  // Sans rafraîchir la page pour garder les filtres
   useEffect(() => {
     const lang = globalLanguage.toUpperCase();
     if (lang === "FR") return;
@@ -84,15 +96,22 @@ export function QuizzesManager({
     });
 
     if (needsTranslation) {
-      // Déclencher la traduction en arrière-plan
+      // Déclencher la traduction en arrière-plan (sans rafraîchir)
       fetch("/api/quizzes/ensure-translations", { method: "POST" })
-        .then(() => {
-          // Rafraîchir pour obtenir les nouvelles traductions
-          router.refresh();
+        .then(res => res.json())
+        .then(async (data) => {
+          // Si des traductions ont été créées, recharger les quizzes via API
+          if (data.translationsCreated > 0) {
+            const res = await fetch("/api/quizzes");
+            if (res.ok) {
+              const updatedQuizzes = await res.json();
+              setQuizzes(updatedQuizzes);
+            }
+          }
         })
         .catch(() => {});
     }
-  }, [globalLanguage, quizzes, router]);
+  }, [globalLanguage]); // Ne pas inclure quizzes pour éviter les boucles
   
   // Utiliser le state externe si fourni, sinon le state interne
   const showCreateDialog = externalShowDialog !== undefined ? externalShowDialog : internalShowDialog;
