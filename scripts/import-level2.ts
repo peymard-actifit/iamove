@@ -1,5 +1,4 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { PrismaClient } from "@prisma/client";
 
 // Les 26 langues supportées
 const SUPPORTED_LANGUAGES = [
@@ -174,9 +173,11 @@ async function translateText(text: string, targetLang: string): Promise<string> 
   return text;
 }
 
-export async function POST() {
+async function main() {
+  const prisma = new PrismaClient();
+  
   try {
-    console.log("Début import niveau 2...");
+    console.log("Connexion à la base de données...");
     
     // Trouver le niveau 2
     const level = await prisma.level.findFirst({
@@ -184,8 +185,11 @@ export async function POST() {
     });
 
     if (!level) {
-      return NextResponse.json({ error: "Niveau 2 non trouvé" }, { status: 404 });
+      console.error("Niveau 2 non trouvé");
+      process.exit(1);
     }
+
+    console.log(`Niveau 2 trouvé: ${level.id}`);
 
     // Trouver un admin pour createdById
     const admin = await prisma.user.findFirst({
@@ -193,21 +197,27 @@ export async function POST() {
     });
 
     if (!admin) {
-      return NextResponse.json({ error: "Admin non trouvé" }, { status: 404 });
+      console.error("Admin non trouvé");
+      process.exit(1);
     }
+
+    console.log(`Admin trouvé: ${admin.id}`);
 
     // Supprimer les quizz existants du niveau 2
     console.log("Suppression des anciens quizz niveau 2...");
     await prisma.quizTranslation.deleteMany({
       where: { quiz: { levelId: level.id } },
     });
-    await prisma.quiz.deleteMany({
+    const deleted = await prisma.quiz.deleteMany({
       where: { levelId: level.id },
     });
+    console.log(`${deleted.count} quizz supprimés`);
 
     // Importer les nouvelles questions
     let imported = 0;
     let translationsCreated = 0;
+
+    console.log(`Import de ${LEVEL2_QUESTIONS.length} questions...`);
 
     for (const q of LEVEL2_QUESTIONS) {
       // Créer le quiz
@@ -261,33 +271,22 @@ export async function POST() {
 
       imported++;
       if (imported % 10 === 0) {
-        console.log(`Import niveau 2: ${imported}/${LEVEL2_QUESTIONS.length} questions...`);
+        console.log(`Progression: ${imported}/${LEVEL2_QUESTIONS.length} questions importées...`);
       }
     }
 
-    console.log(`Import niveau 2 terminé: ${imported} questions, ${translationsCreated} traductions`);
+    console.log("\n========================================");
+    console.log(`IMPORT NIVEAU 2 TERMINÉ`);
+    console.log(`Questions importées: ${imported}`);
+    console.log(`Traductions créées: ${translationsCreated}`);
+    console.log(`Langues: ${SUPPORTED_LANGUAGES.length}`);
+    console.log("========================================\n");
 
-    return NextResponse.json({
-      success: true,
-      imported,
-      translationsCreated,
-      level: 2,
-      languages: SUPPORTED_LANGUAGES.length,
-    });
   } catch (error) {
-    console.error("Erreur import niveau 2:", error);
-    return NextResponse.json(
-      { error: "Erreur lors de l'import", details: String(error) },
-      { status: 500 }
-    );
+    console.error("Erreur:", error);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
-export async function GET() {
-  return NextResponse.json({
-    status: "ready",
-    questionsCount: LEVEL2_QUESTIONS.length,
-    languages: SUPPORTED_LANGUAGES.length,
-    message: "POST to this endpoint to import level 2 questions",
-  });
-}
+main();
