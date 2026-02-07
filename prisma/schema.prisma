@@ -182,6 +182,9 @@ model Person {
   
   // Historique chat IA
   chatMessages      ChatMessage[]
+  
+  // Progression de formation
+  trainingProgress  PersonTrainingProgress[]
 
   @@unique([siteId, email])
   @@map("persons")
@@ -205,8 +208,9 @@ model Level {
   updatedAt     DateTime  @updatedAt
 
   // Relations
-  quizzes       Quiz[]
-  skills        Skill[]
+  quizzes         Quiz[]
+  skills          Skill[]
+  trainingModules TrainingModule[]
 
   @@map("levels")
 }
@@ -388,6 +392,148 @@ model Session {
 enum SessionUserType {
   STUDIO_USER
   PERSON
+}
+
+// =============================================================================
+// MÉTHODES DE FORMATION
+// =============================================================================
+
+model TrainingMethod {
+  id            String    @id @default(cuid())
+  name          String    // Nom de la méthode (ex: "Serious Game")
+  description   String?   @db.Text
+  icon          String?   // Icône (nom Lucide ou URL)
+  type          TrainingMethodType @default(TUTORIAL)
+  isActive      Boolean   @default(true)
+  order         Int       @default(0) // Ordre d'affichage
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  modules       TrainingModule[]
+  translations  TrainingMethodTranslation[]
+
+  @@map("training_methods")
+}
+
+enum TrainingMethodType {
+  SERIOUS_GAME    // Jeux sérieux interactifs
+  TUTORIAL        // Tutoriels pas à pas
+  EXERCISE        // Exercices pratiques
+  VIDEO           // Vidéos de formation
+  ARTICLE         // Articles/lectures
+  INTERACTIVE     // Modules interactifs
+}
+
+model TrainingMethodTranslation {
+  id            String    @id @default(cuid())
+  language      String    // Code ISO (FR, EN, etc.)
+  name          String    // Nom traduit
+  description   String?   @db.Text // Description traduite
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  method        TrainingMethod @relation(fields: [methodId], references: [id], onDelete: Cascade)
+  methodId      String
+
+  @@unique([methodId, language])
+  @@map("training_method_translations")
+}
+
+// =============================================================================
+// MODULES DE FORMATION
+// =============================================================================
+
+model TrainingModule {
+  id                String    @id @default(cuid())
+  title             String
+  description       String?   @db.Text
+  content           String?   @db.Text // Contenu HTML/Markdown
+  duration          Int       @default(15) // Durée estimée en minutes
+  difficulty        Int       @default(1) // 1-5
+  order             Int       @default(0)
+  isActive          Boolean   @default(true)
+  
+  // Exercices pratiques (JSON)
+  // Format: [{ title, description, instructions, expectedResult, aiPrompt }]
+  practicalExercises Json?
+  
+  // Ressources (JSON)
+  // Format: [{ type, title, url, description }]
+  resources         Json?
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  method            TrainingMethod @relation(fields: [methodId], references: [id], onDelete: Cascade)
+  methodId          String
+  level             Level     @relation(fields: [levelId], references: [id])
+  levelId           String
+  translations      TrainingModuleTranslation[]
+  progress          PersonTrainingProgress[]
+
+  @@map("training_modules")
+}
+
+model TrainingModuleTranslation {
+  id            String    @id @default(cuid())
+  language      String
+  title         String
+  description   String?   @db.Text
+  content       String?   @db.Text
+  practicalExercises Json? // Exercices traduits
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  module        TrainingModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId      String
+
+  @@unique([moduleId, language])
+  @@map("training_module_translations")
+}
+
+// =============================================================================
+// PROGRESSION DE FORMATION
+// =============================================================================
+
+model PersonTrainingProgress {
+  id              String    @id @default(cuid())
+  status          TrainingStatus @default(NOT_STARTED)
+  score           Int?      // Score obtenu (0-100)
+  startedAt       DateTime?
+  completedAt     DateTime?
+  
+  // Résultats des exercices pratiques (JSON)
+  // Format: [{ exerciseId, completed, notes, result }]
+  practicalResults Json?
+  
+  // Temps passé (en minutes)
+  timeSpent       Int       @default(0)
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  person          Person    @relation(fields: [personId], references: [id], onDelete: Cascade)
+  personId        String
+  module          TrainingModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId        String
+
+  @@unique([personId, moduleId])
+  @@map("person_training_progress")
+}
+
+enum TrainingStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
 }
 
 // =============================================================================
