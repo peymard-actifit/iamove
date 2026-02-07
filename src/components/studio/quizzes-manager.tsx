@@ -319,47 +319,58 @@ export function QuizzesManager({
       </div>
 
       {/* Stats - Bandeau fixe des 20 niveaux sur 2 lignes */}
-      <div className="sticky top-0 z-10 bg-white dark:bg-gray-950 py-1 -mx-4 px-4 border-b">
-        <div className="grid grid-cols-10 gap-0.5">
-          {levels.filter((l) => l.number >= 1).map((level) => {
-            const count = quizzes.filter((q) => q.levelId === level.id).length;
-            const isGenerating = generatingLevel === level.number;
-            return (
-              <div 
-                key={level.id} 
-                className={`flex items-center justify-between px-1 py-0.5 rounded text-[10px] cursor-pointer transition-colors ${
-                  filterLevel === level.id 
-                    ? "bg-blue-100 dark:bg-blue-900 ring-1 ring-blue-500" 
-                    : "bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
-                }`}
-                onClick={() => setFilterLevel(filterLevel === level.id ? "" : level.id)}
-                title={`Niv. ${level.number} - ${level.name} - ${count} question(s)`}
-              >
-                <span className="font-medium">{level.number}</span>
-                <span className="font-bold">{count}</span>
-                
-                {/* Boutons +1 +10 */}
-                <div className="flex">
-                  <button
-                    className="px-0.5 hover:text-blue-600 disabled:opacity-50"
-                    onClick={(e) => { e.stopPropagation(); generateQuestions(level.number, 1); }}
-                    disabled={isGenerating}
-                    title="+1 question IA"
+      <div className="sticky top-0 z-10 bg-white dark:bg-gray-950 py-2 -mx-4 px-4 border-b">
+        <div className="border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2 bg-gray-50 dark:bg-gray-900">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-2 font-medium flex items-center gap-2">
+            <Sparkles className="h-3 w-3" />
+            Niveaux de quiz - Cliquez pour filtrer, utilisez +1/+10 pour générer des questions IA
+          </div>
+          <div className="grid grid-cols-10 gap-1.5">
+            {levels.filter((l) => l.number >= 1).map((level) => {
+              const count = quizzes.filter((q) => q.levelId === level.id).length;
+              const isGenerating = generatingLevel === level.number;
+              return (
+                <div 
+                  key={level.id} 
+                  className={`flex flex-col p-1.5 rounded-md border transition-all ${
+                    filterLevel === level.id 
+                      ? "bg-blue-100 dark:bg-blue-900 border-blue-500 shadow-md" 
+                      : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-blue-300 hover:shadow-sm"
+                  }`}
+                >
+                  {/* Ligne du haut: numéro et nombre de questions */}
+                  <div 
+                    className="flex items-center justify-between cursor-pointer mb-1"
+                    onClick={() => setFilterLevel(filterLevel === level.id ? "" : level.id)}
+                    title={`Niv. ${level.number} - ${level.name} - ${count} question(s)`}
                   >
-                    {isGenerating ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <span className="text-[8px]">+1</span>}
-                  </button>
-                  <button
-                    className="px-0.5 hover:text-blue-600 disabled:opacity-50"
-                    onClick={(e) => { e.stopPropagation(); generateQuestions(level.number, 10); }}
-                    disabled={isGenerating}
-                    title="+10 questions IA"
-                  >
-                    {isGenerating ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <span className="text-[8px]">+10</span>}
-                  </button>
+                    <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300">N{level.number}</span>
+                    <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400">{count}</span>
+                  </div>
+                  
+                  {/* Boutons +1 +10 */}
+                  <div className="flex gap-1 justify-center">
+                    <button
+                      className="px-1.5 py-0.5 text-[9px] font-medium rounded border border-green-400 bg-green-50 dark:bg-green-900 dark:border-green-600 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-800 disabled:opacity-50 transition-colors"
+                      onClick={(e) => { e.stopPropagation(); generateQuestions(level.number, 1); }}
+                      disabled={isGenerating}
+                      title="Générer 1 question avec l'IA"
+                    >
+                      {isGenerating ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : "+1"}
+                    </button>
+                    <button
+                      className="px-1.5 py-0.5 text-[9px] font-medium rounded border border-purple-400 bg-purple-50 dark:bg-purple-900 dark:border-purple-600 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-800 disabled:opacity-50 transition-colors"
+                      onClick={(e) => { e.stopPropagation(); generateQuestions(level.number, 10); }}
+                      disabled={isGenerating}
+                      title="Générer 10 questions avec l'IA"
+                    >
+                      {isGenerating ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : "+10"}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
 
