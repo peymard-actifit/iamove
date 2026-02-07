@@ -164,6 +164,32 @@ export function buildTranslationsObject(flatTranslations: Record<string, string>
     levels: {
       level: getValue("levels.level", "Niveau"),
     },
+    quiz: {
+      title: getValue("quiz.title", "Gestion des Quiz"),
+      questionsCount: getValue("quiz.questionsCount", "question(s) au total"),
+      searchPlaceholder: getValue("quiz.searchPlaceholder", "Rechercher une question..."),
+      allLevels: getValue("quiz.allLevels", "Tous les niveaux"),
+      import: getValue("quiz.import", "Importer"),
+      newQuestion: getValue("quiz.newQuestion", "Nouvelle question"),
+      levelsHint: getValue("quiz.levelsHint", "Niveaux de quiz - Cliquez pour filtrer, utilisez +1/+10 pour générer des questions IA"),
+      levelLabel: getValue("quiz.levelLabel", "Niv."),
+      question: getValue("quiz.question", "Question"),
+      answers: getValue("quiz.answers", "Réponses"),
+      editQuestion: getValue("quiz.editQuestion", "Modifier la question"),
+      createQuestion: getValue("quiz.createQuestion", "Nouvelle question"),
+      questionLabel: getValue("quiz.questionLabel", "Question"),
+      targetLevel: getValue("quiz.targetLevel", "Niveau cible (1-20)"),
+      category: getValue("quiz.category", "Catégorie"),
+      answersCheckCorrect: getValue("quiz.answersCheckCorrect", "Réponses (cochez les bonnes)"),
+      answerPlaceholder: getValue("quiz.answerPlaceholder", "Réponse"),
+      atLeast2Answers: getValue("quiz.atLeast2Answers", "Au moins 2 réponses sont requises"),
+      atLeast1Correct: getValue("quiz.atLeast1Correct", "Au moins une réponse doit être correcte"),
+      deleteConfirm: getValue("quiz.deleteConfirm", "Supprimer cette question ?"),
+      generateSuccess: getValue("quiz.generateSuccess", "question(s) créée(s) ! Les traductions sont en cours..."),
+      generateError: getValue("quiz.generateError", "Erreur lors de la génération des questions"),
+      generate1: getValue("quiz.generate1", "Générer 1 question avec l'IA"),
+      generate10: getValue("quiz.generate10", "Générer 10 questions avec l'IA"),
+    },
     common: {
       loading: getValue("common.loading", "Chargement..."),
       error: getValue("common.error", "Erreur"),
@@ -330,6 +356,33 @@ export interface Translations {
   levels: {
     level: string;
   };
+  // Quiz
+  quiz: {
+    title: string;
+    questionsCount: string;
+    searchPlaceholder: string;
+    allLevels: string;
+    import: string;
+    newQuestion: string;
+    levelsHint: string;
+    levelLabel: string;
+    question: string;
+    answers: string;
+    editQuestion: string;
+    createQuestion: string;
+    questionLabel: string;
+    targetLevel: string;
+    category: string;
+    answersCheckCorrect: string;
+    answerPlaceholder: string;
+    atLeast2Answers: string;
+    atLeast1Correct: string;
+    deleteConfirm: string;
+    generateSuccess: string;
+    generateError: string;
+    generate1: string;
+    generate10: string;
+  };
   // Commun
   common: {
     loading: string;
@@ -491,6 +544,32 @@ export const FR: Translations = {
   levels: {
     level: "Niveau",
   },
+  quiz: {
+    title: "Gestion des Quiz",
+    questionsCount: "question(s) au total",
+    searchPlaceholder: "Rechercher une question...",
+    allLevels: "Tous les niveaux",
+    import: "Importer",
+    newQuestion: "Nouvelle question",
+    levelsHint: "Niveaux de quiz - Cliquez pour filtrer, utilisez +1/+10 pour générer des questions IA",
+    levelLabel: "Niv.",
+    question: "Question",
+    answers: "Réponses",
+    editQuestion: "Modifier la question",
+    createQuestion: "Nouvelle question",
+    questionLabel: "Question",
+    targetLevel: "Niveau cible (1-20)",
+    category: "Catégorie",
+    answersCheckCorrect: "Réponses (cochez les bonnes)",
+    answerPlaceholder: "Réponse",
+    atLeast2Answers: "Au moins 2 réponses sont requises",
+    atLeast1Correct: "Au moins une réponse doit être correcte",
+    deleteConfirm: "Supprimer cette question ?",
+    generateSuccess: "question(s) créée(s) ! Les traductions sont en cours...",
+    generateError: "Erreur lors de la génération des questions",
+    generate1: "Générer 1 question avec l'IA",
+    generate10: "Générer 10 questions avec l'IA",
+  },
   common: {
     loading: "Chargement...",
     error: "Erreur",
@@ -646,6 +725,32 @@ export const EN: Translations = {
   },
   levels: {
     level: "Level",
+  },
+  quiz: {
+    title: "Quiz Management",
+    questionsCount: "question(s) total",
+    searchPlaceholder: "Search a question...",
+    allLevels: "All levels",
+    import: "Import",
+    newQuestion: "New question",
+    levelsHint: "Quiz levels - Click to filter, use +1/+10 to generate AI questions",
+    levelLabel: "Lvl.",
+    question: "Question",
+    answers: "Answers",
+    editQuestion: "Edit question",
+    createQuestion: "New question",
+    questionLabel: "Question",
+    targetLevel: "Target level (1-20)",
+    category: "Category",
+    answersCheckCorrect: "Answers (check the correct ones)",
+    answerPlaceholder: "Answer",
+    atLeast2Answers: "At least 2 answers are required",
+    atLeast1Correct: "At least one answer must be correct",
+    deleteConfirm: "Delete this question?",
+    generateSuccess: "question(s) created! Translations are in progress...",
+    generateError: "Error generating questions",
+    generate1: "Generate 1 AI question",
+    generate10: "Generate 10 AI questions",
   },
   common: {
     loading: "Loading...",

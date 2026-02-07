@@ -64,7 +64,7 @@ export function QuizzesManager({
   onShowCreateDialogChange,
 }: QuizzesManagerProps) {
   const router = useRouter();
-  const { language: globalLanguage } = useI18n();
+  const { language: globalLanguage, t } = useI18n();
   const [quizzes, setQuizzes] = useState(initialQuizzes);
   const [internalShowDialog, setInternalShowDialog] = useState(false);
   
@@ -122,12 +122,12 @@ export function QuizzesManager({
     
     const validAnswers = formData.answers.filter((a) => a.text.trim());
     if (validAnswers.length < 2) {
-      alert("Au moins 2 réponses sont requises");
+      alert(t.quiz.atLeast2Answers);
       return;
     }
     
     if (!validAnswers.some((a) => a.isCorrect)) {
-      alert("Au moins une réponse doit être correcte");
+      alert(t.quiz.atLeast1Correct);
       return;
     }
 
@@ -158,7 +158,7 @@ export function QuizzesManager({
   };
 
   const handleDelete = async (quizId: string) => {
-    if (!confirm("Supprimer cette question ?")) return;
+    if (!confirm(t.quiz.deleteConfirm)) return;
     
     await fetch(`/api/quizzes/${quizId}`, { method: "DELETE" });
     router.refresh();
@@ -231,13 +231,13 @@ export function QuizzesManager({
       
       if (data.success) {
         router.refresh();
-        alert(`${data.created} question(s) créée(s) ! Les traductions sont en cours...`);
+        alert(`${data.created} ${t.quiz.generateSuccess}`);
       } else {
-        alert(`Erreur: ${data.error || "Échec de la génération"}`);
+        alert(`${t.common.error}: ${data.error || t.quiz.generateError}`);
       }
     } catch (error) {
       console.error("Erreur génération:", error);
-      alert("Erreur lors de la génération des questions");
+      alert(t.quiz.generateError);
     } finally {
       setGeneratingLevel(null);
     }
@@ -277,7 +277,7 @@ export function QuizzesManager({
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Rechercher une question..."
+            placeholder={t.quiz.searchPlaceholder}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -288,10 +288,10 @@ export function QuizzesManager({
           value={filterLevel}
           onChange={(e) => setFilterLevel(e.target.value)}
         >
-          <option value="">Tous les niveaux</option>
+          <option value="">{t.quiz.allLevels}</option>
           {levels.filter((l) => l.number >= 1).map((level) => (
             <option key={level.id} value={level.id}>
-              Niv. {level.number} - {level.name}
+              {t.quiz.levelLabel} {level.number} - {level.name}
             </option>
           ))}
         </select>
@@ -303,7 +303,7 @@ export function QuizzesManager({
             onClick={() => setShowImportDialog(true)}
           >
             <Upload className="h-4 w-4 mr-2" />
-            Importer
+            {t.quiz.import}
           </Button>
         </div>
       </div>
@@ -313,7 +313,7 @@ export function QuizzesManager({
         <div className="border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2 bg-gray-50 dark:bg-gray-900">
           <div className="text-xs text-gray-500 dark:text-gray-400 mb-2 font-medium flex items-center gap-2">
             <Sparkles className="h-3 w-3" />
-            Niveaux de quiz - Cliquez pour filtrer, utilisez +1/+10 pour générer des questions IA
+            {t.quiz.levelsHint}
           </div>
           <div className="grid grid-cols-10 gap-1.5">
             {levels.filter((l) => l.number >= 1).map((level) => {
@@ -332,7 +332,7 @@ export function QuizzesManager({
                   <div 
                     className="flex items-center justify-between cursor-pointer mb-1"
                     onClick={() => setFilterLevel(filterLevel === level.id ? "" : level.id)}
-                    title={`Niv. ${level.number} - ${level.name} - ${count} question(s)`}
+                    title={`${t.quiz.levelLabel} ${level.number} - ${level.name} - ${count} ${t.quiz.questionsCount}`}
                   >
                     <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300">N{level.number}</span>
                     <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400">{count}</span>
@@ -344,7 +344,7 @@ export function QuizzesManager({
                       className="px-1.5 py-0.5 text-[9px] font-medium rounded border border-green-400 bg-green-50 dark:bg-green-900 dark:border-green-600 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-800 disabled:opacity-50 transition-colors"
                       onClick={(e) => { e.stopPropagation(); generateQuestions(level.number, 1); }}
                       disabled={isGenerating}
-                      title="Générer 1 question avec l'IA"
+                      title={t.quiz.generate1}
                     >
                       {isGenerating ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : "+1"}
                     </button>
@@ -352,7 +352,7 @@ export function QuizzesManager({
                       className="px-1.5 py-0.5 text-[9px] font-medium rounded border border-purple-400 bg-purple-50 dark:bg-purple-900 dark:border-purple-600 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-800 disabled:opacity-50 transition-colors"
                       onClick={(e) => { e.stopPropagation(); generateQuestions(level.number, 10); }}
                       disabled={isGenerating}
-                      title="Générer 10 questions avec l'IA"
+                      title={t.quiz.generate10}
                     >
                       {isGenerating ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : "+10"}
                     </button>
@@ -375,7 +375,7 @@ export function QuizzesManager({
                 onClick={() => toggleSort("level")}
               >
                 <div className="flex items-center gap-2">
-                  Niveau
+                  {t.levels.level}
                   <SortIcon field="level" />
                 </div>
               </TableHead>
@@ -384,11 +384,11 @@ export function QuizzesManager({
                 onClick={() => toggleSort("question")}
               >
                 <div className="flex items-center gap-2">
-                  Question
+                  {t.quiz.question}
                   <SortIcon field="question" />
                 </div>
               </TableHead>
-              <TableHead className="w-64">Réponses</TableHead>
+              <TableHead className="w-64">{t.quiz.answers}</TableHead>
               <TableHead className="w-20"></TableHead>
             </TableRow>
           </TableHeader>
@@ -399,7 +399,7 @@ export function QuizzesManager({
                   <TableCell className="font-mono text-gray-500">{index + 1}</TableCell>
                   <TableCell>
                     <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                      Niv. {quiz.level.number}
+                      {t.quiz.levelLabel} {quiz.level.number}
                     </span>
                   </TableCell>
                   <TableCell className="max-w-md">
@@ -452,25 +452,25 @@ export function QuizzesManager({
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              {editingQuiz ? "Modifier la question" : "Nouvelle question"}
+              {editingQuiz ? t.quiz.editQuestion : t.quiz.createQuestion}
             </DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4 py-4 max-h-[60vh] overflow-auto">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Question *</label>
+              <label className="text-sm font-medium">{t.quiz.questionLabel} *</label>
               <textarea
                 className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900"
                 rows={3}
                 value={formData.question}
                 onChange={(e) => setFormData({ ...formData, question: e.target.value })}
-                placeholder="Entrez la question..."
+                placeholder={t.quiz.searchPlaceholder}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Niveau cible (1-20) *</label>
+                <label className="text-sm font-medium">{t.quiz.targetLevel} *</label>
                 <select
                   className="w-full h-10 px-3 rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
                   value={formData.levelId}
@@ -478,13 +478,13 @@ export function QuizzesManager({
                 >
                   {levels.filter((l) => l.number >= 1).map((level) => (
                     <option key={level.id} value={level.id}>
-                      Niv. {level.number} - {level.name}
+                      {t.quiz.levelLabel} {level.number} - {level.name}
                     </option>
                   ))}
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Catégorie</label>
+                <label className="text-sm font-medium">{t.quiz.category}</label>
                 <Input
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
@@ -494,7 +494,7 @@ export function QuizzesManager({
             </div>
 
             <div className="space-y-3">
-              <label className="text-sm font-medium">Réponses (cochez les bonnes)</label>
+              <label className="text-sm font-medium">{t.quiz.answersCheckCorrect}</label>
               {formData.answers.map((answer, index) => (
                 <div key={index} className="flex items-center gap-3">
                   <input
@@ -514,7 +514,7 @@ export function QuizzesManager({
                       newAnswers[index] = { ...answer, text: e.target.value };
                       setFormData({ ...formData, answers: newAnswers });
                     }}
-                    placeholder={`Réponse ${index + 1}`}
+                    placeholder={`${t.quiz.answerPlaceholder} ${index + 1}`}
                     className="flex-1"
                   />
                 </div>
@@ -524,10 +524,10 @@ export function QuizzesManager({
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-              Annuler
+              {t.common.cancel}
             </Button>
             <Button onClick={handleSubmit} isLoading={isLoading}>
-              {editingQuiz ? "Modifier" : "Créer"}
+              {editingQuiz ? t.common.edit : t.common.add}
             </Button>
           </DialogFooter>
         </DialogContent>
