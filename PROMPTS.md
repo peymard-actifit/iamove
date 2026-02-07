@@ -454,12 +454,16 @@ Dans la meme fenetre il me faut aussi un bouton d'importation "Vrac" qui, soit r
 → Affichage du résumé par niveau après import (ex: "Niv.1: 50, Niv.2: 30")
 
 ---
-*Dernière mise à jour: 2026-02-07*
+
+### Prompt #56 (2026-02-07)
 ```
-Change l'ordre des onglets dans le site publié, mettre : Profil, Organigramme, Évaluation, Formation
+Ca fait exactememnt pareil, importe directement les données dans la base et les questions de niveau 2. FAit le maintenant, sans passer par l'interface du studio. Et traduit en 26 langues.
 ```
-→ Nouvel ordre des onglets : Profil → Organigramme → Évaluation → Formation
-→ Onglet par défaut : Profil (tab3)
+→ Création API `/api/seed/level2` pour import direct des 120 questions niveau 2
+→ Import des questions extraites manuellement du PDF fourni
+→ Système d'import par lots pour éviter les timeouts Vercel (10 questions/lot)
+→ 120 questions importées avec 3120 traductions (26 langues via DeepL)
+→ Questions couvrant : IA grand public, recommandations, reconnaissance vocale/faciale, etc.
 
 ---
 *Dernière mise à jour: 2026-02-07*
