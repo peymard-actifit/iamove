@@ -1,14 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "nextjs",
-  "crons": [
-    {
-      "path": "/api/cron/translate-quizzes",
-      "schedule": "*/10 * * * *"
-    },
-    {
-      "path": "/api/cron/translate-levels",
-      "schedule": "0 */6 * * *"
-    }
-  ]
+  "framework": "nextjs"
 }
