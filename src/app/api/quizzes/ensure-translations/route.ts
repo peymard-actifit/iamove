@@ -8,32 +8,50 @@ const TARGET_LANGUAGES = [
   "RO", "SK", "UK", "BG", "HR"
 ];
 
-// Traduction via DeepL
-async function translateText(text: string, targetLang: string): Promise<string> {
-  if (!process.env.DEEPL_API_KEY || !text || text.trim() === "") return text;
+// Traduction via DeepL avec retry
+async function translateText(text: string, targetLang: string, retries = 3): Promise<string | null> {
+  if (!process.env.DEEPL_API_KEY || !text || text.trim() === "") return null;
 
-  try {
-    const response = await fetch("https://api.deepl.com/v2/translate", {
-      method: "POST",
-      headers: {
-        "Authorization": `DeepL-Auth-Key ${process.env.DEEPL_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        text: [text],
-        source_lang: "FR",
-        target_lang: targetLang === "EN" ? "EN-US" : targetLang,
-      }),
-    });
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      const response = await fetch("https://api.deepl.com/v2/translate", {
+        method: "POST",
+        headers: {
+          "Authorization": `DeepL-Auth-Key ${process.env.DEEPL_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: [text],
+          source_lang: "FR",
+          target_lang: targetLang === "EN" ? "EN-US" : targetLang,
+        }),
+      });
 
-    if (response.ok) {
-      const data = await response.json();
-      return data.translations[0]?.text || text;
+      if (response.ok) {
+        const data = await response.json();
+        const translated = data.translations[0]?.text;
+        if (translated && translated !== text) {
+          return translated;
+        }
+        return null; // Traduction identique = pas traduit
+      }
+
+      // Rate limit - attendre avant de réessayer
+      if (response.status === 429) {
+        await new Promise(resolve => setTimeout(resolve, 2000 * (attempt + 1)));
+        continue;
+      }
+
+      // Autre erreur - log et continuer
+      console.error(`[ensure-translations] DeepL ${response.status} pour ${targetLang}`);
+    } catch (error) {
+      console.error(`[ensure-translations] Erreur ${targetLang}:`, error);
+      if (attempt < retries - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+      }
     }
-  } catch (error) {
-    console.error(`[ensure-translations] Erreur ${targetLang}:`, error);
   }
-  return text;
+  return null;
 }
 
 // POST - Traduit un batch de questions sans traduction
@@ -55,14 +73,16 @@ export async function POST() {
     });
 
     // Filtrer celles qui ont besoin de traduction (moins de 25 traductions ou traductions identiques au français)
-    const quizzesToTranslate = quizzesWithTranslations.filter(quiz => {
+    const allQuizzesToTranslate = quizzesWithTranslations.filter(quiz => {
       const existingLangs = quiz.translations.map(t => t.language);
       const missingLangs = TARGET_LANGUAGES.filter(lang => !existingLangs.includes(lang));
       const untranslatedLangs = quiz.translations
         .filter(t => t.language !== "FR" && t.question === quiz.question)
         .map(t => t.language);
       return missingLangs.length > 0 || untranslatedLangs.length > 0;
-    }).slice(0, 5); // Traiter 5 questions par appel
+    });
+    
+    const quizzesToTranslate = allQuizzesToTranslate.slice(0, 10); // Traiter 10 questions par appel
 
     let translationsCreated = 0;
     let quizzesProcessed = 0;
@@ -86,15 +106,19 @@ export async function POST() {
 
         const translatedQuestion = await translateText(quiz.question, lang);
         
-        // Ne pas sauvegarder si la traduction est identique (échec DeepL)
-        if (translatedQuestion === quiz.question) continue;
+        // Passer à la langue suivante si la traduction a échoué
+        if (!translatedQuestion) continue;
 
         const originalAnswers = quiz.answers as Array<{ text: string; isCorrect: boolean }>;
         const translatedAnswers = [];
 
         for (const ans of originalAnswers) {
           const translatedText = await translateText(ans.text, lang);
-          translatedAnswers.push({ text: translatedText, isCorrect: ans.isCorrect });
+          // Si une réponse échoue, utiliser l'original pour cette réponse
+          translatedAnswers.push({ 
+            text: translatedText || ans.text, 
+            isCorrect: ans.isCorrect 
+          });
         }
 
         await prisma.quizTranslation.upsert({
@@ -121,7 +145,8 @@ export async function POST() {
       success: true,
       quizzesProcessed,
       translationsCreated,
-      hasMore: quizzesToTranslate.length > 0,
+      hasMore: allQuizzesToTranslate.length > quizzesToTranslate.length || (quizzesToTranslate.length > 0 && translationsCreated > 0),
+      remaining: allQuizzesToTranslate.length,
       duration: Date.now() - startTime,
     });
   } catch (error) {

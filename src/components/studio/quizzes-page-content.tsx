@@ -67,21 +67,35 @@ export function QuizzesPageContent({
         console.log(`[Auto-traduction] ${status.missingCount} traductions manquantes`);
 
         // Lancer la traduction en boucle jusqu'à ce que tout soit fait
-        let hasMore = true;
         let totalCreated = 0;
         let batchCount = 0;
+        let consecutiveEmpty = 0;
+        const maxConsecutiveEmpty = 3; // Réessayer 3 fois avant de considérer comme terminé
 
-        while (hasMore) {
+        while (true) {
           const res = await fetch("/api/quizzes/ensure-translations", { method: "POST" });
-          if (!res.ok) break;
+          if (!res.ok) {
+            // En cas d'erreur, attendre un peu et réessayer
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            consecutiveEmpty++;
+            if (consecutiveEmpty >= maxConsecutiveEmpty) break;
+            continue;
+          }
 
           const data = await res.json();
           totalCreated += data.translationsCreated || 0;
-          hasMore = data.hasMore && data.translationsCreated > 0;
           batchCount++;
 
           if (data.translationsCreated > 0) {
             console.log(`[Auto-traduction] +${data.translationsCreated} (total: ${totalCreated})`);
+            consecutiveEmpty = 0; // Reset le compteur si on a fait des traductions
+          } else {
+            consecutiveEmpty++;
+          }
+
+          // Si pas de nouvelles traductions ET plus rien à faire, on arrête
+          if (!data.hasMore || consecutiveEmpty >= maxConsecutiveEmpty) {
+            break;
           }
 
           // Recharger les quizzes via API toutes les 10 batches (sans rafraîchir la page)
@@ -93,10 +107,9 @@ export function QuizzesPageContent({
             }
           }
 
-          // Petite pause entre les batches
-          if (hasMore) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          }
+          // Petite pause entre les batches (plus longue si rien créé pour éviter surcharge)
+          const delay = data.translationsCreated > 0 ? 500 : 2000;
+          await new Promise(resolve => setTimeout(resolve, delay));
         }
 
         // Recharger à la fin pour afficher toutes les nouvelles traductions
