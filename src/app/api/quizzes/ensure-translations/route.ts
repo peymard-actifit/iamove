@@ -3,8 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { TARGET_LANGUAGES, getDeepLLanguageCode } from "@/lib/deepl";
 
 // Traduction via DeepL avec retry
+// Retourne le texte traduit (même si identique à l'original - c'est la traduction correcte)
+// Retourne null uniquement en cas d'erreur
 async function translateTextWithRetry(text: string, targetLang: string, retries = 3): Promise<string | null> {
-  if (!process.env.DEEPL_API_KEY || !text || text.trim() === "") return null;
+  if (!process.env.DEEPL_API_KEY || !text || text.trim() === "") return text || null;
 
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
@@ -24,10 +26,9 @@ async function translateTextWithRetry(text: string, targetLang: string, retries 
       if (response.ok) {
         const data = await response.json();
         const translated = data.translations[0]?.text;
-        if (translated && translated !== text) {
-          return translated;
-        }
-        return null; // Traduction identique = pas traduit
+        // Retourner le texte traduit, même s'il est identique à l'original
+        // (certains mots sont identiques dans plusieurs langues)
+        return translated || text;
       }
 
       // Rate limit - attendre avant de réessayer
@@ -66,14 +67,13 @@ export async function POST() {
       orderBy: { createdAt: "asc" },
     });
 
-    // Filtrer celles qui ont besoin de traduction (moins de 25 traductions ou traductions identiques au français)
+    // Filtrer celles qui ont besoin de traduction (moins de 25 traductions)
+    // Note: on ne considère plus les traductions "identiques" comme manquantes car
+    // certains textes sont légitimement identiques dans plusieurs langues
     const allQuizzesToTranslate = quizzesWithTranslations.filter(quiz => {
       const existingLangs = quiz.translations.map(t => t.language);
       const missingLangs = TARGET_LANGUAGES.filter(lang => !existingLangs.includes(lang));
-      const untranslatedLangs = quiz.translations
-        .filter(t => t.language !== "FR" && t.question === quiz.question)
-        .map(t => t.language);
-      return missingLangs.length > 0 || untranslatedLangs.length > 0;
+      return missingLangs.length > 0;
     });
     
     const quizzesToTranslate = allQuizzesToTranslate.slice(0, 10); // Traiter 10 questions par appel
@@ -85,11 +85,7 @@ export async function POST() {
       if (Date.now() - startTime > maxDuration) break;
 
       const existingLangs = quiz.translations.map(t => t.language);
-      const missingLangs = TARGET_LANGUAGES.filter(lang => !existingLangs.includes(lang));
-      const untranslatedLangs = quiz.translations
-        .filter(t => t.language !== "FR" && t.question === quiz.question)
-        .map(t => t.language);
-      const langsToTranslate = [...new Set([...missingLangs, ...untranslatedLangs])];
+      const langsToTranslate = TARGET_LANGUAGES.filter(lang => !existingLangs.includes(lang));
 
       if (langsToTranslate.length === 0) continue;
 
