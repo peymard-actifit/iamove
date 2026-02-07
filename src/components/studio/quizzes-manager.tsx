@@ -327,35 +327,34 @@ export function QuizzesManager({
                       : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-blue-300"
                   }`}
                 >
-                  {/* Contenu de la tuile */}
+                  {/* Ligne du haut: numéro et compteur */}
                   <div 
                     className="flex items-center justify-between cursor-pointer"
                     onClick={() => setFilterLevel(filterLevel === level.id ? "" : level.id)}
                     title={`${level.name} - ${count} questions`}
                   >
-                    {/* Numéro du niveau - plus visible */}
                     <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{level.number}</span>
-                    
-                    {/* Compteur + Boutons à droite */}
-                    <div className="flex items-center gap-1">
-                      <span className="text-[9px] font-bold text-blue-600 dark:text-blue-400">{count}</span>
-                      <button
-                        className="px-1 py-0 text-[7px] font-medium rounded border border-green-400 bg-green-50 dark:bg-green-900/50 text-green-700 dark:text-green-300 hover:bg-green-100 disabled:opacity-50"
-                        onClick={(e) => { e.stopPropagation(); generateQuestions(level.number, 1); }}
-                        disabled={isGenerating}
-                        title={t.quiz.generate1}
-                      >
-                        {isGenerating ? "..." : "+1"}
-                      </button>
-                      <button
-                        className="px-1 py-0 text-[7px] font-medium rounded border border-purple-400 bg-purple-50 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 hover:bg-purple-100 disabled:opacity-50"
-                        onClick={(e) => { e.stopPropagation(); generateQuestions(level.number, 10); }}
-                        disabled={isGenerating}
-                        title={t.quiz.generate10}
-                      >
-                        {isGenerating ? "..." : "+10"}
-                      </button>
-                    </div>
+                    <span className="text-[9px] font-bold text-blue-600 dark:text-blue-400">{count}</span>
+                  </div>
+                  
+                  {/* Boutons +1 +10 à droite */}
+                  <div className="flex gap-0.5 justify-end mt-0.5">
+                    <button
+                      className="px-1 py-0 text-[7px] font-medium rounded border border-green-400 bg-green-50 dark:bg-green-900/50 text-green-700 dark:text-green-300 hover:bg-green-100 disabled:opacity-50"
+                      onClick={(e) => { e.stopPropagation(); generateQuestions(level.number, 1); }}
+                      disabled={isGenerating}
+                      title={t.quiz.generate1}
+                    >
+                      {isGenerating ? "..." : "+1"}
+                    </button>
+                    <button
+                      className="px-1 py-0 text-[7px] font-medium rounded border border-purple-400 bg-purple-50 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 hover:bg-purple-100 disabled:opacity-50"
+                      onClick={(e) => { e.stopPropagation(); generateQuestions(level.number, 10); }}
+                      disabled={isGenerating}
+                      title={t.quiz.generate10}
+                    >
+                      {isGenerating ? "..." : "+10"}
+                    </button>
                   </div>
                 </div>
               );
@@ -395,22 +394,22 @@ export function QuizzesManager({
           <TableBody>
             {filteredQuizzes.map((quiz, index) => {
               return (
-                <TableRow key={quiz.id}>
-                  <TableCell className="font-mono text-gray-500">{index + 1}</TableCell>
-                  <TableCell>
-                    <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                      {t.quiz.levelLabel} {quiz.level.number}
+                <TableRow key={quiz.id} className="h-8">
+                  <TableCell className="font-mono text-gray-500 text-xs py-1">{index + 1}</TableCell>
+                  <TableCell className="py-1">
+                    <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                      Niv. {quiz.level.number}
                     </span>
                   </TableCell>
-                  <TableCell className="max-w-md">
-                    <p className="truncate font-medium">{getTranslatedQuestion(quiz)}</p>
+                  <TableCell className="max-w-md py-1">
+                    <p className="truncate text-sm">{getTranslatedQuestion(quiz)}</p>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
+                  <TableCell className="py-1">
+                    <div className="flex gap-0.5">
                       {getTranslatedAnswers(quiz)?.map((a, i) => (
                         <span
                           key={i}
-                          className={`px-1.5 py-0.5 rounded text-[10px] ${
+                          className={`px-1 py-0 rounded text-[9px] ${
                             a.isCorrect
                               ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
                               : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
@@ -422,21 +421,23 @@ export function QuizzesManager({
                       ))}
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
+                  <TableCell className="py-1">
+                    <div className="flex gap-0">
                       <Button
                         variant="ghost"
                         size="icon"
+                        className="h-6 w-6"
                         onClick={() => handleEdit(quiz)}
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-3 w-3" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
+                        className="h-6 w-6"
                         onClick={() => handleDelete(quiz.id)}
                       >
-                        <Trash2 className="h-4 w-4 text-red-500" />
+                        <Trash2 className="h-3 w-3 text-red-500" />
                       </Button>
                     </div>
                   </TableCell>
