@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const pdfParse = require("pdf-parse");
+
+// Import dynamique de pdf-parse pour éviter les erreurs de build
+async function parsePDF(buffer: Buffer): Promise<string> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const pdfParse = require("pdf-parse");
+    const data = await pdfParse(buffer);
+    return data.text;
+  } catch (error) {
+    console.error("Erreur pdf-parse:", error);
+    throw new Error("Impossible de parser le PDF");
+  }
+}
 
 // Les 26 langues supportées
 const SUPPORTED_LANGUAGES = [
@@ -202,17 +213,16 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     
-    let pdfData;
+    let pdfText: string;
     try {
-      pdfData = await pdfParse(buffer);
-    } catch {
+      pdfText = await parsePDF(buffer);
+    } catch (error) {
+      console.error("Erreur lecture PDF:", error);
       return NextResponse.json(
         { error: "Impossible de lire le fichier PDF" },
         { status: 400 }
       );
     }
-
-    const pdfText = pdfData.text;
     
     // Parser les questions du PDF
     const questions = parseQuizQuestions(pdfText);
@@ -306,8 +316,17 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Erreur import PDF:", error);
     return NextResponse.json(
-      { error: "Erreur serveur lors de l'importation" },
+      { error: "Erreur serveur lors de l'importation", details: String(error) },
       { status: 500 }
     );
   }
+}
+
+// GET pour vérifier que l'API est accessible
+export async function GET() {
+  return NextResponse.json({
+    status: "ok",
+    endpoint: "import-from-pdf",
+    method: "POST required with FormData (file, levelNumber, replaceExisting)",
+  });
 }
