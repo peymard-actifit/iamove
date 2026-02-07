@@ -71,6 +71,28 @@ export function QuizzesManager({
   useEffect(() => {
     setQuizzes(initialQuizzes);
   }, [initialQuizzes]);
+
+  // Quand la langue change, vérifier et créer les traductions manquantes
+  useEffect(() => {
+    const lang = globalLanguage.toUpperCase();
+    if (lang === "FR") return;
+
+    // Vérifier si des questions n'ont pas de traduction pour cette langue
+    const needsTranslation = quizzes.some(q => {
+      if (!q.translations || q.translations.length === 0) return true;
+      return !q.translations.find(t => t.language === lang);
+    });
+
+    if (needsTranslation) {
+      // Déclencher la traduction en arrière-plan
+      fetch("/api/quizzes/ensure-translations", { method: "POST" })
+        .then(() => {
+          // Rafraîchir pour obtenir les nouvelles traductions
+          router.refresh();
+        })
+        .catch(() => {});
+    }
+  }, [globalLanguage, quizzes, router]);
   
   // Utiliser le state externe si fourni, sinon le state interne
   const showCreateDialog = externalShowDialog !== undefined ? externalShowDialog : internalShowDialog;
