@@ -87,11 +87,18 @@ export function LevelsEditorDialog({ open, onOpenChange }: LevelsEditorDialogPro
       const res = await fetch("/api/levels");
       if (res.ok) {
         const data = await res.json();
-        setLevels(data);
         
         // Si moins de 21 niveaux, initialiser automatiquement
         if (data.length < 21) {
-          await seedLevels();
+          const seedRes = await fetch("/api/levels/seed", { method: "POST" });
+          if (seedRes.ok) {
+            const seedData = await seedRes.json();
+            setLevels(seedData.levels);
+          } else {
+            setLevels(data);
+          }
+        } else {
+          setLevels(data);
         }
       }
     } catch {
