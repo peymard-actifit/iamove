@@ -55,8 +55,8 @@ export async function POST(
             },
           });
 
-          // Si 10 bonnes réponses, passer au niveau suivant
-          if (correctAnswers >= 10) {
+          // Si 15 bonnes réponses, passer au niveau suivant
+          if (correctAnswers >= 15) {
             await prisma.person.update({
               where: { id: personId },
               data: { currentLevel: targetLevel },

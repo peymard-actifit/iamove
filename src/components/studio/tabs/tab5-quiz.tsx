@@ -8,6 +8,8 @@ import { useI18n } from "@/lib/i18n";
 
 // Limite de bonnes réponses pour valider un niveau
 const PASSING_SCORE = 15;
+const TOTAL_QUESTIONS = 20;
+const MAX_ERRORS = TOTAL_QUESTIONS - PASSING_SCORE; // 5 erreurs max = échec certain à 6
 
 interface Tab5QuizProps {
   siteId: string;
@@ -137,6 +139,8 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
   const [targetLevel, setTargetLevel] = useState<number | null>(null);
   const [quizFinished, setQuizFinished] = useState(false);
   const [passedEarly, setPassedEarly] = useState(false);
+  const [failedEarly, setFailedEarly] = useState(false);
+  const [errors, setErrors] = useState(0);
 
   const startQuiz = async (level?: number) => {
     const levelToUse = level ?? currentLevel + 1;
@@ -144,6 +148,8 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
     setIsLoading(true);
     setQuizFinished(false);
     setPassedEarly(false);
+    setFailedEarly(false);
+    setErrors(0);
     try {
       const res = await fetch(`/api/sites/${siteId}/quiz/start`, {
         method: "POST",
@@ -193,13 +199,26 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
     setShowResult(true);
     
     const newScore = isAnswerCorrect ? score + 1 : score;
+    const newErrors = isAnswerCorrect ? errors : errors + 1;
+    
     if (isAnswerCorrect) {
       setScore(newScore);
+    } else {
+      setErrors(newErrors);
     }
 
     // Vérifier si le score de passage est atteint (15/20)
     if (newScore >= PASSING_SCORE) {
       setPassedEarly(true);
+      setQuizFinished(true);
+    }
+    // Vérifier si l'échec est certain (plus de 5 erreurs = impossible d'atteindre 15/20)
+    else if (newErrors > MAX_ERRORS) {
+      setFailedEarly(true);
+      setQuizFinished(true);
+    }
+    // Vérifier si c'est la dernière question
+    else if (currentQuestionIndex >= currentQuiz.length - 1) {
       setQuizFinished(true);
     }
 
@@ -217,7 +236,7 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
   };
 
   const nextQuestion = () => {
-    if (!currentQuiz) return;
+    if (!currentQuiz || quizFinished) return;
     
     if (currentQuestionIndex < currentQuiz.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
@@ -233,7 +252,10 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
     setCurrentQuiz(null);
     setTargetLevel(null);
     setQuizFinished(false);
+    setPassedEarly(false);
+    setFailedEarly(false);
     setScore(0);
+    setErrors(0);
   };
 
   // Rendu du contenu du quizz (partie droite)
@@ -291,7 +313,7 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
     // Quiz terminé
     if (quizFinished && currentQuiz) {
       const passed = score >= PASSING_SCORE;
-      const questionsAnswered = currentQuestionIndex + (showResult ? 1 : 0);
+      const questionsAnswered = currentQuestionIndex + 1;
       return (
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="text-center">
@@ -306,21 +328,29 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
               <XCircle className="h-20 w-20 mx-auto mb-4 text-red-400" />
             )}
             <h3 className="text-2xl font-bold mb-2">
-              {passed ? (passedEarly ? "Bravo ! Niveau validé !" : "Félicitations !") : "Dommage..."}
+              {passed 
+                ? (passedEarly ? "Bravo ! Niveau validé !" : "Félicitations !") 
+                : (failedEarly ? "Échec - Quiz terminé" : "Dommage...")}
             </h3>
             <p className="text-4xl font-bold mb-4">
               {score} / {questionsAnswered}
               {passedEarly && <span className="text-lg text-green-500 ml-2">({PASSING_SCORE} atteint !)</span>}
+              {failedEarly && <span className="text-lg text-red-500 ml-2">({errors} erreurs)</span>}
             </p>
             {passedEarly && (
               <p className="text-lg mb-2 text-purple-600">
                 Vous avez atteint le score de {PASSING_SCORE} bonnes réponses en seulement {questionsAnswered} questions !
               </p>
             )}
+            {failedEarly && (
+              <p className="text-lg mb-2 text-red-600">
+                Avec {errors} erreurs, il n&apos;est plus possible d&apos;atteindre {PASSING_SCORE}/{TOTAL_QUESTIONS}.
+              </p>
+            )}
             <p className={`text-lg mb-6 ${passed ? "text-green-600" : "text-red-600"}`}>
               {passed 
                 ? `Niveau ${targetLevel} validé !` 
-                : `Il faut ${PASSING_SCORE}/20 minimum pour valider le niveau ${targetLevel}`
+                : `Il faut ${PASSING_SCORE}/${TOTAL_QUESTIONS} minimum pour valider le niveau ${targetLevel}`
               }
             </p>
             <div className="flex gap-4 justify-center">
@@ -338,8 +368,8 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
       );
     }
 
-    // Quiz en cours
-    if (currentQuiz && currentQuiz.length > 0) {
+    // Quiz en cours (seulement si pas terminé)
+    if (currentQuiz && currentQuiz.length > 0 && !quizFinished) {
       const currentQuestion = currentQuiz[currentQuestionIndex];
       return (
         <div className="flex-1 p-6 overflow-y-auto">
@@ -412,7 +442,7 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
                 </Button>
               ) : (
                 <Button onClick={nextQuestion}>
-                  {currentQuestionIndex < currentQuiz.length - 1 ? (
+                  {currentQuestionIndex < currentQuiz.length - 1 && !quizFinished ? (
                     <>
                       Question suivante
                       <ArrowRight className="ml-2 h-4 w-4" />
@@ -509,6 +539,64 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
     );
   }
 
+  // Quiz terminé - mode publié
+  if (quizFinished) {
+    const passed = score >= PASSING_SCORE;
+    const questionsAnswered = currentQuestionIndex + 1;
+    return (
+      <div className="max-w-2xl mx-auto">
+        <Card className="p-8 text-center">
+          {passed ? (
+            <div className="relative inline-block">
+              <Trophy className="h-20 w-20 mx-auto mb-4 text-yellow-500" />
+              {passedEarly && (
+                <PartyPopper className="h-8 w-8 absolute -top-2 -right-2 text-purple-500 animate-bounce" />
+              )}
+            </div>
+          ) : (
+            <XCircle className="h-20 w-20 mx-auto mb-4 text-red-400" />
+          )}
+          <h3 className="text-2xl font-bold mb-2">
+            {passed 
+              ? (passedEarly ? "Bravo ! Niveau validé !" : "Félicitations !") 
+              : (failedEarly ? "Échec - Quiz terminé" : "Dommage...")}
+          </h3>
+          <p className="text-4xl font-bold mb-4">
+            {score} / {questionsAnswered}
+            {passedEarly && <span className="text-lg text-green-500 ml-2">({PASSING_SCORE} atteint !)</span>}
+            {failedEarly && <span className="text-lg text-red-500 ml-2">({errors} erreurs)</span>}
+          </p>
+          {passedEarly && (
+            <p className="text-lg mb-2 text-purple-600">
+              Vous avez atteint {PASSING_SCORE} bonnes réponses en seulement {questionsAnswered} questions !
+            </p>
+          )}
+          {failedEarly && (
+            <p className="text-lg mb-2 text-red-600">
+              Avec {errors} erreurs, il n&apos;est plus possible d&apos;atteindre {PASSING_SCORE}/{TOTAL_QUESTIONS}.
+            </p>
+          )}
+          <p className={`text-lg mb-6 ${passed ? "text-green-600" : "text-red-600"}`}>
+            {passed 
+              ? `Niveau ${currentLevel + 1} validé !` 
+              : `Il faut ${PASSING_SCORE}/${TOTAL_QUESTIONS} minimum pour valider`
+            }
+          </p>
+          <div className="flex gap-4 justify-center">
+            <Button variant="outline" onClick={resetQuiz}>
+              Retour
+            </Button>
+            {!passed && (
+              <Button onClick={() => startQuiz()}>
+                Réessayer
+              </Button>
+            )}
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   const currentQuestion = currentQuiz[currentQuestionIndex];
 
   return (
@@ -516,7 +604,7 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
       {/* Progress */}
       <div className="flex items-center justify-between text-sm text-gray-500">
         <span>Question {currentQuestionIndex + 1} / {currentQuiz.length}</span>
-        <span>Score : {score} / {currentQuestionIndex + (showResult ? 1 : 0)}</span>
+        <span>Score : {score} / {currentQuestionIndex + (showResult ? 1 : 0)} | Erreurs : {errors}/{MAX_ERRORS + 1}</span>
       </div>
       <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
         <div
@@ -573,7 +661,7 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
           </Button>
         ) : (
           <Button onClick={nextQuestion}>
-            {currentQuestionIndex < currentQuiz.length - 1 ? (
+            {currentQuestionIndex < currentQuiz.length - 1 && !quizFinished ? (
               <>
                 Question suivante
                 <ArrowRight className="ml-2 h-4 w-4" />
