@@ -119,19 +119,22 @@ Réponds UNIQUEMENT avec un nombre entre 1 et 20, sans aucune explication.`
 }
 
 // Parser le contenu du PDF pour extraire les questions avec détection de niveau
+// Supporte plusieurs formats: Q1/Q2, 1./2., Quiz 1, etc.
 function parseQuizQuestionsWithLevel(text: string): QuizQuestionWithLevel[] {
   const questions: QuizQuestionWithLevel[] = [];
   
-  // Normaliser le texte
-  const normalizedText = text.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n");
+  // Nettoyer le texte
+  let cleanText = text
+    .replace(/\r\n/g, "\n")
+    .replace(/-- \d+ of \d+ --/g, "") // Enlever les indicateurs de page
+    .replace(/\n{3,}/g, "\n\n");
   
   // Pattern pour détecter le niveau dans le texte
-  // Ex: "Niveau 1", "Niv. 3", "N1", "Level 5", etc.
-  const levelPattern = /(?:niveau|niv\.?|n|level)\s*(\d{1,2})/i;
+  const levelPattern = /(?:niveau|niv\.?|level)\s*(\d{1,2})/i;
   
   // Chercher un niveau global au début du document
   let globalLevel: number | undefined;
-  const globalLevelMatch = normalizedText.substring(0, 500).match(levelPattern);
+  const globalLevelMatch = cleanText.substring(0, 500).match(levelPattern);
   if (globalLevelMatch) {
     const lvl = parseInt(globalLevelMatch[1], 10);
     if (lvl >= 1 && lvl <= 20) {
@@ -139,21 +142,45 @@ function parseQuizQuestionsWithLevel(text: string): QuizQuestionWithLevel[] {
     }
   }
   
-  // Pattern pour trouver les questions
-  const questionPattern = /(\d{1,3})[.\)]\s*([^\n]+(?:\n(?![A-D][\)\.])[^\n]*)*)\s*\n\s*A[\)\.]?\s*([^\n]+)\s*\n\s*B[\)\.]?\s*([^\n]+)\s*\n\s*C[\)\.]?\s*([^\n]+)\s*\n\s*D[\)\.]?\s*([^\n]+)/gi;
+  // Symboles pour détecter les bonnes réponses
+  const correctMarkers = /[✓✔�]/;
   
-  let match;
-  while ((match = questionPattern.exec(normalizedText)) !== null) {
-    const fullMatch = match[0];
-    const questionText = match[2].trim().replace(/\n/g, " ");
-    const answerA = match[3].trim();
-    const answerB = match[4].trim();
-    const answerC = match[5].trim();
-    const answerD = match[6].trim();
+  // Pattern pour format Q1, Q2, Quiz 1, etc.
+  const questionBlocks = cleanText.split(/(?=\n(?:Q|Quiz\s*)\d+\b)/i);
+  
+  for (const block of questionBlocks) {
+    const headerMatch = block.match(/^[\n\s]*(?:Q|Quiz\s*)(\d+)\b[^\n]*/i);
+    if (!headerMatch) continue;
     
-    // Chercher le niveau dans le contexte de la question
+    const lines = block.split("\n").map(l => l.trim()).filter(l => l);
+    if (lines.length < 2) continue;
+    
+    // Extraire le texte de la question
+    let questionText = "";
+    let answerStartIndex = 1;
+    
+    const firstLine = lines[0];
+    const questionInFirstLine = firstLine.replace(/^(?:Q|Quiz\s*)\d+\s*/i, "").trim();
+    
+    if (questionInFirstLine && !questionInFirstLine.match(/^[A-D]\./i)) {
+      questionText = questionInFirstLine.replace(/^:?\s*/, "").replace(/Question\s*:\s*/i, "").trim();
+    } else {
+      if (lines.length > 1 && !lines[1].match(/^[A-D]\./i)) {
+        questionText = lines[1].replace(/^Question\s*:\s*/i, "").trim();
+        answerStartIndex = 2;
+      }
+    }
+    
+    if (!questionText && lines.length > 1) {
+      questionText = lines[1].trim();
+      answerStartIndex = 2;
+    }
+    
+    if (!questionText) continue;
+    
+    // Détecter le niveau local
     let detectedLevel = globalLevel;
-    const localLevelMatch = fullMatch.match(levelPattern);
+    const localLevelMatch = block.match(levelPattern);
     if (localLevelMatch) {
       const lvl = parseInt(localLevelMatch[1], 10);
       if (lvl >= 1 && lvl <= 20) {
@@ -161,29 +188,33 @@ function parseQuizQuestionsWithLevel(text: string): QuizQuestionWithLevel[] {
       }
     }
     
-    // Détecter la bonne réponse
-    const answers = [
-      { text: answerA.replace(/^\*|\*$|✓|✔|\(correct\)/gi, "").trim(), isCorrect: /^\*|\*$|✓|✔|\(correct\)/i.test(answerA) },
-      { text: answerB.replace(/^\*|\*$|✓|✔|\(correct\)/gi, "").trim(), isCorrect: /^\*|\*$|✓|✔|\(correct\)/i.test(answerB) },
-      { text: answerC.replace(/^\*|\*$|✓|✔|\(correct\)/gi, "").trim(), isCorrect: /^\*|\*$|✓|✔|\(correct\)/i.test(answerC) },
-      { text: answerD.replace(/^\*|\*$|✓|✔|\(correct\)/gi, "").trim(), isCorrect: /^\*|\*$|✓|✔|\(correct\)/i.test(answerD) },
-    ];
+    // Extraire les réponses
+    const answers: { text: string; isCorrect: boolean }[] = [];
     
-    // Chercher "Réponse: X" après les réponses si aucune n'est marquée
-    if (!answers.some(a => a.isCorrect)) {
-      const afterMatch = normalizedText.substring(match.index + match[0].length, match.index + match[0].length + 100);
-      const correctPattern = /(?:réponse|bonne réponse|correct)\s*:?\s*([A-D])/i;
-      const correctMatch = afterMatch.match(correctPattern);
-      if (correctMatch) {
-        const idx = "ABCD".indexOf(correctMatch[1].toUpperCase());
-        if (idx >= 0) {
-          answers[idx].isCorrect = true;
+    for (let i = answerStartIndex; i < lines.length; i++) {
+      const line = lines[i];
+      const answerMatch = line.match(/^([A-D])[\.\)]\s*(.+)/i);
+      if (answerMatch) {
+        const answerText = answerMatch[2].trim();
+        const isCorrect = correctMarkers.test(answerText) || correctMarkers.test(line);
+        const cleanAnswerText = answerText.replace(/[✓✔�\s]+$/g, "").trim();
+        
+        if (cleanAnswerText) {
+          answers.push({ text: cleanAnswerText, isCorrect });
         }
       }
     }
     
-    // Par défaut, marquer la première comme correcte
-    if (!answers.some(a => a.isCorrect)) {
+    // Gérer les questions Vrai/Faux
+    if (answers.length === 1 && answers[0].text.toLowerCase() === "vrai") {
+      answers.length = 0;
+      answers.push({ text: "Vrai", isCorrect: true });
+      answers.push({ text: "Faux", isCorrect: false });
+    } else if (answers.length === 0) {
+      continue;
+    }
+    
+    if (!answers.some(a => a.isCorrect) && answers.length > 0) {
       answers[0].isCorrect = true;
     }
     
@@ -194,6 +225,7 @@ function parseQuizQuestionsWithLevel(text: string): QuizQuestionWithLevel[] {
     });
   }
   
+  console.log(`[Parser Bulk] ${questions.length} questions extraites`);
   return questions;
 }
 

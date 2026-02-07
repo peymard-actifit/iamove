@@ -45,55 +45,92 @@ async function translateText(text: string, targetLang: string): Promise<string> 
 }
 
 // Parser le contenu du PDF pour extraire les questions
+// Supporte plusieurs formats: Q1/Q2, 1./2., Quiz 1, etc.
 function parseQuizQuestions(text: string): QuizQuestion[] {
   const questions: QuizQuestion[] = [];
   
-  // Normaliser le texte (enlever les sauts de ligne multiples, etc.)
-  const normalizedText = text.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n");
+  // Nettoyer le texte
+  let cleanText = text
+    .replace(/\r\n/g, "\n")
+    .replace(/-- \d+ of \d+ --/g, "") // Enlever les indicateurs de page
+    .replace(/\n{3,}/g, "\n\n");
   
-  // Pattern pour trouver les questions
-  // Format attendu: numéro. Question? (ou Question :)
-  // Suivi de A) réponse, B) réponse, C) réponse, D) réponse
-  // La bonne réponse est marquée avec * ou (correct) ou en gras
+  // Symboles pour détecter les bonnes réponses (✓ peut apparaître comme caractères spéciaux)
+  const correctMarkers = /[✓✔�]/;
   
-  // Essayer différents patterns
+  // Pattern pour format Q1, Q2, Quiz 1, etc.
+  // Capture: Q + numéro, puis tout jusqu'à la prochaine question
+  const questionBlocks = cleanText.split(/(?=\n(?:Q|Quiz\s*)\d+\b)/i);
   
-  // Pattern 1: Questions numérotées avec réponses A), B), C), D)
-  const questionPattern = /(\d{1,3})[.\)]\s*([^\n]+(?:\n(?![A-D][\)\.])[^\n]*)*)\s*\n\s*A[\)\.]?\s*([^\n]+)\s*\n\s*B[\)\.]?\s*([^\n]+)\s*\n\s*C[\)\.]?\s*([^\n]+)\s*\n\s*D[\)\.]?\s*([^\n]+)/gi;
-  
-  let match;
-  while ((match = questionPattern.exec(normalizedText)) !== null) {
-    const questionText = match[2].trim().replace(/\n/g, " ");
-    const answerA = match[3].trim();
-    const answerB = match[4].trim();
-    const answerC = match[5].trim();
-    const answerD = match[6].trim();
+  for (const block of questionBlocks) {
+    // Vérifier si c'est un bloc de question
+    const headerMatch = block.match(/^[\n\s]*(?:Q|Quiz\s*)(\d+)\b[^\n]*/i);
+    if (!headerMatch) continue;
     
-    // Détecter la bonne réponse (marquée avec *, ✓, (correct), ou en MAJUSCULES dans certains formats)
-    const answers = [
-      { text: answerA.replace(/^\*|\*$|✓|✔|\(correct\)/gi, "").trim(), isCorrect: /^\*|\*$|✓|✔|\(correct\)/i.test(answerA) },
-      { text: answerB.replace(/^\*|\*$|✓|✔|\(correct\)/gi, "").trim(), isCorrect: /^\*|\*$|✓|✔|\(correct\)/i.test(answerB) },
-      { text: answerC.replace(/^\*|\*$|✓|✔|\(correct\)/gi, "").trim(), isCorrect: /^\*|\*$|✓|✔|\(correct\)/i.test(answerC) },
-      { text: answerD.replace(/^\*|\*$|✓|✔|\(correct\)/gi, "").trim(), isCorrect: /^\*|\*$|✓|✔|\(correct\)/i.test(answerD) },
-    ];
+    const lines = block.split("\n").map(l => l.trim()).filter(l => l);
+    if (lines.length < 2) continue;
     
-    // Si aucune réponse n'est marquée comme correcte, chercher après le bloc de réponses
-    if (!answers.some(a => a.isCorrect)) {
-      // Chercher "Réponse: X" ou "Bonne réponse: X" après les réponses
-      const afterMatch = normalizedText.substring(match.index + match[0].length, match.index + match[0].length + 100);
-      const correctPattern = /(?:réponse|bonne réponse|correct)\s*:?\s*([A-D])/i;
-      const correctMatch = afterMatch.match(correctPattern);
-      if (correctMatch) {
-        const correctLetter = correctMatch[1].toUpperCase();
-        const idx = "ABCD".indexOf(correctLetter);
-        if (idx >= 0) {
-          answers[idx].isCorrect = true;
+    // La première ligne contient Q# ou Quiz #, la question peut être sur la même ligne ou la suivante
+    let questionText = "";
+    let answerStartIndex = 1;
+    
+    // Chercher le texte de la question
+    const firstLine = lines[0];
+    const questionInFirstLine = firstLine.replace(/^(?:Q|Quiz\s*)\d+\s*/i, "").trim();
+    
+    if (questionInFirstLine && !questionInFirstLine.match(/^[A-D]\./i)) {
+      // La question est sur la première ligne (après Q#)
+      questionText = questionInFirstLine.replace(/^:?\s*/, "").replace(/Question\s*:\s*/i, "").trim();
+    } else {
+      // La question est sur la ligne suivante
+      if (lines.length > 1 && !lines[1].match(/^[A-D]\./i)) {
+        questionText = lines[1].replace(/^Question\s*:\s*/i, "").trim();
+        answerStartIndex = 2;
+      }
+    }
+    
+    // Si pas de question explicite, prendre la deuxième ligne
+    if (!questionText && lines.length > 1) {
+      questionText = lines[1].trim();
+      answerStartIndex = 2;
+    }
+    
+    if (!questionText) continue;
+    
+    // Extraire les réponses
+    const answers: { text: string; isCorrect: boolean }[] = [];
+    
+    for (let i = answerStartIndex; i < lines.length; i++) {
+      const line = lines[i];
+      
+      // Vérifier si c'est une ligne de réponse (A., B., C., D.)
+      const answerMatch = line.match(/^([A-D])[\.\)]\s*(.+)/i);
+      if (answerMatch) {
+        const answerText = answerMatch[2].trim();
+        // Détecter si c'est la bonne réponse (marqueur ✓ ou similaire)
+        const isCorrect = correctMarkers.test(answerText) || correctMarkers.test(line);
+        // Nettoyer le texte de la réponse
+        const cleanAnswerText = answerText.replace(/[✓✔�\s]+$/g, "").trim();
+        
+        if (cleanAnswerText) {
+          answers.push({ text: cleanAnswerText, isCorrect });
         }
       }
     }
     
-    // Si toujours aucune réponse correcte, marquer la première comme correcte par défaut
-    if (!answers.some(a => a.isCorrect)) {
+    // S'il n'y a pas de réponses multiples mais une seule (ex: "A. Vrai"), 
+    // créer des réponses Vrai/Faux
+    if (answers.length === 1 && answers[0].text.toLowerCase() === "vrai") {
+      answers.length = 0;
+      answers.push({ text: "Vrai", isCorrect: true });
+      answers.push({ text: "Faux", isCorrect: false });
+    } else if (answers.length === 0) {
+      // Pas de réponses trouvées, sauter cette question
+      continue;
+    }
+    
+    // S'assurer qu'au moins une réponse est marquée comme correcte
+    if (!answers.some(a => a.isCorrect) && answers.length > 0) {
       answers[0].isCorrect = true;
     }
     
@@ -103,45 +140,36 @@ function parseQuizQuestions(text: string): QuizQuestion[] {
     });
   }
   
-  // Si le pattern 1 n'a pas trouvé de questions, essayer un pattern alternatif
+  // Si aucune question trouvée avec le format Q#, essayer le format numérique classique
   if (questions.length === 0) {
-    // Pattern 2: Questions séparées par des lignes vides
-    const blocks = normalizedText.split(/\n\n+/);
-    let currentQuestion: QuizQuestion | null = null;
+    const numericPattern = /(\d{1,3})[.\)]\s*([^\n]+)/g;
+    let match;
     
-    for (const block of blocks) {
-      const lines = block.trim().split("\n").map(l => l.trim()).filter(l => l);
-      
-      if (lines.length === 0) continue;
-      
-      // Si la première ligne ressemble à une question (termine par ? ou contient un numéro)
-      if (lines[0].match(/^\d+[.\)]/)) {
-        if (currentQuestion) {
-          questions.push(currentQuestion);
-        }
+    while ((match = numericPattern.exec(cleanText)) !== null) {
+      const questionText = match[2].trim();
+      if (questionText.length > 10 && !questionText.match(/^[A-D]\./i)) {
+        // Chercher les réponses qui suivent
+        const afterQuestion = cleanText.substring(match.index + match[0].length, match.index + match[0].length + 500);
+        const answerMatches = afterQuestion.match(/[A-D][\.\)]\s*[^\n]+/gi) || [];
         
-        currentQuestion = {
-          question: lines[0].replace(/^\d+[.\)]\s*/, "").trim(),
-          answers: [],
-        };
-        
-        // Chercher les réponses dans les lignes suivantes
-        for (let i = 1; i < lines.length; i++) {
-          const line = lines[i];
-          if (line.match(/^[A-D][\)\.:]/i)) {
-            const isCorrect = line.includes("*") || line.includes("✓") || line.includes("✔");
-            const text = line.replace(/^[A-D][\)\.:]\s*/i, "").replace(/^\*|\*$|✓|✔/g, "").trim();
-            currentQuestion.answers.push({ text, isCorrect });
+        if (answerMatches.length >= 2) {
+          const answers = answerMatches.slice(0, 4).map(ans => {
+            const isCorrect = correctMarkers.test(ans);
+            const text = ans.replace(/^[A-D][\.\)]\s*/i, "").replace(/[✓✔�\s]+$/g, "").trim();
+            return { text, isCorrect };
+          });
+          
+          if (!answers.some(a => a.isCorrect)) {
+            answers[0].isCorrect = true;
           }
+          
+          questions.push({ question: questionText, answers });
         }
       }
     }
-    
-    if (currentQuestion && currentQuestion.answers.length > 0) {
-      questions.push(currentQuestion);
-    }
   }
   
+  console.log(`[Parser] ${questions.length} questions extraites`);
   return questions;
 }
 
