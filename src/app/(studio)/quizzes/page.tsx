@@ -20,7 +20,7 @@ export default async function QuizzesPage() {
       createdBy: { select: { name: true } },
     },
     orderBy: { createdAt: "desc" },
-    take: 100,
+    take: 500, // Augmenté pour afficher toutes les questions
   });
 
   const quizCount = await prisma.quiz.count();
