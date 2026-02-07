@@ -194,7 +194,8 @@ model Person {
 model Level {
   id            String    @id @default(cuid())
   number        Int       @unique // 0-20 (21 niveaux)
-  name          String    // "Non initié", "Curieux IA", etc.
+  name          String    // "Ignorant", "Touriste", etc.
+  category      String    @default("") // "Néophyte", "Utilisateur", "Technicien", "Chercheur"
   seriousGaming String    @default("") // Nom Star Wars
   description   String    @default("")
   color         String    @default("#3B82F6")

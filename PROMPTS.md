@@ -310,4 +310,20 @@ Dans la vue de gestion des quizz, le bouton nouvelle question doit être remont�
 → QuizzesManager modifié pour accepter un contrôle externe du dialog
 
 ---
-*Dernière mise à jour: 2026-02-06*
+
+### Prompt #44 (2026-02-07)
+```
+Récupère le nouveau fichier excel des niveaux et assure toi de bien sauvegarder dans la base la description qui doit être affichée au survol des niveaux dans la vue évaluation mais aussi la nouvelle colonne de catégories : néophyte, utilisateur, technicien, chercheur.
+```
+→ Lecture du nouveau fichier Excel (20260207 SOMONE ENGIE AINAC IASCALE.xlsx)
+→ Extraction des 21 niveaux avec les nouvelles données (catégories, descriptions complètes)
+→ Ajout du champ `category` au modèle Level dans le schéma Prisma
+→ Mise à jour du fichier levels.json avec les catégories
+→ Mise à jour de l'API seed pour inclure la catégorie
+→ Mise à jour de l'API PATCH pour modifier la catégorie
+→ Mise à jour du dialog d'édition des niveaux pour afficher/éditer la catégorie
+→ Mise à jour de l'échelle des niveaux dans tab5-quiz pour afficher la catégorie au survol
+→ Catégories : Néophyte (0-3), Utilisateur (4-10), Technicien (11-15), Chercheur (16-20)
+
+---
+*Dernière mise à jour: 2026-02-07*

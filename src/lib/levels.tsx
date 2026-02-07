@@ -8,6 +8,7 @@ import levelsData from "@/data/levels.json";
 export interface LevelInfo {
   number: number;
   name: string;
+  category: string; // "Néophyte", "Utilisateur", "Technicien", "Chercheur"
   seriousGaming: string;
   description: string;
   skills: {

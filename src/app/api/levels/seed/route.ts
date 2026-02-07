@@ -20,12 +20,14 @@ export async function POST() {
         where: { number: level.number },
         update: {
           name: level.name,
+          category: level.category || "",
           seriousGaming: level.seriousGaming,
           description: level.description,
         },
         create: {
           number: level.number,
           name: level.name,
+          category: level.category || "",
           seriousGaming: level.seriousGaming,
           description: level.description,
         },

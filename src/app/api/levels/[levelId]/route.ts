@@ -18,12 +18,13 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     const { levelId } = await params;
     const body = await request.json();
-    const { name, seriousGaming, description } = body;
+    const { name, category, seriousGaming, description } = body;
 
     const level = await prisma.level.update({
       where: { id: levelId },
       data: {
         ...(name && { name }),
+        ...(category !== undefined && { category }),
         ...(seriousGaming !== undefined && { seriousGaming }),
         ...(description !== undefined && { description }),
       },

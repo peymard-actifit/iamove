@@ -74,9 +74,19 @@ function LevelScale({ onStartQuiz, selectedLevel }: LevelScaleProps) {
       {/* Tooltip fixe en bas de la colonne */}
       {hoveredLevelInfo && (
         <div className="flex-shrink-0 p-2 border-t bg-gray-900 text-white">
-          <p className="text-xs font-semibold mb-1">
-            Niveau {hoveredLevelInfo.number} - {hoveredLevelInfo.name}
-          </p>
+          <div className="flex items-center gap-2 mb-1">
+            <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ${
+              hoveredLevelInfo.category === "Néophyte" ? "bg-gray-600 text-gray-200" :
+              hoveredLevelInfo.category === "Utilisateur" ? "bg-blue-600 text-blue-100" :
+              hoveredLevelInfo.category === "Technicien" ? "bg-purple-600 text-purple-100" :
+              "bg-orange-600 text-orange-100"
+            }`}>
+              {hoveredLevelInfo.category}
+            </span>
+            <span className="text-xs font-semibold">
+              Niveau {hoveredLevelInfo.number} - {hoveredLevelInfo.name}
+            </span>
+          </div>
           <p className="text-[10px] text-gray-300 mb-1 italic">
             {hoveredLevelInfo.seriousGaming}
           </p>

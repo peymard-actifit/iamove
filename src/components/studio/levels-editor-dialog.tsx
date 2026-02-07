@@ -18,6 +18,7 @@ interface Level {
   id: string;
   number: number;
   name: string;
+  category: string;
   seriousGaming: string;
   description: string;
 }
@@ -81,6 +82,7 @@ export function LevelsEditorDialog({ open, onOpenChange }: LevelsEditorDialogPro
     setEditingLevel(level.id);
     setEditForm({
       name: level.name,
+      category: level.category,
       seriousGaming: level.seriousGaming,
       description: level.description,
     });
@@ -160,7 +162,22 @@ export function LevelsEditorDialog({ open, onOpenChange }: LevelsEditorDialogPro
                     <div className="flex-1">
                       {editingLevel === level.id ? (
                         <div className="space-y-2">
-                          <div className="grid grid-cols-2 gap-2">
+                          <div className="grid grid-cols-3 gap-2">
+                            <div>
+                              <label className="text-xs text-gray-500">Catégorie</label>
+                              <select
+                                className="w-full h-10 px-3 rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900 text-sm"
+                                value={editForm.category || ""}
+                                onChange={(e) =>
+                                  setEditForm({ ...editForm, category: e.target.value })
+                                }
+                              >
+                                <option value="Néophyte">Néophyte</option>
+                                <option value="Utilisateur">Utilisateur</option>
+                                <option value="Technicien">Technicien</option>
+                                <option value="Chercheur">Chercheur</option>
+                              </select>
+                            </div>
                             <div>
                               <label className="text-xs text-gray-500">Nom du niveau</label>
                               <Input
@@ -223,7 +240,15 @@ export function LevelsEditorDialog({ open, onOpenChange }: LevelsEditorDialogPro
                           className="cursor-pointer"
                           onClick={() => handleEdit(level)}
                         >
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                              level.category === "Néophyte" ? "bg-gray-200 text-gray-700" :
+                              level.category === "Utilisateur" ? "bg-blue-200 text-blue-700" :
+                              level.category === "Technicien" ? "bg-purple-200 text-purple-700" :
+                              "bg-orange-200 text-orange-700"
+                            }`}>
+                              {level.category}
+                            </span>
                             <span className="font-medium">{level.name}</span>
                             <span className="text-gray-400">•</span>
                             <span className="text-sm text-gray-500 italic">
