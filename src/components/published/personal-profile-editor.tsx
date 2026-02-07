@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, Button, Input } from "@/compo
 import { Mail, Briefcase, Building, Edit, Save, X, User, Globe } from "lucide-react";
 import { getLevelIcon, getLevelInfo } from "@/lib/levels";
 import { useI18n } from "@/lib/i18n";
-import { SUPPORTED_LANGUAGES } from "@/lib/i18n/translations";
+import { SUPPORTED_LANGUAGES, SupportedLanguage } from "@/lib/i18n/translations";
 
 interface Person {
   id: string;
@@ -54,7 +54,7 @@ export function PersonalProfileEditor({
     setSavingLanguage(true);
     try {
       // Mettre à jour dans le contexte i18n
-      setLanguage(newLang);
+      setLanguage(newLang as SupportedLanguage);
       
       // Sauvegarder en base de données
       await fetch("/api/persons/preferences", {
