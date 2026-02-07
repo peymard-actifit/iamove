@@ -271,90 +271,89 @@ export function QuizzesManager({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder={t.quiz.searchPlaceholder}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <select
-          className="h-10 px-3 rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
-          value={filterLevel}
-          onChange={(e) => setFilterLevel(e.target.value)}
-        >
-          <option value="">{t.quiz.allLevels}</option>
-          {levels.filter((l) => l.number >= 1).map((level) => (
-            <option key={level.id} value={level.id}>
-              {t.quiz.levelLabel} {level.number} - {level.name}
-            </option>
-          ))}
-        </select>
-        
-        {/* Bouton Import à droite */}
-        <div className="flex-1 flex justify-end">
-          <Button
-            variant="outline"
-            onClick={() => setShowImportDialog(true)}
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            {t.quiz.import}
-          </Button>
-        </div>
-      </div>
-
-      {/* Stats - Bandeau fixe des 20 niveaux sur 2 lignes */}
-      <div className="sticky top-0 z-10 bg-white dark:bg-gray-950 py-2 -mx-4 px-4 border-b">
-        <div className="border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2 bg-gray-50 dark:bg-gray-900">
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-2 font-medium flex items-center gap-2">
-            <Sparkles className="h-3 w-3" />
-            {t.quiz.levelsHint}
+    <div className="space-y-0">
+      {/* Bandeaux fixes : Recherche + Niveaux */}
+      <div className="sticky top-0 z-10 bg-white dark:bg-gray-950 -mx-4 px-4 pb-2 border-b shadow-sm">
+        {/* Toolbar - Hauteur réduite */}
+        <div className="flex flex-row gap-2 items-center py-1.5">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+            <Input
+              placeholder={t.quiz.searchPlaceholder}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8 h-8 text-sm"
+            />
           </div>
-          <div className="grid grid-cols-10 gap-1.5">
+          <select
+            className="h-8 px-2 text-sm rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
+            value={filterLevel}
+            onChange={(e) => setFilterLevel(e.target.value)}
+          >
+            <option value="">{t.quiz.allLevels}</option>
+            {levels.filter((l) => l.number >= 1).map((level) => (
+              <option key={level.id} value={level.id}>
+                N{level.number} - {level.name}
+              </option>
+            ))}
+          </select>
+          
+          {/* Bouton Import à droite */}
+          <div className="flex-1 flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowImportDialog(true)}
+              className="h-8"
+            >
+              <Upload className="h-3.5 w-3.5 mr-1.5" />
+              {t.quiz.import}
+            </Button>
+          </div>
+        </div>
+
+        {/* Niveaux - 20 sur une seule ligne */}
+        <div className="border border-gray-200 dark:border-gray-700 rounded-md p-1.5 bg-gray-50 dark:bg-gray-900 mt-1">
+          <div className="flex gap-1">
             {levels.filter((l) => l.number >= 1).map((level) => {
               const count = quizzes.filter((q) => q.levelId === level.id).length;
               const isGenerating = generatingLevel === level.number;
               return (
                 <div 
                   key={level.id} 
-                  className={`flex flex-col p-1.5 rounded-md border transition-all ${
+                  className={`flex-1 min-w-0 flex flex-col p-1 rounded border transition-all ${
                     filterLevel === level.id 
-                      ? "bg-blue-100 dark:bg-blue-900 border-blue-500 shadow-md" 
-                      : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-blue-300 hover:shadow-sm"
+                      ? "bg-blue-100 dark:bg-blue-900 border-blue-500" 
+                      : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-blue-300"
                   }`}
                 >
-                  {/* Ligne du haut: numéro et nombre de questions */}
+                  {/* Ligne du haut: numéro et nombre */}
                   <div 
-                    className="flex items-center justify-between cursor-pointer mb-1"
+                    className="flex items-center justify-between cursor-pointer"
                     onClick={() => setFilterLevel(filterLevel === level.id ? "" : level.id)}
-                    title={`${t.quiz.levelLabel} ${level.number} - ${level.name} - ${count} ${t.quiz.questionsCount}`}
+                    title={`${level.name} - ${count} questions`}
                   >
-                    <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300">N{level.number}</span>
-                    <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400">{count}</span>
+                    <span className="text-[8px] font-bold text-gray-600 dark:text-gray-400">{level.number}</span>
+                    <span className="text-[9px] font-bold text-blue-600 dark:text-blue-400">{count}</span>
                   </div>
                   
                   {/* Boutons +1 +10 */}
-                  <div className="flex gap-1 justify-center">
+                  <div className="flex gap-0.5 justify-center mt-0.5">
                     <button
-                      className="px-1.5 py-0.5 text-[9px] font-medium rounded border border-green-400 bg-green-50 dark:bg-green-900 dark:border-green-600 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-800 disabled:opacity-50 transition-colors"
+                      className="px-1 py-0 text-[7px] font-medium rounded border border-green-400 bg-green-50 dark:bg-green-900/50 text-green-700 dark:text-green-300 hover:bg-green-100 disabled:opacity-50"
                       onClick={(e) => { e.stopPropagation(); generateQuestions(level.number, 1); }}
                       disabled={isGenerating}
                       title={t.quiz.generate1}
                     >
-                      {isGenerating ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : "+1"}
+                      {isGenerating ? "..." : "+1"}
                     </button>
                     <button
-                      className="px-1.5 py-0.5 text-[9px] font-medium rounded border border-purple-400 bg-purple-50 dark:bg-purple-900 dark:border-purple-600 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-800 disabled:opacity-50 transition-colors"
+                      className="px-1 py-0 text-[7px] font-medium rounded border border-purple-400 bg-purple-50 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 hover:bg-purple-100 disabled:opacity-50"
                       onClick={(e) => { e.stopPropagation(); generateQuestions(level.number, 10); }}
                       disabled={isGenerating}
                       title={t.quiz.generate10}
                     >
-                      {isGenerating ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : "+10"}
+                      {isGenerating ? "..." : "+10"}
                     </button>
                   </div>
                 </div>
@@ -364,8 +363,8 @@ export function QuizzesManager({
         </div>
       </div>
 
-      {/* Table */}
-      <Card>
+      {/* Table - avec marge pour le contenu scrollable */}
+      <Card className="mt-4">
         <Table>
           <TableHeader>
             <TableRow>
