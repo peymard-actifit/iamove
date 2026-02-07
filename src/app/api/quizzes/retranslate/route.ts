@@ -9,8 +9,13 @@ const SUPPORTED_LANGUAGES = [
 ];
 
 // Traduction via DeepL
-async function translateText(text: string, targetLang: string): Promise<string> {
-  if (!process.env.DEEPL_API_KEY || targetLang === "FR") return text;
+async function translateText(text: string, targetLang: string): Promise<{ translated: string; success: boolean; error?: string }> {
+  if (!process.env.DEEPL_API_KEY) {
+    return { translated: text, success: false, error: "DEEPL_API_KEY missing" };
+  }
+  if (targetLang === "FR") {
+    return { translated: text, success: true };
+  }
   
   try {
     const response = await fetch("https://api-free.deepl.com/v2/translate", {
@@ -28,14 +33,17 @@ async function translateText(text: string, targetLang: string): Promise<string> 
 
     if (response.ok) {
       const data = await response.json();
-      return data.translations[0]?.text || text;
+      const translated = data.translations[0]?.text || text;
+      return { translated, success: true };
     } else {
-      console.error(`DeepL error for ${targetLang}:`, await response.text());
+      const errorText = await response.text();
+      console.error(`DeepL error for ${targetLang}:`, errorText);
+      return { translated: text, success: false, error: `DeepL ${response.status}: ${errorText}` };
     }
   } catch (error) {
     console.error(`Erreur traduction ${targetLang}:`, error);
+    return { translated: text, success: false, error: String(error) };
   }
-  return text;
 }
 
 // GET: Vérifier le statut des traductions
@@ -119,22 +127,36 @@ export async function POST(request: Request) {
       });
     }
 
-    const results = [];
+    const results: Array<{ quizId: string; lang: string; success: boolean; error?: string; translated: boolean }> = [];
     const langsToProcess = lang ? [lang] : SUPPORTED_LANGUAGES.filter(l => l !== "FR");
+    let successCount = 0;
+    let errorCount = 0;
 
     for (const quiz of quizzes) {
       for (const targetLang of langsToProcess) {
         // Traduire la question
-        const translatedQuestion = await translateText(quiz.question, targetLang);
+        const questionResult = await translateText(quiz.question, targetLang);
+        
+        if (!questionResult.success) {
+          errorCount++;
+          results.push({
+            quizId: quiz.id,
+            lang: targetLang,
+            success: false,
+            error: questionResult.error,
+            translated: false,
+          });
+          continue;
+        }
         
         // Traduire les réponses
         const originalAnswers = quiz.answers as Array<{ text: string; isCorrect: boolean }>;
         const translatedAnswers = [];
         
         for (const ans of originalAnswers) {
-          const translatedText = await translateText(ans.text, targetLang);
+          const ansResult = await translateText(ans.text, targetLang);
           translatedAnswers.push({
-            text: translatedText,
+            text: ansResult.translated,
             isCorrect: ans.isCorrect,
           });
         }
@@ -148,32 +170,43 @@ export async function POST(request: Request) {
             },
           },
           update: {
-            question: translatedQuestion,
+            question: questionResult.translated,
             answers: translatedAnswers,
           },
           create: {
             quizId: quiz.id,
             language: targetLang,
-            question: translatedQuestion,
+            question: questionResult.translated,
             answers: translatedAnswers,
           },
         });
 
+        successCount++;
         results.push({
           quizId: quiz.id,
           lang: targetLang,
-          translated: translatedQuestion !== quiz.question,
+          success: true,
+          translated: questionResult.translated !== quiz.question,
         });
       }
     }
 
+    // Afficher les erreurs si présentes
+    const errors = results.filter(r => !r.success);
+    const actuallyTranslated = results.filter(r => r.success && r.translated).length;
+
     return NextResponse.json({
-      success: true,
+      success: errorCount === 0,
       batch,
       processed: quizzes.length,
-      translations: results.length,
+      successCount,
+      errorCount,
+      actuallyTranslated,
       nextBatch: batch + 1,
-      message: `${quizzes.length} questions traduites. Appelez POST?batch=${batch + 1} pour continuer.`,
+      errors: errors.slice(0, 5), // Limiter à 5 erreurs
+      message: errorCount > 0 
+        ? `${errorCount} erreurs DeepL. ${successCount} traductions OK.`
+        : `${quizzes.length} questions traduites (${actuallyTranslated} vraiment différentes). Appelez POST?batch=${batch + 1} pour continuer.`,
     });
   } catch (error) {
     console.error("Erreur retraduction:", error);
