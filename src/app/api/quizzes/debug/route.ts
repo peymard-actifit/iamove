@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const lang = searchParams.get("lang") || "IT";
+  const skip = parseInt(searchParams.get("skip") || "0");
   
   try {
     // Récupérer un quiz avec ses traductions
@@ -13,7 +14,8 @@ export async function GET(request: Request) {
         translations: true,
         level: true,
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "asc" },
+      skip,
     });
 
     if (!quiz) {
@@ -22,22 +24,27 @@ export async function GET(request: Request) {
 
     // Chercher la traduction pour la langue demandée
     const translation = quiz.translations.find(t => t.language === lang);
+    const frTranslation = quiz.translations.find(t => t.language === "FR");
     
-    // Compter les traductions par langue pour ce quiz
-    const translationsByLang = quiz.translations.map(t => ({
-      language: t.language,
-      hasQuestion: !!t.question,
-    }));
+    // Vérifier si les traductions sont différentes du français
+    const translationComparison = quiz.translations
+      .filter(t => t.language !== "FR")
+      .map(t => ({
+        language: t.language,
+        isDifferent: t.question !== quiz.question,
+        questionStart: t.question?.substring(0, 30) || "",
+      }));
 
     return NextResponse.json({
       quizId: quiz.id,
-      originalQuestion: quiz.question,
       level: quiz.level.number,
+      originalQuestion: quiz.question,
+      frQuestion: frTranslation?.question || "N/A",
       requestedLang: lang,
-      translationFound: !!translation,
       translatedQuestion: translation?.question || null,
+      isTranslated: translation?.question !== quiz.question,
       totalTranslations: quiz.translations.length,
-      translationsByLang,
+      translationComparison,
     });
   } catch (error) {
     console.error("Debug error:", error);
