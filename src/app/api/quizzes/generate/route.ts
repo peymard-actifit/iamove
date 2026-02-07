@@ -124,14 +124,19 @@ Réponds UNIQUEMENT avec un tableau JSON valide, sans markdown, sans explication
 }
 
 export async function POST(request: Request) {
+  console.log("[generate] Début de la requête");
+  
   try {
     const session = await getSession();
+    console.log("[generate] Session:", session ? "OK" : "null", session?.role);
+    
     if (!session || session.role !== "ADMIN") {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
     const body = await request.json();
     const { levelNumber, count = 1 } = body;
+    console.log("[generate] Params:", { levelNumber, count });
 
     if (!levelNumber || levelNumber < 1 || levelNumber > 20) {
       return NextResponse.json({ error: "Niveau invalide (1-20)" }, { status: 400 });
@@ -151,8 +156,16 @@ export async function POST(request: Request) {
     }
 
     // Générer les questions avec l'IA
-    console.log(`Génération de ${count} question(s) pour le niveau ${levelNumber}...`);
-    const generatedQuestions = await generateQuestionsWithAI(levelNumber, count);
+    console.log(`[generate] Génération de ${count} question(s) pour le niveau ${levelNumber}...`);
+    
+    let generatedQuestions;
+    try {
+      generatedQuestions = await generateQuestionsWithAI(levelNumber, count);
+      console.log(`[generate] Questions générées:`, generatedQuestions.length);
+    } catch (aiError) {
+      console.error("[generate] Erreur IA:", aiError);
+      return NextResponse.json({ error: `Erreur IA: ${aiError}` }, { status: 500 });
+    }
 
     const createdQuizzes = [];
 
@@ -169,41 +182,58 @@ export async function POST(request: Request) {
         },
       });
 
-      // Créer les traductions dans les 26 langues
-      for (const lang of SUPPORTED_LANGUAGES) {
-        try {
-          const translatedQuestion = await translateText(q.question, lang);
-          const translatedAnswers = [];
-          
-          for (const ans of q.answers) {
-            const translatedText = await translateText(ans.text, lang);
-            translatedAnswers.push({
-              text: translatedText,
-              isCorrect: ans.isCorrect,
+      // Créer d'abord la traduction FR (obligatoire)
+      await prisma.quizTranslation.create({
+        data: {
+          quizId: quiz.id,
+          language: "FR",
+          question: q.question,
+          answers: q.answers,
+        },
+      });
+
+      // Créer les traductions dans les autres langues (en arrière-plan, sans bloquer)
+      // On fait cela en async pour ne pas timeout
+      const translateInBackground = async () => {
+        for (const lang of SUPPORTED_LANGUAGES) {
+          if (lang === "FR") continue;
+          try {
+            const translatedQuestion = await translateText(q.question, lang);
+            const translatedAnswers = [];
+            
+            for (const ans of q.answers) {
+              const translatedText = await translateText(ans.text, lang);
+              translatedAnswers.push({
+                text: translatedText,
+                isCorrect: ans.isCorrect,
+              });
+            }
+
+            await prisma.quizTranslation.create({
+              data: {
+                quizId: quiz.id,
+                language: lang,
+                question: translatedQuestion,
+                answers: translatedAnswers,
+              },
+            });
+          } catch (error) {
+            console.error(`Erreur traduction ${lang}:`, error);
+            // Créer avec texte original si erreur
+            await prisma.quizTranslation.create({
+              data: {
+                quizId: quiz.id,
+                language: lang,
+                question: q.question,
+                answers: q.answers,
+              },
             });
           }
-
-          await prisma.quizTranslation.create({
-            data: {
-              quizId: quiz.id,
-              language: lang,
-              question: translatedQuestion,
-              answers: translatedAnswers,
-            },
-          });
-        } catch (error) {
-          console.error(`Erreur traduction ${lang}:`, error);
-          // Créer avec texte original si erreur
-          await prisma.quizTranslation.create({
-            data: {
-              quizId: quiz.id,
-              language: lang,
-              question: q.question,
-              answers: q.answers,
-            },
-          });
         }
-      }
+      };
+      
+      // Lancer la traduction en arrière-plan (ne pas attendre)
+      translateInBackground().catch(e => console.error("[generate] Erreur traduction bg:", e));
 
       createdQuizzes.push({
         id: quiz.id,
@@ -211,7 +241,7 @@ export async function POST(request: Request) {
       });
     }
 
-    console.log(`${createdQuizzes.length} question(s) créée(s) avec traductions`);
+    console.log(`[generate] ${createdQuizzes.length} question(s) créée(s)`);
 
     return NextResponse.json({
       success: true,

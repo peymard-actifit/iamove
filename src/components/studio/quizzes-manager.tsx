@@ -311,73 +311,55 @@ export function QuizzesManager({
         </div>
       </div>
 
-      {/* Stats - Tuiles compactes pour 20 niveaux (1-20, pas de quizz pour le niveau 0) */}
-      <div className="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-10 gap-2">
-        {levels.filter((l) => l.number >= 1).map((level) => {
-          const count = quizzes.filter((q) => q.levelId === level.id).length;
-          const isGenerating = generatingLevel === level.number;
-          return (
-            <Card 
-              key={level.id} 
-              className={`p-2 transition-colors ${
-                filterLevel === level.id ? "ring-2 ring-blue-500" : ""
-              }`}
-              title={`Niv. ${level.number} - ${level.name} - ${count} question(s)`}
-            >
+      {/* Stats - Bandeau fixe des 20 niveaux */}
+      <div className="sticky top-0 z-10 bg-white dark:bg-gray-950 py-2 -mx-4 px-4 border-b">
+        <div className="flex gap-1 overflow-x-auto pb-1">
+          {levels.filter((l) => l.number >= 1).map((level) => {
+            const count = quizzes.filter((q) => q.levelId === level.id).length;
+            const isGenerating = generatingLevel === level.number;
+            return (
               <div 
-                className="text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded p-1"
+                key={level.id} 
+                className={`flex-shrink-0 flex items-center gap-1 px-2 py-1 rounded border cursor-pointer transition-colors ${
+                  filterLevel === level.id 
+                    ? "bg-blue-100 dark:bg-blue-900 border-blue-500" 
+                    : "bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
+                }`}
                 onClick={() => setFilterLevel(filterLevel === level.id ? "" : level.id)}
+                title={`Niv. ${level.number} - ${level.name} - ${count} question(s)`}
               >
-                <p className="text-[10px] text-gray-500 truncate">Niv. {level.number}</p>
-                <p className="text-lg font-bold">{count}</p>
+                <span className="text-xs font-medium w-4 text-center">{level.number}</span>
+                <span className="text-sm font-bold min-w-[24px] text-center">{count}</span>
+                
+                {/* Boutons de génération IA - compacts */}
+                <div className="flex gap-0.5 ml-1 border-l pl-1 border-gray-300 dark:border-gray-600">
+                  <button
+                    className="text-[9px] px-1 py-0.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      generateQuestions(level.number, 1);
+                    }}
+                    disabled={isGenerating}
+                    title="Générer 1 question avec l'IA"
+                  >
+                    {isGenerating ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Sparkles className="h-2.5 w-2.5 inline" />+1</>}
+                  </button>
+                  <button
+                    className="text-[9px] px-1 py-0.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      generateQuestions(level.number, 10);
+                    }}
+                    disabled={isGenerating}
+                    title="Générer 10 questions avec l'IA"
+                  >
+                    {isGenerating ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Sparkles className="h-2.5 w-2.5 inline" />+10</>}
+                  </button>
+                </div>
               </div>
-              
-              {/* Boutons de génération IA */}
-              <div className="flex gap-1 mt-1 justify-center">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 px-1.5 text-[10px]"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    generateQuestions(level.number, 1);
-                  }}
-                  disabled={isGenerating}
-                  title="Générer 1 question avec l'IA"
-                >
-                  {isGenerating ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                  ) : (
-                    <>
-                      <Sparkles className="h-3 w-3 mr-0.5" />
-                      +1
-                    </>
-                  )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 px-1.5 text-[10px]"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    generateQuestions(level.number, 10);
-                  }}
-                  disabled={isGenerating}
-                  title="Générer 10 questions avec l'IA"
-                >
-                  {isGenerating ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                  ) : (
-                    <>
-                      <Sparkles className="h-3 w-3 mr-0.5" />
-                      +10
-                    </>
-                  )}
-                </Button>
-              </div>
-            </Card>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* Table */}
