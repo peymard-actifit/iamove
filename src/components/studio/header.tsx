@@ -35,6 +35,7 @@ import type { SessionPayload } from "@/lib/auth";
 import { useHeaderContent } from "./header-context";
 import { LanguageSelector } from "./language-selector";
 import { LevelsEditorDialog } from "./levels-editor-dialog";
+import { PPGainsDialog } from "./pp-gains-dialog";
 import { useI18n } from "@/lib/i18n";
 
 interface StudioHeaderProps {
