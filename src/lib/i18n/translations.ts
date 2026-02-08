@@ -69,8 +69,78 @@ export async function loadTranslationsFromDB(lang: SupportedLanguage): Promise<R
   return {};
 }
 
+// Fallbacks statiques formation/assessment pour langues sans objet complet (ex. JA → sinon EN)
+// Utilisés quand la clé manque en DB pour afficher la bonne langue au lieu de EN.
+const EXTRA_STATIC_FORMATION_ASSESSMENT: Partial<Record<SupportedLanguage, Record<string, string>>> = {
+  JA: {
+    "formation.title": "研修",
+    "formation.tabParcours": "コース",
+    "formation.tabApplications": "アプリ",
+    "formation.tabConnaissances": "知識",
+    "formation.assistantTitle": "AI研修アシスタント",
+    "formation.welcomeTitle": "AI研修へようこそ",
+    "formation.welcomeIntro": "AI、ベストプラクティスについて質問するか、スキル向上のアドバイスを求めてください。",
+    "formation.thinking": "考え中...",
+    "formation.placeholder": "質問を入力...",
+    "formation.selectLevelHint": "左でレベルを選択してコンテンツを表示するか、下のすべてのリソースを参照してください。",
+    "formation.resourcesHint": "リソースと知識はここに表示されます（全レベルが利用可能）。",
+    "formation.seeAll": "すべて表示",
+    "formation.contentForLevel": "レベル{n}向けコンテンツ（近日公開）。",
+    "formation.levelLabel": "レベル",
+    "formation.applicationsPlaceholder": "アプリと演習はここに表示されます。",
+    "formation.parcoursPlaceholder": "研修コースはここに表示されます。",
+    "formation.resizeTitle": "ドラッグして幅を変更",
+  },
+  ZH: {
+    "formation.title": "培训",
+    "formation.tabParcours": "路径",
+    "formation.tabApplications": "应用",
+    "formation.tabConnaissances": "知识",
+    "formation.assistantTitle": "AI培训助手",
+    "formation.welcomeTitle": "欢迎参加AI培训",
+    "formation.parcoursPlaceholder": "培训路径将在此显示。",
+  },
+  KO: {
+    "formation.title": "교육",
+    "formation.tabParcours": "경로",
+    "formation.tabApplications": "응용",
+    "formation.tabConnaissances": "지식",
+    "formation.assistantTitle": "AI 교육 도우미",
+    "formation.welcomeTitle": "AI 교육에 오신 것을 환영합니다",
+    "formation.parcoursPlaceholder": "교육 경로가 여기에 표시됩니다.",
+  },
+  DE: {
+    "formation.title": "Schulung",
+    "formation.tabParcours": "Wege",
+    "formation.tabApplications": "Anwendungen",
+    "formation.tabConnaissances": "Wissen",
+    "formation.assistantTitle": "KI-Schulungsassistent",
+    "formation.parcoursPlaceholder": "Schulungswege werden hier angezeigt.",
+  },
+  ES: {
+    "formation.title": "Formación",
+    "formation.tabParcours": "Recorridos",
+    "formation.tabApplications": "Aplicaciones",
+    "formation.tabConnaissances": "Conocimientos",
+    "formation.assistantTitle": "Asistente de formación IA",
+    "formation.parcoursPlaceholder": "Los itinerarios de formación se mostrarán aquí.",
+  },
+  IT: {
+    "formation.title": "Formazione",
+    "formation.tabParcours": "Percorsi",
+    "formation.tabApplications": "Applicazioni",
+    "formation.tabConnaissances": "Conoscenze",
+    "formation.assistantTitle": "Assistente formazione IA",
+    "formation.parcoursPlaceholder": "I percorsi di formazione saranno mostrati qui.",
+  },
+};
+
 // Récupérer une valeur par clé plate (ex: "formation.title") depuis l'objet statique de la langue
 function getStaticValueByKey(lang: SupportedLanguage, dottedKey: string): string | undefined {
+  if (dottedKey.startsWith("formation.") || dottedKey.startsWith("assessment.")) {
+    const extra = EXTRA_STATIC_FORMATION_ASSESSMENT[lang];
+    if (extra?.[dottedKey]) return extra[dottedKey];
+  }
   const obj = getTranslations(lang);
   const parts = dottedKey.split(".");
   let v: unknown = obj;
