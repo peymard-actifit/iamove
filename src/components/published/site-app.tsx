@@ -270,7 +270,7 @@ export function PublishedSiteApp({
   );
 }
 
-const CLICK_THROTTLE_MS = 2000;
+const CLICK_THROTTLE_MS = 1000;
 const PP_SESSION_KEY = "pp_seen_menu";
 
 function PPClickTracker() {

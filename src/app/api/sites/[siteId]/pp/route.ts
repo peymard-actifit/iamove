@@ -15,14 +15,16 @@ export async function GET(
     }
 
     const { siteId } = await params;
-    if (session.userType !== "PERSON") {
-      return NextResponse.json({ pp: 0, rank: 0 });
-    }
-
-    const person = await prisma.person.findFirst({
+    let person = await prisma.person.findFirst({
       where: { id: session.userId, siteId },
       select: { participationPoints: true },
     });
+    if (!person && session.userType === "STUDIO_USER") {
+      person = await prisma.person.findFirst({
+        where: { siteId, email: session.email },
+        select: { participationPoints: true },
+      });
+    }
     if (!person) {
       return NextResponse.json({ pp: 0, rank: 0 });
     }
@@ -45,7 +47,7 @@ export async function GET(
   }
 }
 
-/** POST : ajouter des PP pour une action (PERSON uniquement, usage site publié) */
+/** POST : ajouter des PP pour une action (usage site publié : PERSON ou studio lié à une personne) */
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ siteId: string }> }
@@ -54,10 +56,6 @@ export async function POST(
     const session = await getSession();
     if (!session) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
-
-    if (session.userType !== "PERSON") {
-      return NextResponse.json({ error: "Seul l'usage du site publié génère des PP" }, { status: 403 });
     }
 
     const { siteId } = await params;
@@ -73,10 +71,17 @@ export async function POST(
       return NextResponse.json({ error: "Action inconnue ou sans gain" }, { status: 400 });
     }
 
-    const person = await prisma.person.findFirst({
+    // Cibler la personne : soit session PERSON, soit personne du site liée par email (studio qui teste le site publié)
+    let person = await prisma.person.findFirst({
       where: { id: session.userId, siteId },
       select: { id: true, participationPoints: true },
     });
+    if (!person && session.userType === "STUDIO_USER") {
+      person = await prisma.person.findFirst({
+        where: { siteId, email: session.email },
+        select: { id: true, participationPoints: true },
+      });
+    }
     if (!person) {
       return NextResponse.json({ error: "Personne non trouvée sur ce site" }, { status: 404 });
     }
