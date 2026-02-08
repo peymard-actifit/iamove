@@ -320,6 +320,24 @@ export function buildTranslationsObject(flatTranslations: Record<string, string>
       earlyFail: getValue("assessment.earlyFail", "Avec {n} erreurs, il n'est plus possible d'atteindre {min}/{total}."),
       passingReached: getValue("assessment.passingReached", "{n} atteint !"),
     },
+    formation: {
+      title: getValue("formation.title", "Formation"),
+      tabParcours: getValue("formation.tabParcours", "Parcours"),
+      tabApplications: getValue("formation.tabApplications", "Applications"),
+      tabConnaissances: getValue("formation.tabConnaissances", "Connaissances"),
+      assistantTitle: getValue("formation.assistantTitle", "Assistant Formation IA"),
+      welcomeTitle: getValue("formation.welcomeTitle", "Bienvenue dans votre formation IA"),
+      welcomeIntro: getValue("formation.welcomeIntro", "Posez vos questions sur l'intelligence artificielle, les bonnes pratiques, ou demandez des conseils pour progresser dans vos compétences."),
+      thinking: getValue("formation.thinking", "En train de réfléchir..."),
+      placeholder: getValue("formation.placeholder", "Posez votre question..."),
+      selectLevelHint: getValue("formation.selectLevelHint", "Sélectionnez un niveau à gauche pour afficher le contenu adapté, ou parcourez toutes les ressources ci-dessous."),
+      resourcesHint: getValue("formation.resourcesHint", "Ressources et connaissances seront affichées ici (accessibles à tous les niveaux)."),
+      seeAll: getValue("formation.seeAll", "Voir tout"),
+      contentForLevel: getValue("formation.contentForLevel", "Contenu adapté au niveau {n} (à venir)."),
+      levelLabel: getValue("formation.levelLabel", "Niveau"),
+      applicationsPlaceholder: getValue("formation.applicationsPlaceholder", "Applications et exercices seront affichés ici."),
+      parcoursPlaceholder: getValue("formation.parcoursPlaceholder", "Parcours de formation seront affichés ici."),
+    },
   };
 }
 
@@ -586,6 +604,24 @@ export interface Translations {
     earlyFail: string;
     passingReached: string;
   };
+  formation: {
+    title: string;
+    tabParcours: string;
+    tabApplications: string;
+    tabConnaissances: string;
+    assistantTitle: string;
+    welcomeTitle: string;
+    welcomeIntro: string;
+    thinking: string;
+    placeholder: string;
+    selectLevelHint: string;
+    resourcesHint: string;
+    seeAll: string;
+    contentForLevel: string;
+    levelLabel: string;
+    applicationsPlaceholder: string;
+    parcoursPlaceholder: string;
+  };
 }
 
 // Traductions françaises (par défaut)
@@ -835,6 +871,24 @@ export const FR: Translations = {
     earlyFail: "Avec {n} erreurs, il n'est plus possible d'atteindre {min}/{total}.",
     passingReached: "{n} atteint !",
   },
+  formation: {
+    title: "Formation",
+    tabParcours: "Parcours",
+    tabApplications: "Applications",
+    tabConnaissances: "Connaissances",
+    assistantTitle: "Assistant Formation IA",
+    welcomeTitle: "Bienvenue dans votre formation IA",
+    welcomeIntro: "Posez vos questions sur l'intelligence artificielle, les bonnes pratiques, ou demandez des conseils pour progresser dans vos compétences.",
+    thinking: "En train de réfléchir...",
+    placeholder: "Posez votre question...",
+    selectLevelHint: "Sélectionnez un niveau à gauche pour afficher le contenu adapté, ou parcourez toutes les ressources ci-dessous.",
+    resourcesHint: "Ressources et connaissances seront affichées ici (accessibles à tous les niveaux).",
+    seeAll: "Voir tout",
+    contentForLevel: "Contenu adapté au niveau {n} (à venir).",
+    levelLabel: "Niveau",
+    applicationsPlaceholder: "Applications et exercices seront affichés ici.",
+    parcoursPlaceholder: "Parcours de formation seront affichés ici.",
+  },
 };
 
 // Traductions anglaises
@@ -1083,6 +1137,24 @@ export const EN: Translations = {
     earlyReached: "You reached {n} correct answers in just {q} questions!",
     earlyFail: "With {n} errors, it is no longer possible to reach {min}/{total}.",
     passingReached: "{n} reached!",
+  },
+  formation: {
+    title: "Training",
+    tabParcours: "Paths",
+    tabApplications: "Applications",
+    tabConnaissances: "Knowledge",
+    assistantTitle: "AI Training Assistant",
+    welcomeTitle: "Welcome to your AI training",
+    welcomeIntro: "Ask your questions about artificial intelligence, best practices, or ask for advice to progress in your skills.",
+    thinking: "Thinking...",
+    placeholder: "Ask your question...",
+    selectLevelHint: "Select a level on the left to display adapted content, or browse all resources below.",
+    resourcesHint: "Resources and knowledge will be displayed here (accessible to all levels).",
+    seeAll: "See all",
+    contentForLevel: "Content adapted to level {n} (coming soon).",
+    levelLabel: "Level",
+    applicationsPlaceholder: "Applications and exercises will be displayed here.",
+    parcoursPlaceholder: "Training paths will be displayed here.",
   },
 };
 

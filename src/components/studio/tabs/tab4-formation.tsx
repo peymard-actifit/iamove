@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, Button, Input, Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui";
 import { Send, Bot, User, Sparkles } from "lucide-react";
 import { LEVELS, getLevelIcon } from "@/lib/levels";
+import { useI18n } from "@/lib/i18n";
 
 interface Tab4FormationProps {
   siteId: string;
@@ -19,6 +20,7 @@ interface Message {
 }
 
 export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationProps) {
+  const { t } = useI18n();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -166,7 +168,7 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
             <div className="border-b px-4 py-1.5 bg-gray-50 dark:bg-gray-800/50 min-h-[2rem] flex items-center">
               <h3 className="text-sm font-semibold flex items-center gap-2">
                 <Bot className="h-4 w-4 text-blue-500" />
-                Assistant Formation IA
+                {t.formation.assistantTitle}
               </h3>
             </div>
             <div className="flex-1 overflow-auto p-4 space-y-4 min-h-0">
@@ -174,10 +176,9 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
                 <div className="h-full flex items-center justify-center text-center min-h-[160px]">
                   <div>
                     <Sparkles className="h-12 w-12 mx-auto text-yellow-500 mb-4" />
-                    <h3 className="font-semibold text-lg">Bienvenue dans votre formation IA</h3>
+                    <h3 className="font-semibold text-lg">{t.formation.welcomeTitle}</h3>
                     <p className="text-gray-500 mt-2 max-w-md text-sm">
-                      Posez vos questions sur l&apos;intelligence artificielle, les bonnes pratiques, 
-                      ou demandez des conseils pour progresser dans vos compétences.
+                      {t.formation.welcomeIntro}
                     </p>
                   </div>
                 </div>
@@ -214,7 +215,7 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
                   <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
                     <div className="flex items-center gap-2">
                       <Bot className="h-4 w-4" />
-                      <span className="animate-pulse text-sm">En train de réfléchir...</span>
+                      <span className="animate-pulse text-sm">{t.formation.thinking}</span>
                     </div>
                   </div>
                 </div>
@@ -226,7 +227,7 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Posez votre question..."
+                  placeholder={t.formation.placeholder}
                   disabled={isLoading}
                   className="flex-1"
                 />
@@ -263,42 +264,42 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
       >
         <Tabs defaultValue="parcours" className="flex flex-col flex-1 min-h-0">
           <div className="border-b px-4 py-1.5 bg-gray-50 dark:bg-gray-800/50 flex items-center gap-4 flex-shrink-0 min-h-[2rem]">
-            <h3 className="text-sm font-semibold">Formation</h3>
+            <h3 className="text-sm font-semibold">{t.formation.title}</h3>
             <TabsList className="h-6 bg-transparent p-0 gap-0 border-0 [&>button]:rounded [&>button]:px-2.5 [&>button]:py-0.5 [&>button]:text-xs [&>button]:data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 [&>button]:data-[state=active]:shadow-sm">
-              <TabsTrigger value="parcours">Parcours</TabsTrigger>
-              <TabsTrigger value="applications">Applications</TabsTrigger>
-              <TabsTrigger value="connaissances">Connaissances</TabsTrigger>
+              <TabsTrigger value="parcours">{t.formation.tabParcours}</TabsTrigger>
+              <TabsTrigger value="applications">{t.formation.tabApplications}</TabsTrigger>
+              <TabsTrigger value="connaissances">{t.formation.tabConnaissances}</TabsTrigger>
             </TabsList>
           </div>
           <div className="flex-1 overflow-auto min-h-0">
             <TabsContent value="parcours" className="mt-0 p-4 h-full data-[state=inactive]:hidden">
               <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                <p className="text-sm">Parcours de formation seront affichés ici.</p>
+                <p className="text-sm">{t.formation.parcoursPlaceholder}</p>
               </div>
             </TabsContent>
             <TabsContent value="applications" className="mt-0 p-4 h-full data-[state=inactive]:hidden">
               <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                <p className="text-sm">Applications et exercices seront affichés ici.</p>
+                <p className="text-sm">{t.formation.applicationsPlaceholder}</p>
               </div>
             </TabsContent>
             <TabsContent value="connaissances" className="mt-0 h-full data-[state=inactive]:hidden flex flex-col min-h-0">
               <div className="flex flex-1 min-h-0 overflow-hidden">
-                {/* Barre verticale des 20 niveaux (1 à 20) pour filtrer le contenu */}
-                <div className="w-14 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col items-center py-2 gap-0.5 overflow-y-auto">
+                {/* Barre verticale des 20 niveaux (1 à 20) : icône puis numéro côte à côte, grille 2 colonnes pour éviter l'ascenseur */}
+                <div className="w-20 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30 py-2 px-1 grid grid-cols-2 gap-0.5 content-start">
                   {LEVELS.filter((l) => l.number >= 1 && l.number <= 20).map((level) => (
                     <button
                       key={level.number}
                       type="button"
                       onClick={() => setSelectedKnowledgeLevel(selectedKnowledgeLevel === level.number ? null : level.number)}
-                      className={`flex flex-col items-center justify-center w-10 h-10 rounded-lg transition-colors ${
+                      className={`flex items-center justify-center gap-1 min-w-0 py-1 px-1 rounded-md transition-colors ${
                         selectedKnowledgeLevel === level.number
                           ? "bg-blue-100 dark:bg-blue-900/50 ring-1 ring-blue-500 dark:ring-blue-400"
                           : "hover:bg-gray-200 dark:hover:bg-gray-700"
                       }`}
                       title={`Niveau ${level.number} - ${level.name} (${level.category})`}
                     >
-                      {getLevelIcon(level.number, "h-5 w-5")}
-                      <span className="text-[10px] font-medium text-gray-600 dark:text-gray-400 mt-0.5">
+                      {getLevelIcon(level.number, "h-4 w-4 flex-shrink-0")}
+                      <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300 tabular-nums">
                         {level.number}
                       </span>
                     </button>
@@ -308,8 +309,8 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
                 <div className="flex-1 overflow-auto p-4 min-w-0">
                   {selectedKnowledgeLevel === null ? (
                     <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                      <p className="text-sm">Sélectionnez un niveau à gauche pour afficher le contenu adapté, ou parcourez toutes les ressources ci-dessous.</p>
-                      <p className="text-xs mt-4">Ressources et connaissances seront affichées ici (accessibles à tous les niveaux).</p>
+                      <p className="text-sm">{t.formation.selectLevelHint}</p>
+                      <p className="text-xs mt-4">{t.formation.resourcesHint}</p>
                     </div>
                   ) : (
                     <div className="space-y-4">
@@ -317,7 +318,7 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
                         {getLevelIcon(selectedKnowledgeLevel, "h-6 w-6")}
                         <div>
                           <p className="text-sm font-semibold">
-                            Niveau {selectedKnowledgeLevel} – {LEVELS[selectedKnowledgeLevel]?.name ?? ""}
+                            {t.formation.levelLabel} {selectedKnowledgeLevel} – {LEVELS[selectedKnowledgeLevel]?.name ?? ""}
                           </p>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
                             {LEVELS[selectedKnowledgeLevel]?.category ?? ""}
@@ -328,11 +329,11 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
                           onClick={() => setSelectedKnowledgeLevel(null)}
                           className="text-xs text-blue-600 dark:text-blue-400 hover:underline ml-2"
                         >
-                          Voir tout
+                          {t.formation.seeAll}
                         </button>
                       </div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">
-                        Contenu adapté au niveau {selectedKnowledgeLevel} (à venir).
+                        {t.formation.contentForLevel.replace("{n}", String(selectedKnowledgeLevel))}
                       </div>
                     </div>
                   )}
