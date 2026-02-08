@@ -11,7 +11,7 @@ export async function urlToPdf(url: string): Promise<Buffer> {
 
   const browser = await puppeteerCore.launch({
     args: isLocal ? [] : chromium.args,
-    defaultViewport: chromium.defaultViewport,
+    defaultViewport: { width: 1280, height: 900 },
     executablePath: isLocal
       ? // En local : utiliser Chrome/Chromium installé sur le système
         process.platform === "win32"
