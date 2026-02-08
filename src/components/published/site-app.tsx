@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, createContext, useContext, useEffect, useRef } from "react";
+import { useState, useCallback, createContext, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger, TabsContent, Button } from "@/components/ui";
 import { Network, User, GraduationCap, ClipboardCheck, LogOut } from "lucide-react";
