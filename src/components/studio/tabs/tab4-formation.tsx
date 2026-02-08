@@ -6,10 +6,50 @@ import { Send, Bot, User, Sparkles } from "lucide-react";
 import { LEVELS, getLevelIcon } from "@/lib/levels";
 import { useI18n, getLanguageInfo } from "@/lib/i18n";
 
+interface LevelTranslation {
+  id: string;
+  language: string;
+  name: string;
+  category: string;
+  seriousGaming: string;
+  description?: string;
+}
+
+interface LevelWithTranslations {
+  id: string;
+  number: number;
+  name: string;
+  category?: string;
+  seriousGaming?: string;
+  translations?: LevelTranslation[];
+}
+
 interface Tab4FormationProps {
   siteId: string;
   isStudioMode: boolean;
   personId?: string;
+  /** En mode publié : niveaux avec traductions pour afficher noms/catégories dans la langue sélectionnée */
+  levelsWithTranslations?: LevelWithTranslations[];
+}
+
+function getLevelDisplay(
+  levelNumber: number,
+  levels: LevelWithTranslations[] | undefined,
+  language: string
+): { name: string; category: string } {
+  if (!levels?.length) {
+    const info = LEVELS[levelNumber] ?? LEVELS[0];
+    return { name: info.name, category: info.category };
+  }
+  const level = levels.find((l) => l.number === levelNumber);
+  if (!level) {
+    const info = LEVELS[levelNumber] ?? LEVELS[0];
+    return { name: info.name, category: info.category };
+  }
+  const lang = language?.toUpperCase() || "FR";
+  const tr = level.translations?.find((x) => x.language.toUpperCase() === lang);
+  if (tr) return { name: tr.name, category: tr.category };
+  return { name: level.name, category: level.category || "" };
 }
 
 interface Message {
@@ -19,7 +59,7 @@ interface Message {
   timestamp: Date;
 }
 
-export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationProps) {
+export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTranslations }: Tab4FormationProps) {
   const { t, language } = useI18n();
   const locale = (() => {
     const info = getLanguageInfo(language);
@@ -290,7 +330,11 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
               <div className="flex flex-1 min-h-0 overflow-hidden">
                 {/* Barre verticale des 20 niveaux (1 à 20) : une seule colonne, icône puis numéro à droite, répartition de la hauteur sans ascenseur */}
                 <div className="w-14 flex-shrink-0 self-stretch border-r border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col min-h-0">
-                  {LEVELS.filter((l) => l.number >= 1 && l.number <= 20).map((level) => (
+                  {LEVELS.filter((l) => l.number >= 1 && l.number <= 20).map((level) => {
+                    const display = levelsWithTranslations?.length
+                      ? getLevelDisplay(level.number, levelsWithTranslations, language)
+                      : { name: level.name, category: level.category };
+                    return (
                     <button
                       key={level.number}
                       type="button"
@@ -300,14 +344,15 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
                           ? "bg-blue-100 dark:bg-blue-900/50 ring-1 ring-blue-500 dark:ring-blue-400"
                           : "hover:bg-gray-200 dark:hover:bg-gray-700"
                       }`}
-                      title={`Niveau ${level.number} - ${level.name} (${level.category})`}
+                      title={`${t.formation.levelLabel} ${level.number} - ${display.name} (${display.category})`}
                     >
                       {getLevelIcon(level.number, "h-3.5 w-3.5 flex-shrink-0")}
                       <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300 tabular-nums leading-none">
                         {level.number}
                       </span>
                     </button>
-                  ))}
+                  );
+                  })}
                 </div>
                 {/* Zone contenu Connaissances (accessible à tous, triée par niveau si sélectionné) */}
                 <div className="flex-1 overflow-auto p-4 min-w-0">
@@ -316,16 +361,20 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
                       <p className="text-sm">{t.formation.selectLevelHint}</p>
                       <p className="text-xs mt-4">{t.formation.resourcesHint}</p>
                     </div>
-                  ) : (
+                  ) : (() => {
+                    const display = levelsWithTranslations?.length
+                      ? getLevelDisplay(selectedKnowledgeLevel, levelsWithTranslations, language)
+                      : { name: LEVELS[selectedKnowledgeLevel]?.name ?? "", category: LEVELS[selectedKnowledgeLevel]?.category ?? "" };
+                    return (
                     <div className="space-y-4">
                       <div className="flex items-center gap-2 mb-4">
                         {getLevelIcon(selectedKnowledgeLevel, "h-6 w-6")}
                         <div>
                           <p className="text-sm font-semibold">
-                            {t.formation.levelLabel} {selectedKnowledgeLevel} – {LEVELS[selectedKnowledgeLevel]?.name ?? ""}
+                            {t.formation.levelLabel} {selectedKnowledgeLevel} – {display.name}
                           </p>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {LEVELS[selectedKnowledgeLevel]?.category ?? ""}
+                            {display.category}
                           </p>
                         </div>
                         <button
@@ -340,7 +389,8 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
                         {t.formation.contentForLevel.replace("{n}", String(selectedKnowledgeLevel))}
                       </div>
                     </div>
-                  )}
+                  );
+                  })()}
                 </div>
               </div>
             </TabsContent>
