@@ -1,8 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
-import { urlToPdf } from "@/lib/url-to-pdf";
 
 /**
- * Articles IA réels, catégorisés par niveau de l’échelle (1–20).
+ * Articles IA réels, catégorisés par niveau de l'échelle (1–20).
  * Utilisés pour le seed automatique des modules « Articles & Lectures ».
  */
 export const ARTICLES_IA: Array<{
@@ -40,7 +39,8 @@ export const ARTICLES_IA: Array<{
 /**
  * Crée les 20 articles IA (niveaux 1–20) dans la méthode « Articles & Lectures » si besoin.
  * Idempotent : ne crée pas de doublon (même titre pour cette méthode).
- * À appeler sans contrôle d’auth (ex. au premier accès à l’API articles).
+ * Nettoie les modules orphelins (anciennes versions avec apostrophes spéciales, etc.).
+ * À appeler sans contrôle d'auth (ex. au premier accès à l'API articles).
  */
 export async function ensureTrainingArticlesSeeded(prisma: PrismaClient): Promise<void> {
   const method = await prisma.trainingMethod.findFirst({
@@ -48,6 +48,32 @@ export async function ensureTrainingArticlesSeeded(prisma: PrismaClient): Promis
   });
   if (!method) return;
 
+  // ── Nettoyage : supprimer les modules orphelins ──
+  // Un module est orphelin si son titre ne correspond à aucun article du seed.
+  const expectedTitles = ARTICLES_IA.map((a) => a.title);
+  const allModules = await prisma.trainingModule.findMany({
+    where: { methodId: method.id },
+    select: { id: true, title: true },
+  });
+  const orphanIds = allModules
+    .filter((m) => !expectedTitles.includes(m.title))
+    .map((m) => m.id);
+
+  if (orphanIds.length > 0) {
+    // Supprimer les relations puis les modules orphelins
+    await prisma.trainingModuleTranslation.deleteMany({
+      where: { moduleId: { in: orphanIds } },
+    });
+    await prisma.personTrainingProgress.deleteMany({
+      where: { moduleId: { in: orphanIds } },
+    });
+    await prisma.trainingModule.deleteMany({
+      where: { id: { in: orphanIds } },
+    });
+    console.log(`[seed-articles] Nettoyage : ${orphanIds.length} module(s) orphelin(s) supprimé(s).`);
+  }
+
+  // ── Seed des articles manquants ──
   const levels = await prisma.level.findMany({
     where: { number: { gte: 1, lte: 20 } },
     orderBy: { number: "asc" },
@@ -101,79 +127,4 @@ export async function ensureTrainingArticlesSeeded(prisma: PrismaClient): Promis
       },
     });
   }
-
-  // Lancer la génération des PDF manquants en arrière-plan (fire-and-forget)
-  triggerPdfGenerationInBackground(prisma);
-}
-
-/** Variable pour éviter de lancer plusieurs générations en parallèle */
-let pdfGenerationRunning = false;
-
-/**
- * Lance la génération des PDF manquants en arrière-plan.
- * Ne bloque pas l'appelant. S'exécute une seule fois à la fois.
- */
-function triggerPdfGenerationInBackground(prisma: PrismaClient): void {
-  if (pdfGenerationRunning) return;
-  pdfGenerationRunning = true;
-  generateMissingArticlePdfs(prisma)
-    .then((result) => {
-      if (result.generated > 0 || result.errors > 0) {
-        console.log(`[PDF background] ${result.generated} PDF généré(s), ${result.errors} erreur(s).`);
-      }
-    })
-    .catch((err) => console.error("[PDF background] Erreur:", err))
-    .finally(() => { pdfGenerationRunning = false; });
-}
-
-/**
- * Génère les PDF manquants pour les articles existants.
- * Pour chaque module ARTICLE qui n'a pas encore de pdfData,
- * on fetch l'URL source et on génère un PDF via Puppeteer.
- * Appelé en arrière-plan (ne bloque pas le seed).
- */
-export async function generateMissingArticlePdfs(prisma: PrismaClient): Promise<{ generated: number; errors: number }> {
-  const method = await prisma.trainingMethod.findFirst({
-    where: { type: "ARTICLE", isActive: true },
-  });
-  if (!method) return { generated: 0, errors: 0 };
-
-  const modulesWithoutPdf = await prisma.trainingModule.findMany({
-    where: {
-      methodId: method.id,
-      isActive: true,
-      pdfData: null,
-    },
-    include: { level: true },
-    orderBy: { level: { number: "asc" } },
-  });
-
-  let generated = 0;
-  let errors = 0;
-
-  for (const mod of modulesWithoutPdf) {
-    // Extraire l'URL depuis resources JSON
-    const resources = mod.resources as Array<{ url?: string }> | null;
-    const url = resources?.[0]?.url;
-    if (!url) {
-      errors++;
-      continue;
-    }
-
-    try {
-      console.log(`[PDF] Génération PDF pour "${mod.title}" (niveau ${mod.level.number}) depuis ${url}`);
-      const pdfBuffer = await urlToPdf(url);
-      await prisma.trainingModule.update({
-        where: { id: mod.id },
-        data: { pdfData: pdfBuffer },
-      });
-      generated++;
-      console.log(`[PDF] OK – ${mod.title} (${(pdfBuffer.length / 1024).toFixed(0)} Ko)`);
-    } catch (err) {
-      errors++;
-      console.error(`[PDF] Erreur pour "${mod.title}":`, err);
-    }
-  }
-
-  return { generated, errors };
 }

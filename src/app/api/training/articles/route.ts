@@ -68,17 +68,10 @@ export async function GET(request: Request) {
       },
     });
 
-    // Vérifier quels modules ont un PDF (sans charger le blob)
-    const moduleIds = modules.map((m) => m.id);
-    const withPdf = await prisma.trainingModule.findMany({
-      where: { id: { in: moduleIds }, pdfData: { not: null } },
-      select: { id: true },
-    });
-    const pdfSet = new Set(withPdf.map((m) => m.id));
-
+    // Tous les articles ont un PDF (généré à la demande si besoin)
     const articles = modules.map((m) => ({
       ...m,
-      hasPdf: pdfSet.has(m.id),
+      hasPdf: true, // PDF généré on-demand par /api/training/articles/[moduleId]
     }));
 
     return NextResponse.json({ articles });
