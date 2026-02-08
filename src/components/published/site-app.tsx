@@ -282,16 +282,17 @@ function PPClickTracker() {
 
       if (menuEl) {
         const id = (menuEl as HTMLElement).getAttribute("data-pp-menu") || "menu";
-        addPP("menu_or_button");
         try {
           const seen = sessionStorage.getItem(PP_SESSION_KEY) || "[]";
           const arr: string[] = JSON.parse(seen);
           if (!arr.includes(id)) {
-            addPP("menu_or_button_first");
+            addPP("menu_or_button");
             sessionStorage.setItem(PP_SESSION_KEY, JSON.stringify([...arr, id]));
+          } else {
+            addPP("click");
           }
         } catch {
-          addPP("menu_or_button_first");
+          addPP("menu_or_button");
         }
       } else {
         addPP("click");
