@@ -398,6 +398,36 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
             );
           })}
         </div>
+        <div className="mt-4 flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={isLoading}
+            onClick={async () => {
+              setIsLoading(true);
+              try {
+                const res = await fetch("/api/training/seed-articles", { method: "POST", credentials: "include" });
+                const data = await res.json();
+                if (res.ok) {
+                  alert(`Articles IA : ${data.created} créé(s), ${data.skipped} déjà présent(s).`);
+                  router.refresh();
+                } else {
+                  alert(data.error || "Erreur");
+                }
+              } catch (e) {
+                console.error(e);
+                alert("Erreur lors du chargement des articles.");
+              }
+              setIsLoading(false);
+            }}
+          >
+            <Sparkles className="h-4 w-4 mr-1" />
+            Charger les articles IA (10 articles, par niveau)
+          </Button>
+          <span className="text-xs text-gray-500">
+            Insère des articles réels sur l’IA, catégorisés par niveau de l’échelle.
+          </span>
+        </div>
       </section>
 
       {/* Applications : serious game, exercices */}
