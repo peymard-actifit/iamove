@@ -3,9 +3,11 @@ description: Exécuter le script de commit et déploiement après chaque amélio
 alwaysApply: true
 ---
 
-# Commit et déploiement systématique
+# Commit et déploiement systématique – PROCÉDURE OBLIGATOIRE
 
-Après **chaque** modification ou amélioration du code (nouvelle fonctionnalité, correctif, refactor), tu **dois** exécuter le script de déploiement du projet.
+**Le build automatique Vercel au push est DÉSACTIVÉ.** Le déploiement ne se fait **que** via le script `commit-and-deploy.ps1`. Ne jamais supposer qu’un simple `git push` déclenchera un déploiement.
+
+Après **chaque** modification ou amélioration du code (nouvelle fonctionnalité, correctif, refactor), tu **dois** exécuter le script. **À CHAQUE FOIS, sans exception** – c’est une règle en dur du projet.
 
 ## Commande à exécuter
 
@@ -15,12 +17,13 @@ Après **chaque** modification ou amélioration du code (nouvelle fonctionnalit�
 
 - **Level** : `patch` (défaut), `minor` (nouvelle fonctionnalité), `major` (breaking change).
 - **Message** : message de commit en français, concis (ex. "Onglets Formation centrés, sous-onglets Parcours/Applications/Connaissances").
+- **Redéploiement sans nouveau commit** : `.\commit-and-deploy.ps1 -Force`
 
-## À ne jamais oublier – À CHAQUE FOIS, sans exception
+## À ne jamais oublier – PROCÉDURE EN DUR
 
-1. Une fois les changements de code terminés et validés (lint OK), **exécuter** le script (ne pas se contenter de proposer).
-2. Ne pas considérer la tâche comme terminée sans avoir exécuté (ou rappelé à l’utilisateur d’exécuter) `commit-and-deploy.ps1`.
-3. Le script gère : mise à jour de la version dans `package.json`, commit Git, push, puis déploiement Vercel via API (déploiement maîtrisé, pas de build auto au push).
+1. Une fois les changements de code terminés et validés (lint OK), **exécuter le script** (ne pas se contenter de proposer, ne pas faire seulement un commit/push).
+2. Ne **jamais** considérer la tâche comme terminée sans avoir exécuté `commit-and-deploy.ps1`.
+3. Le script gère : mise à jour de la version dans `package.json`, commit Git, push, puis **déploiement Vercel via API** (seul moyen de déployer, build auto désactivé).
 
 ## Exemple
 
