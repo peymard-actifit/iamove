@@ -122,6 +122,8 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
   const [editingPath, setEditingPath] = useState<TrainingPath | null>(null);
   const [pathForm, setPathForm] = useState({ name: "", description: "" });
   const [showAddPathItemDialog, setShowAddPathItemDialog] = useState<TrainingPath | null>(null);
+  // Viewer PDF pour un module ARTICLE
+  const [viewingPdfModuleId, setViewingPdfModuleId] = useState<string | null>(null);
 
   const knowledgeMethods = methods.filter((m) => TYPOLOGY_KNOWLEDGE.includes(m.type));
   const applicationMethods = methods.filter((m) => TYPOLOGY_APPLICATIONS.includes(m.type));
@@ -671,6 +673,11 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
                         ))}
                       </div>
                       <div className="flex gap-1">
+                        {selectedMethod.type === "ARTICLE" && (
+                          <Button variant="ghost" size="icon" title="Voir le PDF" onClick={() => setViewingPdfModuleId(module.id)}>
+                            <FileText className="h-4 w-4 text-amber-600" />
+                          </Button>
+                        )}
                         <Button variant="ghost" size="icon" onClick={() => {
                           setEditingModule(module);
                           setModuleForm({
@@ -867,6 +874,31 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
                   );
                 })}
               </ul>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Viewer PDF (pleine largeur) */}
+      <Dialog open={!!viewingPdfModuleId} onOpenChange={() => setViewingPdfModuleId(null)}>
+        <DialogContent className="max-w-5xl w-[95vw] h-[85vh] flex flex-col p-0 gap-0">
+          <DialogHeader className="px-4 py-3 border-b flex-shrink-0">
+            <DialogTitle className="text-base">
+              {(() => {
+                const mod = allModules.find((m) => m.id === viewingPdfModuleId);
+                if (!mod) return "PDF";
+                const tr = mod.translations?.find((x) => x.language === globalLanguage.toUpperCase());
+                return tr?.title ?? mod.title;
+              })()}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 min-h-0">
+            {viewingPdfModuleId && (
+              <iframe
+                src={`/api/training/articles/${viewingPdfModuleId}`}
+                className="w-full h-full"
+                title="Viewer PDF"
+              />
             )}
           </div>
         </DialogContent>
