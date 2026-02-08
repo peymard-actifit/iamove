@@ -270,18 +270,15 @@ export function PublishedSiteApp({
   );
 }
 
-const CLICK_THROTTLE_MS = 1000;
 const PP_SESSION_KEY = "pp_seen_menu";
 
 function PPClickTracker() {
   const { addPP } = usePP() ?? { addPP: async () => {} };
-  const lastClickRef = useRef(0);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const menuEl = target.closest?.("[data-pp-menu]");
-      const now = Date.now();
 
       if (menuEl) {
         const id = (menuEl as HTMLElement).getAttribute("data-pp-menu") || "menu";
@@ -296,10 +293,7 @@ function PPClickTracker() {
         } catch {
           addPP("menu_or_button_first");
         }
-      }
-
-      if (now - lastClickRef.current >= CLICK_THROTTLE_MS) {
-        lastClickRef.current = now;
+      } else {
         addPP("click");
       }
     };
