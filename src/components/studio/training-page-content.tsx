@@ -66,7 +66,7 @@ interface PathItemModule {
   title: string;
   level: { number: number };
   method: { id: string; name: string; type: string };
-  translations: TrainingModuleTranslation[];
+  translations?: TrainingModuleTranslation[];
 }
 
 interface TrainingPathItem {

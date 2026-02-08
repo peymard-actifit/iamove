@@ -48,7 +48,6 @@ export default async function TrainingPage() {
               level: { select: { number: true } },
               method: { select: { id: true, name: true, type: true } },
             },
-            translations: true,
           },
         },
       },

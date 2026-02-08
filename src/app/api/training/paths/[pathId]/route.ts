@@ -22,7 +22,6 @@ export async function GET(
               include: {
                 level: { select: { number: true } },
                 method: { select: { id: true, name: true, type: true } },
-                translations: true,
               },
             },
           },
@@ -82,7 +81,6 @@ export async function PATCH(
               include: {
                 level: { select: { number: true } },
                 method: { select: { id: true, name: true, type: true } },
-                translations: true,
               },
             },
           },
