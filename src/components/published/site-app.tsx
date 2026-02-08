@@ -87,11 +87,11 @@ export function PublishedSiteApp({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       {/* Favicon dynamique basé sur le niveau de la personne connectée */}
       {currentPerson && <DynamicFavicon level={currentPerson.currentLevel} />}
       
-      <Tabs defaultValue="tab3" className="w-full">
+      <Tabs defaultValue="tab3" className="flex flex-col flex-1 min-h-0 w-full">
         {/* Header avec onglets intégrés dans la barre */}
         <header 
           className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800"
@@ -154,8 +154,8 @@ export function PublishedSiteApp({
         </header>
 
         {/* Contenu des onglets */}
-        <main className="container mx-auto px-4 pt-2 pb-6">
-          <TabsContent value="tab2" className="mt-0">
+        <main className="container mx-auto px-4 pt-2 pb-6 flex-1 min-h-0 flex flex-col">
+          <TabsContent value="tab2" className="mt-0 flex-1 min-h-0 data-[state=inactive]:hidden flex flex-col">
             <Tab2Organigramme
               siteId={site.id}
               siteName={site.name}
@@ -168,7 +168,7 @@ export function PublishedSiteApp({
             />
           </TabsContent>
 
-          <TabsContent value="tab3" className="mt-0">
+          <TabsContent value="tab3" className="mt-0 flex-1 min-h-0 data-[state=inactive]:hidden flex flex-col">
             {currentPerson ? (
               <PersonalProfileEditor
                 siteId={site.id}
@@ -183,7 +183,7 @@ export function PublishedSiteApp({
             )}
           </TabsContent>
 
-          <TabsContent value="tab4" className="mt-0">
+          <TabsContent value="tab4" className="mt-0 flex-1 min-h-0 data-[state=inactive]:hidden flex flex-col">
             <Tab4Formation
               siteId={site.id}
               isStudioMode={false}
@@ -191,7 +191,7 @@ export function PublishedSiteApp({
             />
           </TabsContent>
 
-          <TabsContent value="tab5" className="mt-0">
+          <TabsContent value="tab5" className="mt-0 flex-1 min-h-0 data-[state=inactive]:hidden flex flex-col">
             <Tab5Quiz
               siteId={site.id}
               isStudioMode={false}

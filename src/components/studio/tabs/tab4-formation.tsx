@@ -160,7 +160,7 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
   return (
     <div
       ref={containerRef}
-      className={`flex h-[calc(100vh-8rem)] min-h-[360px] ${isDragging ? "select-none" : ""}`}
+      className={`flex flex-1 min-h-0 w-full ${isDragging ? "select-none" : ""}`}
     >
       {/* Partie gauche : prompt / assistant OpenAI */}
       <div
