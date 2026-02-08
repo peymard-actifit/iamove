@@ -6,6 +6,12 @@ import { Send, Bot, User, Sparkles, FileText, Clock, ExternalLink, Loader2 } fro
 import { LEVELS, getLevelIcon } from "@/lib/levels";
 import { useI18n, getLanguageInfo } from "@/lib/i18n";
 import { usePP } from "@/components/published/site-app";
+import dynamic from "next/dynamic";
+
+const TrainingPageContent = dynamic(
+  () => import("@/components/studio/training-page-content").then((m) => m.TrainingPageContent),
+  { ssr: false, loading: () => <div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" /></div> }
+);
 
 interface LevelTranslation {
   id: string;
@@ -132,39 +138,52 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
     }
   };
 
-  if (isStudioMode) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Formation IA</h2>
-        </div>
+  // Mode studio : charger dynamiquement les méthodes, niveaux et parcours,
+  // puis afficher le vrai composant de gestion (Connaissances, Applications, Parcours).
+  const [studioData, setStudioData] = useState<{ methods: unknown[]; levels: unknown[]; paths: unknown[] } | null>(null);
+  const [studioLoading, setStudioLoading] = useState(isStudioMode);
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-yellow-500" />
-              Aperçu du module de formation
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-500">
-              Dans cet onglet, les utilisateurs du site publié pourront dialoguer avec une IA 
-              spécialisée pour progresser dans leurs compétences.
-            </p>
-            <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                <strong>Fonctionnalités :</strong>
-              </p>
-              <ul className="mt-2 text-sm text-gray-500 space-y-1">
-                <li>• Dialogue avec l&apos;assistant IA</li>
-                <li>• Base de connaissances sur les technologies IA</li>
-                <li>• Suggestions de progression personnalisées</li>
-                <li>• Historique des conversations sauvegardé</li>
-              </ul>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+  useEffect(() => {
+    if (!isStudioMode) return;
+    let cancelled = false;
+    setStudioLoading(true);
+    Promise.all([
+      fetch("/api/training/seed").then((r) => r.json()),
+      fetch("/api/levels").then((r) => r.json()),
+      fetch("/api/training/paths").then((r) => r.json()),
+    ])
+      .then(([methodsData, levelsData, pathsData]) => {
+        if (cancelled) return;
+        setStudioData({
+          methods: methodsData.methods || [],
+          levels: Array.isArray(levelsData) ? levelsData : levelsData.levels || [],
+          paths: pathsData.paths || [],
+        });
+      })
+      .catch((err) => {
+        console.error("Erreur chargement formation studio:", err);
+        if (!cancelled) setStudioData({ methods: [], levels: [], paths: [] });
+      })
+      .finally(() => {
+        if (!cancelled) setStudioLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [isStudioMode]);
+
+  if (isStudioMode) {
+    if (studioLoading || !studioData) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+        </div>
+      );
+    }
+    return (
+      <TrainingPageContent
+        methods={studioData.methods as never[]}
+        levels={studioData.levels as never[]}
+        paths={studioData.paths as never[]}
+      />
     );
   }
 

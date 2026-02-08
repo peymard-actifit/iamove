@@ -179,6 +179,16 @@ export async function GET() {
       orderBy: { order: "asc" },
       include: {
         translations: true,
+        modules: {
+          include: {
+            level: true,
+            translations: true,
+          },
+          orderBy: [
+            { level: { number: "asc" } },
+            { order: "asc" },
+          ],
+        },
         _count: {
           select: { modules: true },
         },
