@@ -11,11 +11,32 @@ const PASSING_SCORE = 15;
 const TOTAL_QUESTIONS = 20;
 const MAX_ERRORS = TOTAL_QUESTIONS - PASSING_SCORE; // 5 erreurs max = échec certain à 6
 
+interface LevelTranslation {
+  id: string;
+  language: string;
+  name: string;
+  category: string;
+  seriousGaming: string;
+  description: string;
+}
+
+interface LevelWithTranslations {
+  id: string;
+  number: number;
+  name: string;
+  category?: string;
+  seriousGaming?: string;
+  description?: string;
+  translations?: LevelTranslation[];
+}
+
 interface Tab5QuizProps {
   siteId: string;
   isStudioMode: boolean;
   personId?: string;
   currentLevel?: number;
+  /** En mode publié : niveaux avec traductions pour afficher l'échelle dans la langue sélectionnée */
+  levelsWithTranslations?: LevelWithTranslations[];
 }
 
 interface LevelScaleProps {
@@ -23,12 +44,48 @@ interface LevelScaleProps {
   selectedLevel?: number | null;
   /** En mode publié : niveaux 1 à maxAllowedLevel (inclus) sont jouables. Non défini = studio, tous les niveaux 1-20. */
   maxAllowedLevel?: number;
+  /** Niveaux avec traductions + langue pour afficher noms/catégories traduits (mode publié) */
+  levelsWithTranslations?: LevelWithTranslations[];
+  language?: string;
+}
+
+function getCategoryStyleIndex(levelNumber: number): number {
+  if (levelNumber <= 3) return 0;
+  if (levelNumber <= 9) return 1;
+  if (levelNumber <= 15) return 2;
+  return 3;
+}
+
+function getLevelDisplayForScale(
+  levelNumber: number,
+  levels: LevelWithTranslations[] | undefined,
+  language: string
+): { name: string; category: string; seriousGaming: string; description: string } {
+  if (!levels?.length) {
+    const info = LEVELS[levelNumber] ?? LEVELS[0];
+    return { name: info.name, category: info.category, seriousGaming: info.seriousGaming, description: info.description };
+  }
+  const level = levels.find((l) => l.number === levelNumber);
+  if (!level) {
+    const info = LEVELS[levelNumber] ?? LEVELS[0];
+    return { name: info.name, category: info.category, seriousGaming: info.seriousGaming, description: info.description };
+  }
+  const lang = language?.toUpperCase() || "FR";
+  const tr = level.translations?.find((x) => x.language.toUpperCase() === lang);
+  if (tr) return { name: tr.name, category: tr.category, seriousGaming: tr.seriousGaming, description: tr.description };
+  return {
+    name: level.name,
+    category: level.category || "",
+    seriousGaming: level.seriousGaming || "",
+    description: level.description || "",
+  };
 }
 
 // Composant échelle des niveaux
-function LevelScale({ onStartQuiz, selectedLevel, maxAllowedLevel }: LevelScaleProps) {
-  const { t } = useI18n();
+function LevelScale({ onStartQuiz, selectedLevel, maxAllowedLevel, levelsWithTranslations, language }: LevelScaleProps) {
+  const { t, language: i18nLanguage } = useI18n();
   const [hoveredLevel, setHoveredLevel] = useState<number | null>(null);
+  const lang = language ?? i18nLanguage ?? "FR";
 
   // En mode publié : jouable = niveau 1 à maxAllowedLevel (et niveau 0 toujours indisponible)
   const isLevelPlayable = (levelNum: number) => {
@@ -37,7 +94,12 @@ function LevelScale({ onStartQuiz, selectedLevel, maxAllowedLevel }: LevelScaleP
     return levelNum <= maxAllowedLevel;
   };
 
-  const hoveredLevelInfo = hoveredLevel !== null ? LEVELS[hoveredLevel] : null;
+  const getDisplayInfo = (levelNum: number) =>
+    levelsWithTranslations?.length && lang
+      ? { number: levelNum, ...getLevelDisplayForScale(levelNum, levelsWithTranslations, lang) }
+      : (LEVELS[levelNum] ?? LEVELS[0]);
+
+  const hoveredLevelInfo = hoveredLevel !== null ? getDisplayInfo(hoveredLevel) : null;
 
   return (
     <div className="w-56 h-full bg-gray-50 dark:bg-gray-900 border-r flex-shrink-0 flex flex-col">
@@ -50,6 +112,7 @@ function LevelScale({ onStartQuiz, selectedLevel, maxAllowedLevel }: LevelScaleP
       <div className="flex-1 overflow-y-auto px-2 pb-2">
         <div className="space-y-0.5">
           {LEVELS.map((level) => {
+            const display = getDisplayInfo(level.number);
             const playable = isLevelPlayable(level.number);
             const disabled = level.number === 0 || (maxAllowedLevel !== undefined && level.number > maxAllowedLevel);
             return (
@@ -81,10 +144,10 @@ function LevelScale({ onStartQuiz, selectedLevel, maxAllowedLevel }: LevelScaleP
                 </span>
                 <div className="flex-1 min-w-0 overflow-hidden">
                   <p className="text-[10px] font-medium truncate leading-tight">
-                    {level.name}
+                    {display.name}
                   </p>
                   <p className="text-[8px] text-gray-500 truncate leading-tight">
-                    {level.seriousGaming}
+                    {display.seriousGaming}
                   </p>
                 </div>
               </div>
@@ -99,9 +162,9 @@ function LevelScale({ onStartQuiz, selectedLevel, maxAllowedLevel }: LevelScaleP
         <div className="flex-shrink-0 p-2 border-t bg-gray-900 text-white">
           <div className="flex items-center gap-2 mb-1">
             <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ${
-              hoveredLevelInfo.category === "Néophyte" ? "bg-gray-600 text-gray-200" :
-              hoveredLevelInfo.category === "Utilisateur" ? "bg-blue-600 text-blue-100" :
-              hoveredLevelInfo.category === "Technicien" ? "bg-purple-600 text-purple-100" :
+              getCategoryStyleIndex(hoveredLevelInfo.number) === 0 ? "bg-gray-600 text-gray-200" :
+              getCategoryStyleIndex(hoveredLevelInfo.number) === 1 ? "bg-blue-600 text-blue-100" :
+              getCategoryStyleIndex(hoveredLevelInfo.number) === 2 ? "bg-purple-600 text-purple-100" :
               "bg-orange-600 text-orange-100"
             }`}>
               {hoveredLevelInfo.category}
@@ -144,7 +207,7 @@ interface QuizQuestion {
   answers: { text: string; isCorrect: boolean }[];
 }
 
-export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: Tab5QuizProps) {
+export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0, levelsWithTranslations }: Tab5QuizProps) {
   const { language, t } = useI18n();
   const [currentQuiz, setCurrentQuiz] = useState<QuizQuestion[] | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -512,6 +575,8 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
           onStartQuiz={startQuiz}
           selectedLevel={targetLevel}
           maxAllowedLevel={isStudioMode ? undefined : Math.min(20, currentLevel + 1)}
+          levelsWithTranslations={levelsWithTranslations}
+          language={language}
         />
         
         {/* Contenu principal - Quizz */}

@@ -22,19 +22,79 @@ interface Person {
   language?: string;
 }
 
+interface LevelTranslation {
+  id: string;
+  language: string;
+  name: string;
+  category: string;
+  seriousGaming: string;
+  description: string;
+}
+
+interface LevelWithTranslations {
+  id: string;
+  number: number;
+  name: string;
+  category?: string;
+  seriousGaming?: string;
+  translations?: LevelTranslation[];
+}
+
 interface PersonalProfileEditorProps {
   siteId: string;
   person: Person;
   persons: Person[];
+  levels: LevelWithTranslations[];
+}
+
+// Style par index de catégorie (0–3 : Néophyte, Utilisateur, Technicien, Chercheur)
+function getCategoryStyleIndex(levelNumber: number): number {
+  if (levelNumber <= 3) return 0;
+  if (levelNumber <= 9) return 1;
+  if (levelNumber <= 15) return 2;
+  return 3;
+}
+
+function getLevelDisplayInfo(
+  levelNumber: number,
+  levels: LevelWithTranslations[],
+  language: string
+): { name: string; category: string; seriousGaming: string } {
+  if (!levels?.length) {
+    const fallback = getLevelInfo(levelNumber);
+    return { name: fallback.name, category: fallback.category, seriousGaming: fallback.seriousGaming };
+  }
+  const level = levels.find((l) => l.number === levelNumber);
+  if (!level) {
+    const fallback = levels.find((l) => l.number === 0);
+    if (fallback) {
+      const tr = fallback.translations?.find((t) => t.language.toUpperCase() === (language?.toUpperCase() || "FR"));
+      if (tr) return { name: tr.name, category: tr.category, seriousGaming: tr.seriousGaming };
+      return { name: fallback.name, category: fallback.category || "", seriousGaming: fallback.seriousGaming || "" };
+    }
+    const staticFallback = getLevelInfo(levelNumber);
+    return { name: staticFallback.name, category: staticFallback.category, seriousGaming: staticFallback.seriousGaming };
+  }
+  const lang = language?.toUpperCase() || "FR";
+  const translation = level.translations?.find((tr) => tr.language.toUpperCase() === lang);
+  if (translation) {
+    return { name: translation.name, category: translation.category, seriousGaming: translation.seriousGaming };
+  }
+  return {
+    name: level.name,
+    category: level.category || "",
+    seriousGaming: level.seriousGaming || "",
+  };
 }
 
 export function PersonalProfileEditor({
   siteId,
   person,
   persons,
+  levels,
 }: PersonalProfileEditorProps) {
   const router = useRouter();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -81,7 +141,8 @@ export function PersonalProfileEditor({
     setIsEditing(false);
   };
 
-  const levelInfo = getLevelInfo(person.currentLevel);
+  const levelDisplay = getLevelDisplayInfo(person.currentLevel, levels, language);
+  const categoryStyleIndex = getCategoryStyleIndex(person.currentLevel);
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -222,11 +283,11 @@ export function PersonalProfileEditor({
           </div>
         </div>
 
-          {/* Catégorie IA (non modifiable) */}
+          {/* Catégorie IA (non modifiable) - libellés selon la langue (GLOBAL / LevelTranslation) */}
           <div className={`p-4 rounded-lg border ${
-            levelInfo.category === "Néophyte" ? "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700" :
-            levelInfo.category === "Utilisateur" ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800" :
-            levelInfo.category === "Technicien" ? "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800" :
+            categoryStyleIndex === 0 ? "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700" :
+            categoryStyleIndex === 1 ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800" :
+            categoryStyleIndex === 2 ? "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800" :
             "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800"
           }`}>
             <div className="flex items-center gap-4">
@@ -235,30 +296,30 @@ export function PersonalProfileEditor({
               </div>
               <div className="flex-1">
                 <p className={`text-sm font-medium ${
-                  levelInfo.category === "Néophyte" ? "text-gray-700 dark:text-gray-300" :
-                  levelInfo.category === "Utilisateur" ? "text-blue-700 dark:text-blue-300" :
-                  levelInfo.category === "Technicien" ? "text-purple-700 dark:text-purple-300" :
+                  categoryStyleIndex === 0 ? "text-gray-700 dark:text-gray-300" :
+                  categoryStyleIndex === 1 ? "text-blue-700 dark:text-blue-300" :
+                  categoryStyleIndex === 2 ? "text-purple-700 dark:text-purple-300" :
                   "text-orange-700 dark:text-orange-300"
                 }`}>
                   {t.published.aiCategory}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
                   <span className={`px-3 py-1 rounded-full text-sm font-bold ${
-                    levelInfo.category === "Néophyte" ? "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200" :
-                    levelInfo.category === "Utilisateur" ? "bg-blue-200 text-blue-700 dark:bg-blue-800 dark:text-blue-200" :
-                    levelInfo.category === "Technicien" ? "bg-purple-200 text-purple-700 dark:bg-purple-800 dark:text-purple-200" :
+                    categoryStyleIndex === 0 ? "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200" :
+                    categoryStyleIndex === 1 ? "bg-blue-200 text-blue-700 dark:bg-blue-800 dark:text-blue-200" :
+                    categoryStyleIndex === 2 ? "bg-purple-200 text-purple-700 dark:bg-purple-800 dark:text-purple-200" :
                     "bg-orange-200 text-orange-700 dark:bg-orange-800 dark:text-orange-200"
                   }`}>
-                    {levelInfo.category}
+                    {levelDisplay.category}
                   </span>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">{levelInfo.name} - {levelInfo.seriousGaming}</p>
+                <p className="text-xs text-gray-500 mt-2">{levelDisplay.name} - {levelDisplay.seriousGaming}</p>
               </div>
             </div>
             <p className={`text-xs mt-3 ${
-              levelInfo.category === "Néophyte" ? "text-gray-600 dark:text-gray-400" :
-              levelInfo.category === "Utilisateur" ? "text-blue-600 dark:text-blue-400" :
-              levelInfo.category === "Technicien" ? "text-purple-600 dark:text-purple-400" :
+              categoryStyleIndex === 0 ? "text-gray-600 dark:text-gray-400" :
+              categoryStyleIndex === 1 ? "text-blue-600 dark:text-blue-400" :
+              categoryStyleIndex === 2 ? "text-purple-600 dark:text-purple-400" :
               "text-orange-600 dark:text-orange-400"
             }`}>
               {t.published.categoryUpdatedAuto}

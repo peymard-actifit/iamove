@@ -45,10 +45,22 @@ interface Site {
   } | null;
 }
 
+interface LevelTranslation {
+  id: string;
+  language: string;
+  name: string;
+  category: string;
+  seriousGaming: string;
+  description: string;
+}
+
 interface Level {
   id: string;
   number: number;
   name: string;
+  category?: string;
+  seriousGaming?: string;
+  translations?: LevelTranslation[];
 }
 
 interface PublishedSiteAppProps {
@@ -174,6 +186,7 @@ export function PublishedSiteApp({
                 siteId={site.id}
                 person={currentPerson}
                 persons={visiblePersons}
+                levels={levels}
               />
             ) : (
               <div className="text-center py-12 text-gray-500">
@@ -197,6 +210,7 @@ export function PublishedSiteApp({
               isStudioMode={false}
               personId={currentPerson?.id}
               currentLevel={currentPerson?.currentLevel || 0}
+              levelsWithTranslations={levels}
             />
           </TabsContent>
         </main>

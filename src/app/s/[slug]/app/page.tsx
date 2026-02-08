@@ -77,6 +77,7 @@ export default async function PublishedSiteAppPage({ params }: PageProps) {
 
   const levels = await prisma.level.findMany({
     orderBy: { number: "asc" },
+    include: { translations: true },
   });
 
   return (
