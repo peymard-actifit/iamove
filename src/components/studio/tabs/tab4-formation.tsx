@@ -288,22 +288,22 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
             </TabsContent>
             <TabsContent value="connaissances" className="mt-0 h-full data-[state=inactive]:hidden flex flex-col min-h-0">
               <div className="flex flex-1 min-h-0 overflow-hidden">
-                {/* Barre verticale des 20 niveaux (1 à 20) : icône puis numéro côte à côte, grille 2 colonnes pour éviter l'ascenseur */}
-                <div className="w-20 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30 py-2 px-1 grid grid-cols-2 gap-0.5 content-start">
+                {/* Barre verticale des 20 niveaux (1 à 20) : une seule colonne, icône puis numéro à droite, répartition de la hauteur sans ascenseur */}
+                <div className="w-14 flex-shrink-0 self-stretch border-r border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col min-h-0">
                   {LEVELS.filter((l) => l.number >= 1 && l.number <= 20).map((level) => (
                     <button
                       key={level.number}
                       type="button"
                       onClick={() => setSelectedKnowledgeLevel(selectedKnowledgeLevel === level.number ? null : level.number)}
-                      className={`flex items-center justify-center gap-1 min-w-0 py-1 px-1 rounded-md transition-colors ${
+                      className={`flex items-center justify-center gap-1 min-h-0 flex-1 px-1 rounded-sm transition-colors ${
                         selectedKnowledgeLevel === level.number
                           ? "bg-blue-100 dark:bg-blue-900/50 ring-1 ring-blue-500 dark:ring-blue-400"
                           : "hover:bg-gray-200 dark:hover:bg-gray-700"
                       }`}
                       title={`Niveau ${level.number} - ${level.name} (${level.category})`}
                     >
-                      {getLevelIcon(level.number, "h-4 w-4 flex-shrink-0")}
-                      <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300 tabular-nums">
+                      {getLevelIcon(level.number, "h-3.5 w-3.5 flex-shrink-0")}
+                      <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300 tabular-nums leading-none">
                         {level.number}
                       </span>
                     </button>
