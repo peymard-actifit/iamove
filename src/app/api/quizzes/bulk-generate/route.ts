@@ -14,6 +14,7 @@ interface LevelInfo {
 const LEVELS: LevelInfo[] = levelsData.levels;
 
 import { TARGET_LANGUAGES, getDeepLLanguageCode } from "@/lib/deepl";
+import { OPENAI_CONFIG } from "@/lib/api-config";
 
 // Les 26 langues supportées (FR + les 25 langues cibles)
 const SUPPORTED_LANGUAGES = ["FR", ...TARGET_LANGUAGES];
@@ -102,7 +103,7 @@ Réponds UNIQUEMENT avec un tableau JSON valide, sans markdown, sans explication
         { role: "user", content: prompt }
       ],
       temperature: 0.9, // Plus de variété
-      max_tokens: 4000,
+      max_tokens: OPENAI_CONFIG.maxTokens.default,
     }),
   });
 

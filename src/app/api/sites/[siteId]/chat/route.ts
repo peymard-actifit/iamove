@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import OpenAI from "openai";
+import { OPENAI_CONFIG } from "@/lib/api-config";
 
 const openai = new OpenAI({
   apiKey: process.env["OPENAI_API_KEY"],
@@ -59,7 +60,7 @@ export async function POST(
     const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo-preview",
       messages,
-      max_tokens: 1000,
+      max_tokens: OPENAI_CONFIG.maxTokens.default,
       temperature: 0.7,
     });
 

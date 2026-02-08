@@ -479,4 +479,21 @@ L'usage des traductions des questions ne fonctionne pas, ni dans la gestion des 
 → **API de génération IA** : Création de `/api/quizzes/generate` utilisant OpenAI GPT-4o-mini avec le contexte du niveau et traduction automatique en 26 langues via DeepL
 
 ---
-*Dernière mise à jour: 2026-02-07*
+
+### Prompt #58 (2026-02-08) - Initialisation session
+```
+Ceci est le prompt d'initialisation de la session de travail sur Cursor
+Les commandes suivantes doivent être faites à la suite puis un rapport doit être généré :
+Repasse en revue le code pour bien le comprendre.
+Vérifie que tu as bien les tokens Git et Vercel nécessaires et qu'ils sont valides.
+Vérifie que le worktree local de Cursor est bien synchronisé avec le dépôt Git dans le cloud.
+[...] Rapport (LoC, Tokens, API_KEYs, DB, Sync, Script déploiement, Limites). Exécute commit-and-deploy.ps1 à la fin.
+```
+→ Revue du code (studio, quizz, API, Prisma, i18n)
+→ Vérification Git (branch main, à jour avec origin/main), tokens GitHub (dans remote URL) et Vercel (dans commit-and-deploy.ps1)
+→ PROMPTS.md confirmé comme fichier d’historique des prompts dans le dépôt
+→ Limites OpenAI alignées sur api-config (max_tokens 4096 où applicable)
+→ Rapport d’initialisation généré ; déploiement via script
+
+---
+*Dernière mise à jour: 2026-02-08*
