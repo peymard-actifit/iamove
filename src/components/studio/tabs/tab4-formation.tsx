@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, Button, Input, Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui";
-import { Send, Bot, User, Sparkles } from "lucide-react";
+import { Send, Bot, User, Sparkles, FileText, Clock, ExternalLink, Loader2 } from "lucide-react";
 import { LEVELS, getLevelIcon } from "@/lib/levels";
 import { useI18n, getLanguageInfo } from "@/lib/i18n";
 import { usePP } from "@/components/published/site-app";
@@ -58,6 +58,18 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+}
+
+/** Module article (type ARTICLE) renvoyé par l’API /api/training/articles */
+interface KnowledgeArticle {
+  id: string;
+  title: string;
+  description: string | null;
+  content: string | null;
+  duration: number;
+  difficulty: number;
+  resources?: Array<{ type?: string; title?: string; url?: string; description?: string }> | null;
+  translations?: Array<{ language: string; title: string; description: string | null; content: string | null }>;
 }
 
 export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTranslations }: Tab4FormationProps) {
@@ -166,6 +178,31 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
   const containerRef = useRef<HTMLDivElement>(null);
   // Niveau sélectionné dans l'onglet Connaissances (1-20), null = tous
   const [selectedKnowledgeLevel, setSelectedKnowledgeLevel] = useState<number | null>(null);
+  const [knowledgeArticles, setKnowledgeArticles] = useState<KnowledgeArticle[]>([]);
+  const [knowledgeArticlesLoading, setKnowledgeArticlesLoading] = useState(false);
+
+  // Charger les articles du niveau sélectionné (site publié uniquement)
+  useEffect(() => {
+    if (isStudioMode || selectedKnowledgeLevel == null) {
+      setKnowledgeArticles([]);
+      return;
+    }
+    let cancelled = false;
+    setKnowledgeArticlesLoading(true);
+    setKnowledgeArticles([]);
+    fetch(`/api/training/articles?levelNumber=${selectedKnowledgeLevel}`)
+      .then((res) => (res.ok ? res.json() : { articles: [] }))
+      .then((data) => {
+        if (!cancelled && Array.isArray(data.articles)) setKnowledgeArticles(data.articles);
+      })
+      .catch(() => {
+        if (!cancelled) setKnowledgeArticles([]);
+      })
+      .finally(() => {
+        if (!cancelled) setKnowledgeArticlesLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [isStudioMode, selectedKnowledgeLevel]);
 
   const handleDividerMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -393,9 +430,68 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
                           {t.formation.seeAll}
                         </button>
                       </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {t.formation.contentForLevel.replace("{n}", String(selectedKnowledgeLevel))}
-                      </div>
+                      {knowledgeArticlesLoading ? (
+                        <div className="flex items-center justify-center gap-2 py-8 text-gray-500 dark:text-gray-400">
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          <span className="text-sm">{t.formation.resourcesHint}</span>
+                        </div>
+                      ) : knowledgeArticles.length === 0 ? (
+                        <p className="text-sm text-gray-500 dark:text-gray-400 py-4">
+                          {t.formation.resourcesHint}
+                        </p>
+                      ) : (
+                        <ul className="space-y-3">
+                          {knowledgeArticles.map((article) => {
+                            const lang = language?.toUpperCase() || "FR";
+                            const tr = article.translations?.find((x) => x.language.toUpperCase() === lang);
+                            const title = tr?.title ?? article.title;
+                            const description = tr?.description ?? article.description;
+                            const link = Array.isArray(article.resources) && article.resources[0]?.url
+                              ? article.resources[0].url
+                              : null;
+                            return (
+                              <li key={article.id}>
+                                <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 p-4">
+                                  <div className="flex items-start gap-3">
+                                    <div className="flex-shrink-0 p-2 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+                                      <FileText className="h-5 w-5" />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <h4 className="font-medium text-gray-900 dark:text-gray-100">
+                                        {title}
+                                      </h4>
+                                      {description && (
+                                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                                          {description}
+                                        </p>
+                                      )}
+                                      <div className="flex flex-wrap items-center gap-3 mt-2">
+                                        {article.duration > 0 && (
+                                          <span className="inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                                            <Clock className="h-3.5 w-3.5" />
+                                            {article.duration} min
+                                          </span>
+                                        )}
+                                        {link && (
+                                          <a
+                                            href={link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                                          >
+                                            Lire l’article
+                                            <ExternalLink className="h-3.5 w-3.5" />
+                                          </a>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )}
                     </div>
                   );
                   })()}
