@@ -2,11 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger, TabsContent, Button } from "@/components/ui";
-import { Network, User, GraduationCap, ClipboardCheck, LogOut, Route } from "lucide-react";
+import { Network, User, GraduationCap, ClipboardCheck, LogOut } from "lucide-react";
 import { Tab2Organigramme } from "@/components/studio/tabs/tab2-organigramme";
 import { Tab4Formation } from "@/components/studio/tabs/tab4-formation";
 import { Tab5Quiz } from "@/components/studio/tabs/tab5-quiz";
-import { Tab6TrainingPaths } from "@/components/studio/tabs/tab6-training-paths";
 import { PersonalProfileEditor } from "./personal-profile-editor";
 import { DynamicFavicon } from "./dynamic-favicon";
 import { LanguageSelector } from "@/components/studio/language-selector";
@@ -98,17 +97,17 @@ export function PublishedSiteApp({
           className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800"
           style={{ backgroundColor: site.primaryColor }}
         >
-          <div className="container mx-auto flex h-10 min-h-[2.5rem] items-center gap-2 px-2 sm:px-4">
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <div className="h-7 w-7 rounded bg-white/20 flex items-center justify-center">
+          <div className="container mx-auto flex h-10 min-h-[2.5rem] items-center justify-between gap-2 px-2 sm:px-4">
+            <div className="flex items-center gap-2 flex-shrink-0 min-w-0 flex-1 justify-start">
+              <div className="h-7 w-7 rounded bg-white/20 flex items-center justify-center flex-shrink-0">
                 <span className="text-white font-bold text-sm">{site.name.charAt(0)}</span>
               </div>
               <span className="text-base font-semibold text-white truncate max-w-[120px] sm:max-w-none">
                 {site.name}
               </span>
             </div>
-            {/* Onglets au centre de la barre */}
-            <TabsList className="flex-1 justify-start h-8 mx-1 bg-white/10 border-0 gap-0.5 p-0.5 [&>button]:text-white/90 [&>button]:data-[state=active]:bg-white/20 [&>button]:rounded [&>button]:px-2 [&>button]:py-1 [&>button]:text-xs">
+            {/* Onglets centrés dans la barre */}
+            <TabsList className="flex-shrink-0 justify-center h-8 mx-1 bg-white/10 border-0 gap-0.5 p-0.5 [&>button]:text-white/90 [&>button]:data-[state=active]:bg-white/20 [&>button]:rounded [&>button]:px-2 [&>button]:py-1 [&>button]:text-xs">
               {settings.tab3Enabled && (
                 <TabsTrigger value="tab3" className="gap-1">
                   <User className="h-3.5 w-3.5" />
@@ -133,12 +132,8 @@ export function PublishedSiteApp({
                   <span className="hidden sm:inline">{t.tabs.training}</span>
                 </TabsTrigger>
               )}
-              <TabsTrigger value="tab6" className="gap-1">
-                <Route className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">{t.published.trainingPaths}</span>
-              </TabsTrigger>
             </TabsList>
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2 flex-shrink-0 flex-1 justify-end">
               {currentPerson && (
                 <span className="text-white/80 text-xs hidden sm:inline truncate max-w-[100px]">
                   {currentPerson.name}
@@ -200,14 +195,6 @@ export function PublishedSiteApp({
             <Tab5Quiz
               siteId={site.id}
               isStudioMode={false}
-              personId={currentPerson?.id}
-              currentLevel={currentPerson?.currentLevel || 0}
-            />
-          </TabsContent>
-
-          <TabsContent value="tab6" className="mt-0">
-            <Tab6TrainingPaths
-              siteId={site.id}
               personId={currentPerson?.id}
               currentLevel={currentPerson?.currentLevel || 0}
             />

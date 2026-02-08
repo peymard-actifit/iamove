@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle, Button, Input } from "@/components/ui";
+import { Card, CardContent, CardHeader, CardTitle, Button, Input, Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui";
 import { Send, Bot, User, Sparkles } from "lucide-react";
 
 interface Tab4FormationProps {
@@ -160,9 +160,9 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
       >
         {leftPercent > 0 && (
           <>
-            <div className="border-b px-4 py-3 bg-gray-50 dark:bg-gray-800/50">
-              <h3 className="font-semibold flex items-center gap-2">
-                <Bot className="h-5 w-5 text-blue-500" />
+            <div className="border-b px-4 py-2 bg-gray-50 dark:bg-gray-800/50">
+              <h3 className="text-sm font-semibold flex items-center gap-2">
+                <Bot className="h-4 w-4 text-blue-500" />
                 Assistant Formation IA
               </h3>
             </div>
@@ -249,7 +249,7 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
         <div className="w-0.5 h-8 rounded-full bg-gray-400 group-hover:bg-white opacity-50 group-hover:opacity-100 transition-opacity" />
       </div>
 
-      {/* Partie droite : autres éléments de formation (à venir) */}
+      {/* Partie droite : Formation avec sous-onglets Parcours, Applications, Connaissances */}
       <div
         className="flex flex-col border rounded-r-lg overflow-hidden bg-white dark:bg-gray-900 shadow-sm min-w-0"
         style={{
@@ -258,16 +258,33 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
           minWidth: leftPercent >= 100 ? 0 : undefined,
         }}
       >
-        <div className="border-b px-4 py-3 bg-gray-50 dark:bg-gray-800/50">
-          <h3 className="font-semibold">Formation</h3>
-        </div>
-        <div className="flex-1 overflow-auto p-6 flex items-center justify-center min-h-[200px]">
-          <div className="text-center text-gray-500 dark:text-gray-400 max-w-sm">
-            <p className="text-sm">
-              Modules, parcours et ressources de formation seront affichés ici.
-            </p>
+        <Tabs defaultValue="parcours" className="flex flex-col flex-1 min-h-0">
+          <div className="border-b px-4 py-2 bg-gray-50 dark:bg-gray-800/50 flex items-center gap-4 flex-shrink-0">
+            <h3 className="text-sm font-semibold">Formation</h3>
+            <TabsList className="h-7 bg-transparent p-0 gap-0 border-0 [&>button]:rounded [&>button]:px-3 [&>button]:py-1 [&>button]:text-xs [&>button]:data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 [&>button]:data-[state=active]:shadow-sm">
+              <TabsTrigger value="parcours">Parcours</TabsTrigger>
+              <TabsTrigger value="applications">Applications</TabsTrigger>
+              <TabsTrigger value="connaissances">Connaissances</TabsTrigger>
+            </TabsList>
           </div>
-        </div>
+          <div className="flex-1 overflow-auto min-h-0">
+            <TabsContent value="parcours" className="mt-0 p-4 h-full data-[state=inactive]:hidden">
+              <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                <p className="text-sm">Parcours de formation seront affichés ici.</p>
+              </div>
+            </TabsContent>
+            <TabsContent value="applications" className="mt-0 p-4 h-full data-[state=inactive]:hidden">
+              <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                <p className="text-sm">Applications et exercices seront affichés ici.</p>
+              </div>
+            </TabsContent>
+            <TabsContent value="connaissances" className="mt-0 p-4 h-full data-[state=inactive]:hidden">
+              <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                <p className="text-sm">Ressources et connaissances seront affichées ici.</p>
+              </div>
+            </TabsContent>
+          </div>
+        </Tabs>
       </div>
     </div>
   );

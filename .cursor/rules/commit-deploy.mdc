@@ -1,0 +1,31 @@
+---
+description: Exécuter le script de commit et déploiement après chaque amélioration
+alwaysApply: true
+---
+
+# Commit et déploiement systématique
+
+Après **chaque** modification ou amélioration du code (nouvelle fonctionnalité, correctif, refactor), tu **dois** exécuter le script de déploiement du projet.
+
+## Commande à exécuter
+
+```powershell
+.\commit-and-deploy.ps1 -Level patch -Message "Description courte des changements"
+```
+
+- **Level** : `patch` (défaut), `minor` (nouvelle fonctionnalité), `major` (breaking change).
+- **Message** : message de commit en français, concis (ex. "Onglets Formation centrés, sous-onglets Parcours/Applications/Connaissances").
+
+## À ne jamais oublier
+
+1. Une fois les changements de code terminés et validés (lint OK), proposer ou exécuter le script.
+2. Ne pas considérer la tâche comme terminée sans avoir exécuté (ou rappelé à l’utilisateur d’exécuter) `commit-and-deploy.ps1`.
+3. Le script gère : mise à jour de la version dans `package.json`, commit Git, push, puis déploiement Vercel via API (déploiement maîtrisé, pas de build auto au push).
+
+## Exemple
+
+Après avoir ajouté des sous-onglets dans l’onglet Formation :
+
+```powershell
+.\commit-and-deploy.ps1 -Level patch -Message "Formation : sous-onglets Parcours, Applications, Connaissances ; onglets header centrés"
+```
