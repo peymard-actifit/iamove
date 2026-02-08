@@ -35,7 +35,7 @@ import {
 import type { SessionPayload } from "@/lib/auth";
 import { useHeaderContent } from "./header-context";
 import { LanguageSelector } from "./language-selector";
-import { LevelsEditorDialog } from "./levels-editor-dialog";
+// LevelsEditorDialog supprimé — remplacé par la page /levels
 import { PPGainsDialog } from "./pp-gains-dialog";
 import { useI18n } from "@/lib/i18n";
 
@@ -49,7 +49,7 @@ export function StudioHeader({ session }: StudioHeaderProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showAdminDialog, setShowAdminDialog] = useState(false);
-  const [showLevelsDialog, setShowLevelsDialog] = useState(false);
+  // showLevelsDialog supprimé — redirigé vers /levels
   const [showPPGainsDialog, setShowPPGainsDialog] = useState(false);
   const [adminCode, setAdminCode] = useState("");
   const [adminError, setAdminError] = useState("");
@@ -128,9 +128,11 @@ export function StudioHeader({ session }: StudioHeaderProps) {
                     {t.nav.manageTraining}
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setShowLevelsDialog(true)}>
-                  <Scale className="mr-2 h-4 w-4" />
-                  {t.nav.levelsScale}
+                <DropdownMenuItem asChild>
+                  <Link href="/levels">
+                    <Scale className="mr-2 h-4 w-4" />
+                    {t.nav.levelsScale}
+                  </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -223,11 +225,7 @@ export function StudioHeader({ session }: StudioHeaderProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Dialog Échelle des niveaux */}
-      <LevelsEditorDialog
-        open={showLevelsDialog}
-        onOpenChange={setShowLevelsDialog}
-      />
+      {/* Échelle des niveaux : redirigé vers /levels (plus de dialog) */}
       <PPGainsDialog open={showPPGainsDialog} onOpenChange={setShowPPGainsDialog} />
     </header>
   );

@@ -8,11 +8,11 @@ export function getDeepLLanguageCode(lang: string): string {
   }
 }
 
-// Les 25 langues cibles (sans FR qui est la source)
+// Les 26 langues cibles (sans FR qui est la source)
 export const TARGET_LANGUAGES = [
   "EN", "DE", "ES", "IT", "PT", "NL", "PL", "RU", "JA", "ZH",
   "KO", "AR", "TR", "SV", "DA", "FI", "NO", "CS", "EL", "HU",
-  "RO", "SK", "UK", "BG", "HR"
+  "RO", "SK", "UK", "BG", "HR", "ID"
 ];
 
 // Fonction pour traduire un texte via DeepL
