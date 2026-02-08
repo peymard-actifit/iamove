@@ -97,7 +97,7 @@ export function PublishedSiteApp({
         className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800"
         style={{ backgroundColor: site.primaryColor }}
       >
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        <div className="container mx-auto flex h-10 min-h-[2.5rem] items-center justify-between px-4">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
               <span className="text-white font-bold">
@@ -130,32 +130,32 @@ export function PublishedSiteApp({
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-4 pt-0 pb-6">
         <Tabs defaultValue="tab3" className="w-full">
-          <TabsList className="w-full justify-start mb-6">
-            {/* Ordre : Profil, Organigramme, Évaluation, Formation */}
+          <TabsList className="w-full justify-start mb-2">
+            {/* Ordre : Profil, Organigramme, Évaluation, Formation, Parcours — libellés traduits selon la langue UI */}
             {settings.tab3Enabled && (
               <TabsTrigger value="tab3" className="gap-2">
                 <User className="h-4 w-4" />
-                <span className="hidden sm:inline">{settings.tab3Title}</span>
+                <span className="hidden sm:inline">{t.tabs.profile}</span>
               </TabsTrigger>
             )}
             {settings.tab2Enabled && (
               <TabsTrigger value="tab2" className="gap-2">
                 <Network className="h-4 w-4" />
-                <span className="hidden sm:inline">{settings.tab2Title}</span>
+                <span className="hidden sm:inline">{t.tabs.organization}</span>
               </TabsTrigger>
             )}
             {settings.tab5Enabled && (
               <TabsTrigger value="tab5" className="gap-2">
                 <ClipboardCheck className="h-4 w-4" />
-                <span className="hidden sm:inline">{settings.tab5Title}</span>
+                <span className="hidden sm:inline">{t.tabs.assessment}</span>
               </TabsTrigger>
             )}
             {settings.tab4Enabled && (
               <TabsTrigger value="tab4" className="gap-2">
                 <GraduationCap className="h-4 w-4" />
-                <span className="hidden sm:inline">{settings.tab4Title}</span>
+                <span className="hidden sm:inline">{t.tabs.training}</span>
               </TabsTrigger>
             )}
             <TabsTrigger value="tab6" className="gap-2">

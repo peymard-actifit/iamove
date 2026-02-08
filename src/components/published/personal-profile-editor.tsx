@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle, Flag } from "@/components/ui";
-import { Mail, Briefcase, Building, Edit, Save, X, User, Globe } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, Button, Input } from "@/components/ui";
+import { Mail, Briefcase, Building, Edit, Save, X, User } from "lucide-react";
 import { getLevelIcon, getLevelInfo } from "@/lib/levels";
-import { useI18n, SupportedLanguage } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n";
 
 interface Person {
   id: string;
@@ -34,11 +34,9 @@ export function PersonalProfileEditor({
   persons,
 }: PersonalProfileEditorProps) {
   const router = useRouter();
-  const { language: globalLanguage, setLanguage, languageInfo, availableLanguages, t } = useI18n();
+  const { t } = useI18n();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [savingLanguage, setSavingLanguage] = useState(false);
-  const [showLanguageDialog, setShowLanguageDialog] = useState(false);
   const [editForm, setEditForm] = useState({
     name: person.name,
     email: person.email,
@@ -48,27 +46,6 @@ export function PersonalProfileEditor({
     department: person.department || "",
     managerId: person.managerId || "",
   });
-
-  // Sauvegarder la préférence de langue
-  const handleLanguageChange = async (newLang: SupportedLanguage) => {
-    setSavingLanguage(true);
-    setShowLanguageDialog(false);
-    try {
-      // Mettre à jour dans le contexte i18n
-      setLanguage(newLang);
-      
-      // Sauvegarder en base de données
-      await fetch("/api/persons/preferences", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ language: newLang }),
-      });
-    } catch {
-      // Erreur silencieuse
-    } finally {
-      setSavingLanguage(false);
-    }
-  };
 
   const handleSave = async () => {
     setIsLoading(true);
@@ -241,58 +218,9 @@ export function PersonalProfileEditor({
                 ) : (
                   <p className="font-medium">{person.manager?.name || t.persons.none}</p>
                 )}
-              </div>
-            </div>
           </div>
-
-          {/* Préférence de langue */}
-          <div className="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800">
-            <Globe className="h-5 w-5 text-blue-500" />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-blue-700 dark:text-blue-300">{t.common.chooseLanguage}</p>
-              <p className="text-xs text-gray-500 mt-0.5">{t.common.siteLanguageDescription}</p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowLanguageDialog(true)}
-              disabled={savingLanguage}
-              className="px-3"
-            >
-              <Flag countryCode={languageInfo?.countryCode || "fr"} size="md" />
-              <span className="ml-2">{languageInfo?.nativeName || "Français"}</span>
-            </Button>
           </div>
-
-          {/* Dialog de sélection de langue */}
-          <Dialog open={showLanguageDialog} onOpenChange={setShowLanguageDialog}>
-            <DialogContent className="max-w-3xl">
-              <DialogHeader>
-                <DialogTitle className="text-center">
-                  {t.common.chooseLanguage}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="grid grid-cols-6 gap-3 py-4">
-                {availableLanguages.map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => handleLanguageChange(lang.code)}
-                    className={`
-                      flex items-center justify-center p-2 rounded-lg transition-all
-                      hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105
-                      ${globalLanguage === lang.code 
-                        ? "bg-blue-100 dark:bg-blue-900 ring-2 ring-blue-500 scale-105" 
-                        : "bg-gray-50 dark:bg-gray-900"
-                      }
-                    `}
-                    title={lang.nativeName}
-                  >
-                    <Flag countryCode={lang.countryCode} size="xl" />
-                  </button>
-                ))}
-              </div>
-            </DialogContent>
-          </Dialog>
+        </div>
 
           {/* Catégorie IA (non modifiable) */}
           <div className={`p-4 rounded-lg border ${

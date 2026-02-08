@@ -21,13 +21,21 @@ interface Tab5QuizProps {
 interface LevelScaleProps {
   onStartQuiz?: (level: number) => void;
   selectedLevel?: number | null;
+  /** En mode publié : niveaux 1 à maxAllowedLevel (inclus) sont jouables. Non défini = studio, tous les niveaux 1-20. */
+  maxAllowedLevel?: number;
 }
 
 // Composant échelle des niveaux
-function LevelScale({ onStartQuiz, selectedLevel }: LevelScaleProps) {
+function LevelScale({ onStartQuiz, selectedLevel, maxAllowedLevel }: LevelScaleProps) {
   const [hoveredLevel, setHoveredLevel] = useState<number | null>(null);
 
-  // Trouver les infos du niveau survolé
+  // En mode publié : jouable = niveau 1 à maxAllowedLevel (et niveau 0 toujours indisponible)
+  const isLevelPlayable = (levelNum: number) => {
+    if (levelNum === 0) return false;
+    if (maxAllowedLevel === undefined) return true; // studio : tous les niveaux 1-20
+    return levelNum <= maxAllowedLevel;
+  };
+
   const hoveredLevelInfo = hoveredLevel !== null ? LEVELS[hoveredLevel] : null;
 
   return (
@@ -40,7 +48,10 @@ function LevelScale({ onStartQuiz, selectedLevel }: LevelScaleProps) {
       
       <div className="flex-1 overflow-y-auto px-2 pb-2">
         <div className="space-y-0.5">
-          {LEVELS.map((level) => (
+          {LEVELS.map((level) => {
+            const playable = isLevelPlayable(level.number);
+            const disabled = level.number === 0 || (maxAllowedLevel !== undefined && level.number > maxAllowedLevel);
+            return (
             <div
               key={level.number}
               className="relative"
@@ -54,10 +65,9 @@ function LevelScale({ onStartQuiz, selectedLevel }: LevelScaleProps) {
                     : hoveredLevel === level.number 
                     ? "bg-blue-100 dark:bg-blue-900/30" 
                     : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                } ${onStartQuiz && level.number >= 1 ? "cursor-pointer" : level.number === 0 ? "cursor-not-allowed opacity-60" : "cursor-help"}`}
+                } ${onStartQuiz && playable ? "cursor-pointer" : disabled ? "cursor-not-allowed opacity-60" : "cursor-help"}`}
                 onDoubleClick={() => {
-                  // Pas de quizz pour le niveau 0
-                  if (level.number >= 1) {
+                  if (playable) {
                     onStartQuiz?.(level.number);
                   }
                 }}
@@ -78,7 +88,8 @@ function LevelScale({ onStartQuiz, selectedLevel }: LevelScaleProps) {
                 </div>
               </div>
             </div>
-          ))}
+          );
+          })}
         </div>
       </div>
 
@@ -104,7 +115,7 @@ function LevelScale({ onStartQuiz, selectedLevel }: LevelScaleProps) {
           <p className="text-[10px] leading-relaxed text-gray-200">
             {hoveredLevelInfo.description}
           </p>
-          {onStartQuiz && hoveredLevelInfo.number >= 1 && (
+          {onStartQuiz && isLevelPlayable(hoveredLevelInfo.number) && (
             <p className="text-[9px] text-blue-300 mt-2 flex items-center gap-1">
               <Play className="h-3 w-3" />
               Double-cliquez pour lancer le quizz
@@ -113,6 +124,11 @@ function LevelScale({ onStartQuiz, selectedLevel }: LevelScaleProps) {
           {onStartQuiz && hoveredLevelInfo.number === 0 && (
             <p className="text-[9px] text-gray-400 mt-2">
               Niveau de base - pas de quizz disponible
+            </p>
+          )}
+          {onStartQuiz && maxAllowedLevel !== undefined && hoveredLevelInfo.number > maxAllowedLevel && (
+            <p className="text-[9px] text-gray-400 mt-2">
+              Validez le niveau {maxAllowedLevel} pour débloquer ce niveau
             </p>
           )}
         </div>
@@ -488,7 +504,11 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
     return (
       <div className="flex h-[calc(100vh-220px)] min-h-[500px] border rounded-lg overflow-hidden">
         {/* Échelle des niveaux à gauche */}
-        <LevelScale onStartQuiz={startQuiz} selectedLevel={targetLevel} />
+        <LevelScale
+          onStartQuiz={startQuiz}
+          selectedLevel={targetLevel}
+          maxAllowedLevel={isStudioMode ? undefined : Math.min(20, currentLevel + 1)}
+        />
         
         {/* Contenu principal - Quizz */}
         {renderQuizContent()}
