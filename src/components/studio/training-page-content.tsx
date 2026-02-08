@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button, Card, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Input } from "@/components/ui";
 import { 
   Gamepad2, BookOpen, Wrench, Video, FileText, Layers, 
-  Plus, Edit, Trash2, ChevronRight, Sparkles
+  Plus, Edit, Trash2, ChevronRight, Sparkles, Route, ArrowUp, ArrowDown
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useHeaderContent } from "./header-context";
@@ -39,6 +39,7 @@ interface TrainingModule {
   difficulty: number;
   order: number;
   level: Level;
+  methodId?: string;
   translations: TrainingModuleTranslation[];
 }
 
@@ -56,9 +57,36 @@ interface TrainingMethod {
   };
 }
 
+// Typologies : Connaissances (vidéos, articles, tutoriels, modules) / Applications (reste)
+const TYPOLOGY_KNOWLEDGE = ["VIDEO", "ARTICLE", "TUTORIAL", "INTERACTIVE"];
+const TYPOLOGY_APPLICATIONS = ["SERIOUS_GAME", "EXERCISE"];
+
+interface PathItemModule {
+  id: string;
+  title: string;
+  level: { number: number };
+  method: { id: string; name: string; type: string };
+  translations: TrainingModuleTranslation[];
+}
+
+interface TrainingPathItem {
+  id: string;
+  order: number;
+  module: PathItemModule;
+}
+
+interface TrainingPath {
+  id: string;
+  name: string;
+  description: string | null;
+  order: number;
+  items: TrainingPathItem[];
+}
+
 interface TrainingPageContentProps {
   methods: TrainingMethod[];
   levels: Level[];
+  paths: TrainingPath[];
 }
 
 const ICONS: Record<string, React.ReactNode> = {
@@ -81,7 +109,7 @@ const TYPE_COLORS: Record<string, string> = {
 
 const TRAINING_SUBTITLE = "Gérez les méthodes et modules de formation";
 
-export function TrainingPageContent({ methods, levels }: TrainingPageContentProps) {
+export function TrainingPageContent({ methods, levels, paths: initialPaths }: TrainingPageContentProps) {
   const router = useRouter();
   const { language: globalLanguage, t } = useI18n();
   const { setCenterContent, setRightActions } = useHeaderContent();
@@ -89,6 +117,14 @@ export function TrainingPageContent({ methods, levels }: TrainingPageContentProp
   const [showModuleDialog, setShowModuleDialog] = useState(false);
   const [editingModule, setEditingModule] = useState<TrainingModule | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [paths, setPaths] = useState<TrainingPath[]>(initialPaths);
+  const [showPathDialog, setShowPathDialog] = useState(false);
+  const [editingPath, setEditingPath] = useState<TrainingPath | null>(null);
+  const [pathForm, setPathForm] = useState({ name: "", description: "" });
+  const [showAddPathItemDialog, setShowAddPathItemDialog] = useState<TrainingPath | null>(null);
+
+  const knowledgeMethods = methods.filter((m) => TYPOLOGY_KNOWLEDGE.includes(m.type));
+  const applicationMethods = methods.filter((m) => TYPOLOGY_APPLICATIONS.includes(m.type));
 
   const handleInitMethods = useCallback(async () => {
     setIsLoading(true);
@@ -207,45 +243,350 @@ export function TrainingPageContent({ methods, levels }: TrainingPageContentProp
     }
   };
 
+  const handleCreatePath = async () => {
+    if (!pathForm.name.trim()) return;
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/training/paths", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ name: pathForm.name.trim(), description: pathForm.description.trim() || undefined }),
+      });
+      if (res.ok) {
+        const { path } = await res.json();
+        setPaths((prev) => [...prev, { ...path, items: [] }]);
+        setShowPathDialog(false);
+        setPathForm({ name: "", description: "" });
+        router.refresh();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    setIsLoading(false);
+  };
+
+  const handleUpdatePath = async (pathId: string, data: { name?: string; description?: string }) => {
+    try {
+      const res = await fetch(`/api/training/paths/${pathId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      if (res.ok) {
+        const { path } = await res.json();
+        setPaths((prev) => prev.map((p) => (p.id === pathId ? path : p)));
+        setEditingPath(null);
+        router.refresh();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDeletePath = async (pathId: string) => {
+    if (!confirm("Supprimer ce parcours ?")) return;
+    try {
+      const res = await fetch(`/api/training/paths/${pathId}`, { method: "DELETE", credentials: "include" });
+      if (res.ok) {
+        setPaths((prev) => prev.filter((p) => p.id !== pathId));
+        router.refresh();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleAddPathItem = async (pathId: string, moduleId: string) => {
+    try {
+      const res = await fetch(`/api/training/paths/${pathId}/items`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ moduleId }),
+      });
+      if (res.ok) {
+        const { item } = await res.json();
+        setPaths((prev) =>
+          prev.map((p) => (p.id === pathId ? { ...p, items: [...p.items, item] } : p))
+        );
+        setShowAddPathItemDialog(null);
+        router.refresh();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Erreur");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleRemovePathItem = async (pathId: string, itemId: string) => {
+    try {
+      const res = await fetch(`/api/training/paths/${pathId}/items/${itemId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (res.ok) {
+        setPaths((prev) =>
+          prev.map((p) => (p.id === pathId ? { ...p, items: p.items.filter((i) => i.id !== itemId) } : p))
+        );
+        router.refresh();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleReorderPathItems = async (pathId: string, itemIds: string[]) => {
+    try {
+      const res = await fetch(`/api/training/paths/${pathId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ itemIds }),
+      });
+      if (res.ok) {
+        const { path } = await res.json();
+        setPaths((prev) => prev.map((p) => (p.id === pathId ? path : p)));
+        router.refresh();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const allModules = methods.flatMap((m) => m.modules);
+
   return (
-    <div className="px-3 py-2 sm:px-4 sm:py-3 space-y-4 max-w-full">
-      {/* Liste des méthodes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {methods.map(method => {
-          const translated = getTranslatedMethod(method);
-          const isSelected = selectedMethod?.id === method.id;
-          
-          return (
-            <Card
-              key={method.id}
-              className={`p-4 cursor-pointer transition-all ${
-                isSelected 
-                  ? "ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20" 
-                  : "hover:shadow-md"
-              }`}
-              onClick={() => setSelectedMethod(isSelected ? null : method)}
-            >
-              <div className="flex items-start gap-3">
-                <div className={`p-2 rounded-lg ${TYPE_COLORS[method.type] || "bg-gray-100"}`}>
-                  {ICONS[method.icon || "Layers"]}
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold">{translated.name}</h3>
-                  <p className="text-sm text-gray-500 line-clamp-2">
-                    {translated.description}
-                  </p>
-                  <div className="mt-2 flex items-center gap-2">
-                    <span className="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800">
-                      {method._count.modules} module(s)
-                    </span>
-                    <ChevronRight className={`h-4 w-4 transition-transform ${isSelected ? "rotate-90" : ""}`} />
+    <div className="px-3 py-2 sm:px-4 sm:py-3 space-y-6 max-w-full">
+      {/* Connaissances : vidéos, articles, tutoriels, modules interactifs */}
+      <section>
+        <h2 className="text-lg font-semibold mb-3">Connaissances</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+          Vidéos, articles, tutoriels et modules interactifs.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {knowledgeMethods.map((method) => {
+            const translated = getTranslatedMethod(method);
+            const isSelected = selectedMethod?.id === method.id;
+            return (
+              <Card
+                key={method.id}
+                className={`p-4 cursor-pointer transition-all ${
+                  isSelected ? "ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20" : "hover:shadow-md"
+                }`}
+                onClick={() => setSelectedMethod(isSelected ? null : method)}
+              >
+                <div className="flex items-start gap-3">
+                  <div className={`p-2 rounded-lg ${TYPE_COLORS[method.type] || "bg-gray-100"}`}>
+                    {ICONS[method.icon || "Layers"]}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold">{translated.name}</h3>
+                    <p className="text-sm text-gray-500 line-clamp-2">{translated.description}</p>
+                    <div className="mt-2 flex items-center gap-2">
+                      <span className="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800">
+                        {method._count.modules} module(s)
+                      </span>
+                      <ChevronRight className={`h-4 w-4 transition-transform ${isSelected ? "rotate-90" : ""}`} />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Card>
-          );
-        })}
-      </div>
+              </Card>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Applications : serious game, exercices */}
+      <section>
+        <h2 className="text-lg font-semibold mb-3">Applications</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+          Serious game et exercices pratiques.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {applicationMethods.map((method) => {
+            const translated = getTranslatedMethod(method);
+            const isSelected = selectedMethod?.id === method.id;
+            return (
+              <Card
+                key={method.id}
+                className={`p-4 cursor-pointer transition-all ${
+                  isSelected ? "ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20" : "hover:shadow-md"
+                }`}
+                onClick={() => setSelectedMethod(isSelected ? null : method)}
+              >
+                <div className="flex items-start gap-3">
+                  <div className={`p-2 rounded-lg ${TYPE_COLORS[method.type] || "bg-gray-100"}`}>
+                    {ICONS[method.icon || "Layers"]}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold">{translated.name}</h3>
+                    <p className="text-sm text-gray-500 line-clamp-2">{translated.description}</p>
+                    <div className="mt-2 flex items-center gap-2">
+                      <span className="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800">
+                        {method._count.modules} module(s)
+                      </span>
+                      <ChevronRight className={`h-4 w-4 transition-transform ${isSelected ? "rotate-90" : ""}`} />
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Parcours : enchaînements vers un objectif */}
+      <section>
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <Route className="h-5 w-5" />
+              Parcours
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Enchaînements de formations pour guider vers des objectifs précis.
+            </p>
+          </div>
+          <Button size="sm" onClick={() => { setPathForm({ name: "", description: "" }); setEditingPath(null); setShowPathDialog(true); }}>
+            <Plus className="h-4 w-4 mr-1" />
+            Nouveau parcours
+          </Button>
+        </div>
+        {paths.length === 0 ? (
+          <Card className="p-6 text-center text-gray-500">
+            <Route className="h-12 w-12 mx-auto mb-2 opacity-50" />
+            <p>Aucun parcours. Créez un parcours et ajoutez-y des modules (Connaissances ou Applications).</p>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            {paths.map((path) => (
+              <Card key={path.id} className="p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    {editingPath?.id === path.id ? (
+                      <div className="space-y-2">
+                        <Input
+                          value={pathForm.name}
+                          onChange={(e) => setPathForm((f) => ({ ...f, name: e.target.value }))}
+                          placeholder="Nom du parcours"
+                          className="font-semibold"
+                        />
+                        <textarea
+                          className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm"
+                          rows={2}
+                          value={pathForm.description}
+                          onChange={(e) => setPathForm((f) => ({ ...f, description: e.target.value }))}
+                          placeholder="Objectif / description"
+                        />
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={() => handleUpdatePath(path.id, { name: pathForm.name, description: pathForm.description })}>
+                            Enregistrer
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => { setEditingPath(null); setShowPathDialog(false); }}>
+                            Annuler
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <h3 className="font-semibold">{path.name}</h3>
+                        {path.description && (
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{path.description}</p>
+                        )}
+                        <div className="flex items-center gap-2 mt-2">
+                          <Button variant="ghost" size="sm" onClick={() => { setEditingPath(path); setPathForm({ name: path.name, description: path.description || "" }); }}>
+                            <Edit className="h-3 w-3 mr-1" />
+                            Modifier
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => setShowAddPathItemDialog(path)}>
+                            <Plus className="h-3 w-3 mr-1" />
+                            Ajouter un élément
+                          </Button>
+                          <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDeletePath(path.id)}>
+                            <Trash2 className="h-3 w-3 mr-1" />
+                            Supprimer
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+                {path.items.length > 0 && (
+                  <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Étapes du parcours</p>
+                    <ul className="space-y-2">
+                      {path.items.map((item, index) => {
+                        const tr = item.module.translations?.find((x) => x.language === globalLanguage.toUpperCase());
+                        const title = tr?.title ?? item.module.title;
+                        return (
+                          <li
+                            key={item.id}
+                            className="flex items-center gap-2 py-2 px-3 rounded-lg bg-gray-50 dark:bg-gray-800/50"
+                          >
+                            <span className="text-xs font-mono text-gray-400 w-6">{index + 1}.</span>
+                            <span className="flex-1 text-sm">
+                              {title}
+                              <span className="text-xs text-gray-500 ml-2">
+                                ({item.module.method.name} · Niv. {item.module.level.number})
+                              </span>
+                            </span>
+                            <div className="flex items-center gap-0.5">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
+                                disabled={index === 0}
+                                onClick={() => {
+                                  const ids = path.items.map((i) => i.id);
+                                  const idx = ids.indexOf(item.id);
+                                  if (idx > 0) {
+                                    [ids[idx - 1], ids[idx]] = [ids[idx], ids[idx - 1]];
+                                    handleReorderPathItems(path.id, ids);
+                                  }
+                                }}
+                              >
+                                <ArrowUp className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
+                                disabled={index === path.items.length - 1}
+                                onClick={() => {
+                                  const ids = path.items.map((i) => i.id);
+                                  const idx = ids.indexOf(item.id);
+                                  if (idx < ids.length - 1) {
+                                    [ids[idx], ids[idx + 1]] = [ids[idx + 1], ids[idx]];
+                                    handleReorderPathItems(path.id, ids);
+                                  }
+                                }}
+                              >
+                                <ArrowDown className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-red-500"
+                                onClick={() => handleRemovePathItem(path.id, item.id)}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )}
+              </Card>
+            ))}
+          </div>
+        )}
+      </section>
 
       {/* Modules de la méthode sélectionnée */}
       {selectedMethod && (
@@ -413,6 +754,91 @@ export function TrainingPageContent({ methods, levels }: TrainingPageContentProp
               {editingModule ? t.common.edit : t.common.add}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog nouveau parcours */}
+      <Dialog open={showPathDialog} onOpenChange={setShowPathDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nouveau parcours</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Nom *</label>
+              <Input
+                value={pathForm.name}
+                onChange={(e) => setPathForm((f) => ({ ...f, name: e.target.value }))}
+                placeholder="Ex: Parcours IA débutant"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Objectif / description</label>
+              <textarea
+                className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900"
+                rows={3}
+                value={pathForm.description}
+                onChange={(e) => setPathForm((f) => ({ ...f, description: e.target.value }))}
+                placeholder="Objectif précis pour les personnes qui suivront ce parcours..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPathDialog(false)}>
+              {t.common.cancel}
+            </Button>
+            <Button onClick={handleCreatePath} disabled={!pathForm.name.trim()} isLoading={isLoading}>
+              Créer le parcours
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog ajouter un élément au parcours */}
+      <Dialog open={!!showAddPathItemDialog} onOpenChange={() => setShowAddPathItemDialog(null)}>
+        <DialogContent className="max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Ajouter un élément au parcours</DialogTitle>
+            {showAddPathItemDialog && (
+              <p className="text-sm text-gray-500">Parcours : {showAddPathItemDialog.name}</p>
+            )}
+          </DialogHeader>
+          <div className="overflow-auto flex-1 min-h-0 py-4">
+            {allModules.length === 0 ? (
+              <p className="text-sm text-gray-500">Aucun module disponible. Créez d’abord des modules dans Connaissances ou Applications.</p>
+            ) : (
+              <ul className="space-y-1">
+                {allModules.map((mod) => {
+                  const method = methods.find((m) => m.modules.some((mo) => mo.id === mod.id));
+                  const alreadyInPath = showAddPathItemDialog?.items.some((i) => i.module.id === mod.id);
+                  const tr = mod.translations?.find((x) => x.language === globalLanguage.toUpperCase());
+                  const title = tr?.title ?? mod.title;
+                  return (
+                    <li key={mod.id}>
+                      <button
+                        type="button"
+                        disabled={!!alreadyInPath}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-sm flex items-center justify-between gap-2 ${
+                          alreadyInPath
+                            ? "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
+                            : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                        }`}
+                        onClick={() => !alreadyInPath && showAddPathItemDialog && handleAddPathItem(showAddPathItemDialog.id, mod.id)}
+                      >
+                        <span>
+                          {title}
+                          <span className="text-xs text-gray-500 ml-2">
+                            {method?.name ?? ""} · Niv. {mod.level.number}
+                          </span>
+                        </span>
+                        {alreadyInPath ? <span className="text-xs">Déjà dans le parcours</span> : <Plus className="h-4 w-4 flex-shrink-0" />}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

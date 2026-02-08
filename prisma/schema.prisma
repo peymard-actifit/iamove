@@ -497,6 +497,7 @@ model TrainingModule {
   levelId           String
   translations      TrainingModuleTranslation[]
   progress          PersonTrainingProgress[]
+  pathItems         TrainingPathItem[]
 
   @@map("training_modules")
 }
@@ -518,6 +519,37 @@ model TrainingModuleTranslation {
 
   @@unique([moduleId, language])
   @@map("training_module_translations")
+}
+
+// =============================================================================
+// PARCOURS DE FORMATION (enchaînements d’éléments vers un objectif)
+// =============================================================================
+
+model TrainingPath {
+  id          String    @id @default(cuid())
+  name        String    // Ex: "Parcours IA débutant"
+  description String?   @db.Text
+  order       Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  items       TrainingPathItem[]
+
+  @@map("training_paths")
+}
+
+model TrainingPathItem {
+  id       String   @id @default(cuid())
+  order    Int      @default(0) // Position dans le parcours
+  pathId   String
+  moduleId String
+
+  path   TrainingPath   @relation(fields: [pathId], references: [id], onDelete: Cascade)
+  module TrainingModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([pathId, moduleId])
+  @@map("training_path_items")
 }
 
 // =============================================================================

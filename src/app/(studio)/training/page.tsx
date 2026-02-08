@@ -32,16 +32,34 @@ export default async function TrainingPage() {
     },
   });
 
-  // Récupérer les niveaux pour la création de modules
   const levels = await prisma.level.findMany({
     where: { number: { gte: 1, lte: 20 } },
     orderBy: { number: "asc" },
+  });
+
+  const paths = await prisma.trainingPath.findMany({
+    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+    include: {
+      items: {
+        orderBy: { order: "asc" },
+        include: {
+          module: {
+            include: {
+              level: { select: { number: true } },
+              method: { select: { id: true, name: true, type: true } },
+            },
+            translations: true,
+          },
+        },
+      },
+    },
   });
 
   return (
     <TrainingPageContent
       methods={methods}
       levels={levels}
+      paths={paths}
     />
   );
 }
