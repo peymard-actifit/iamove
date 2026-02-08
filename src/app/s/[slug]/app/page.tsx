@@ -80,6 +80,17 @@ export default async function PublishedSiteAppPage({ params }: PageProps) {
     include: { translations: true },
   });
 
+  const pp = currentPerson?.participationPoints ?? 0;
+  const rank =
+    currentPerson != null
+      ? (await prisma.person.count({
+          where: {
+            siteId: site.id,
+            participationPoints: { gt: currentPerson.participationPoints },
+          },
+        })) + 1
+      : 0;
+
   return (
     <PublishedSiteApp
       site={site}
@@ -87,6 +98,8 @@ export default async function PublishedSiteAppPage({ params }: PageProps) {
       visiblePersons={visiblePersons}
       levels={levels}
       isStudioUser={session.userType === "STUDIO_USER"}
+      initialPP={pp}
+      initialRank={rank}
     />
   );
 }

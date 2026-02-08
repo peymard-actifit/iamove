@@ -29,6 +29,7 @@ import {
   Scale,
   FileQuestion,
   GraduationCap,
+  Trophy,
 } from "lucide-react";
 import type { SessionPayload } from "@/lib/auth";
 import { useHeaderContent } from "./header-context";
@@ -47,6 +48,7 @@ export function StudioHeader({ session }: StudioHeaderProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showAdminDialog, setShowAdminDialog] = useState(false);
   const [showLevelsDialog, setShowLevelsDialog] = useState(false);
+  const [showPPGainsDialog, setShowPPGainsDialog] = useState(false);
   const [adminCode, setAdminCode] = useState("");
   const [adminError, setAdminError] = useState("");
 
@@ -224,6 +226,7 @@ export function StudioHeader({ session }: StudioHeaderProps) {
         open={showLevelsDialog}
         onOpenChange={setShowLevelsDialog}
       />
+      <PPGainsDialog open={showPPGainsDialog} onOpenChange={setShowPPGainsDialog} />
     </header>
   );
 }

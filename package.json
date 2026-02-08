@@ -1,6 +1,6 @@
 {
   "name": "iamove",
-  "version": "2.6.38",
+  "version": "2.6.40",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -9,6 +9,7 @@
     "lint": "next lint",
     "postinstall": "prisma generate",
     "db:push": "prisma db push",
+    "db:migrate": "node scripts/migrate-with-env.js",
     "db:studio": "prisma studio",
     "db:seed": "npx ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts",
     "db:seed-translations": "npx ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed-translations.ts"

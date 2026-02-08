@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, Button, Input, Tabs, TabsList
 import { Send, Bot, User, Sparkles } from "lucide-react";
 import { LEVELS, getLevelIcon } from "@/lib/levels";
 import { useI18n, getLanguageInfo } from "@/lib/i18n";
+import { usePP } from "@/components/published/site-app";
 
 interface LevelTranslation {
   id: string;
@@ -61,6 +62,7 @@ interface Message {
 
 export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTranslations }: Tab4FormationProps) {
   const { t, language } = useI18n();
+  const ppApi = usePP();
   const locale = (() => {
     const info = getLanguageInfo(language);
     return info ? `${language.toLowerCase()}-${info.countryCode.toUpperCase()}` : "fr-FR";
@@ -338,7 +340,13 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
                     <button
                       key={level.number}
                       type="button"
-                      onClick={() => setSelectedKnowledgeLevel(selectedKnowledgeLevel === level.number ? null : level.number)}
+                      onClick={() => {
+                        const next = selectedKnowledgeLevel === level.number ? null : level.number;
+                        setSelectedKnowledgeLevel(next);
+                        if (next != null && !isStudioMode && personId && ppApi?.addPP) {
+                          ppApi.addPP("knowledge_view");
+                        }
+                      }}
                       className={`flex items-center justify-center gap-1 min-h-0 flex-1 px-1 rounded-sm transition-colors ${
                         selectedKnowledgeLevel === level.number
                           ? "bg-blue-100 dark:bg-blue-900/50 ring-1 ring-blue-500 dark:ring-blue-400"

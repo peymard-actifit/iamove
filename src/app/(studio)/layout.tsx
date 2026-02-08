@@ -24,7 +24,7 @@ export default async function StudioLayout({
     <StudioProviders>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <StudioHeader session={session} />
-        <main className="container mx-auto px-4 py-4">{children}</main>
+        <main className="container mx-auto px-3 py-2 sm:px-4 sm:py-3 min-h-[calc(100vh-3.5rem)]">{children}</main>
       </div>
     </StudioProviders>
   );

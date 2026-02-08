@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Input } from "@/components/ui";
 import { 
   Gamepad2, BookOpen, Wrench, Video, FileText, Layers, 
-  Plus, Edit, Trash2, ChevronRight, Sparkles, Settings
+  Plus, Edit, Trash2, ChevronRight, Sparkles
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { useHeaderContent } from "./header-context";
 
 interface TrainingMethodTranslation {
   id: string;
@@ -78,13 +79,55 @@ const TYPE_COLORS: Record<string, string> = {
   INTERACTIVE: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300",
 };
 
+const TRAINING_SUBTITLE = "Gérez les méthodes et modules de formation";
+
 export function TrainingPageContent({ methods, levels }: TrainingPageContentProps) {
   const router = useRouter();
   const { language: globalLanguage, t } = useI18n();
+  const { setCenterContent, setRightActions } = useHeaderContent();
   const [selectedMethod, setSelectedMethod] = useState<TrainingMethod | null>(null);
   const [showModuleDialog, setShowModuleDialog] = useState(false);
   const [editingModule, setEditingModule] = useState<TrainingModule | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleInitMethods = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/training/seed", {
+        method: "POST",
+        credentials: "include",
+      });
+      if (res.ok) router.refresh();
+    } catch (e) {
+      console.error("Erreur:", e);
+    }
+    setIsLoading(false);
+  }, []);
+
+  // Titre et sous-titre au centre du header, bouton "Initialiser" à droite si besoin
+  useEffect(() => {
+    setCenterContent(
+      <div className="flex flex-col items-center justify-center text-center">
+        <h1 className="text-lg font-bold leading-tight">{t.tabs.training}</h1>
+        <p className="text-xs text-gray-500 dark:text-gray-400">{TRAINING_SUBTITLE}</p>
+      </div>
+    );
+    return () => setCenterContent(null);
+  }, [t.tabs.training, setCenterContent]);
+
+  useEffect(() => {
+    if (methods.length === 0) {
+      setRightActions(
+        <Button onClick={handleInitMethods} size="sm" disabled={isLoading}>
+          <Sparkles className="h-4 w-4 mr-2" />
+          Initialiser les méthodes
+        </Button>
+      );
+    } else {
+      setRightActions(null);
+    }
+    return () => setRightActions(null);
+  }, [methods.length, isLoading, handleInitMethods, setRightActions]);
 
   const [moduleForm, setModuleForm] = useState({
     title: "",
@@ -111,22 +154,6 @@ export function TrainingPageContent({ methods, levels }: TrainingPageContentProp
       title: translation?.title || module.title,
       description: translation?.description || module.description,
     };
-  };
-
-  const handleInitMethods = async () => {
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/training/seed", { 
-        method: "POST",
-        credentials: "include",
-      });
-      if (res.ok) {
-        router.refresh();
-      }
-    } catch (error) {
-      console.error("Erreur:", error);
-    }
-    setIsLoading(false);
   };
 
   const resetModuleForm = () => {
@@ -181,25 +208,7 @@ export function TrainingPageContent({ methods, levels }: TrainingPageContentProp
   };
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{t.tabs.training}</h1>
-          <p className="text-gray-500">
-            Gérez les méthodes et modules de formation
-          </p>
-        </div>
-        <div className="flex gap-2">
-          {methods.length === 0 && (
-            <Button onClick={handleInitMethods} isLoading={isLoading}>
-              <Sparkles className="h-4 w-4 mr-2" />
-              Initialiser les méthodes
-            </Button>
-          )}
-        </div>
-      </div>
-
+    <div className="px-3 py-2 sm:px-4 sm:py-3 space-y-4 max-w-full">
       {/* Liste des méthodes */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {methods.map(method => {

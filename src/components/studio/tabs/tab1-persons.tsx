@@ -33,6 +33,7 @@ interface Person {
   currentLevel: number;
   canViewAll: boolean;
   managerId: string | null;
+  participationPoints?: number;
   manager: { id: string; name: string } | null;
 }
 
@@ -239,7 +240,7 @@ function ManagerSelector({
   );
 }
 
-type SortColumn = "name" | "email" | "jobTitle" | "department" | "currentLevel" | "manager";
+type SortColumn = "name" | "email" | "jobTitle" | "department" | "currentLevel" | "manager" | "pp";
 type SortDirection = "asc" | "desc";
 
 export function Tab1Persons({
@@ -299,6 +300,10 @@ export function Tab1Persons({
       case "manager":
         valueA = (a.manager?.name || "").toLowerCase();
         valueB = (b.manager?.name || "").toLowerCase();
+        break;
+      case "pp":
+        valueA = a.participationPoints ?? 0;
+        valueB = b.participationPoints ?? 0;
         break;
       default:
         valueA = a.name.toLowerCase();
@@ -428,6 +433,16 @@ export function Tab1Persons({
                     {sortColumn === "manager" && (sortDirection === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
                   </div>
                 </TableHead>
+                <TableHead 
+                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-0 w-16"
+                  onClick={() => handleSort("pp")}
+                  title={sortDirection === "asc" ? t.tooltip.sortDescending : t.tooltip.sortAscending}
+                >
+                  <div className="flex items-center gap-1">
+                    PP
+                    {sortColumn === "pp" && (sortDirection === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+                  </div>
+                </TableHead>
                 <TableHead className="w-[90px] text-right text-xs py-0">{t.persons.actions}</TableHead>
               </TableRow>
             </TableHeader>
@@ -472,6 +487,9 @@ export function Tab1Persons({
                       currentPersonId={person.id}
                       onChange={(v) => updatePerson(person.id, "managerId", v)}
                     />
+                  </TableCell>
+                  <TableCell className="py-0.5 text-right tabular-nums text-gray-600 dark:text-gray-400">
+                    {person.participationPoints ?? 0}
                   </TableCell>
                   <TableCell className="py-0.5">
                     <div className="flex items-center justify-end gap-0.5">

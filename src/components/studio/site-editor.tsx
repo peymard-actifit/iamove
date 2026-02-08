@@ -42,6 +42,7 @@ interface Person {
   currentLevel: number;
   canViewAll: boolean;
   managerId: string | null;
+  participationPoints?: number;
   manager: { id: string; name: string } | null;
   subordinates: { id: string; name: string }[];
 }

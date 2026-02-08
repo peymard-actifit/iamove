@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle, Button } from "@/components/ui";
 import { ClipboardCheck, CheckCircle, XCircle, ArrowRight, Trophy, Play, PartyPopper } from "lucide-react";
 import { getLevelIcon, LEVELS } from "@/lib/levels";
@@ -221,11 +221,13 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0, lev
   const [passedEarly, setPassedEarly] = useState(false);
   const [failedEarly, setFailedEarly] = useState(false);
   const [errors, setErrors] = useState(0);
+  const quizCompleteSentRef = useRef(false);
   // En mode publié : niveau de quiz choisi (1 à currentLevel+1), défaut = niveau cible
   const maxQuizLevel = Math.min(20, currentLevel + 1);
   const [selectedQuizLevel, setSelectedQuizLevel] = useState(maxQuizLevel);
 
   const startQuiz = async (level?: number) => {
+    quizCompleteSentRef.current = false;
     const levelToUse = level ?? currentLevel + 1;
     setTargetLevel(levelToUse);
     setIsLoading(true);
@@ -339,7 +341,31 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0, lev
     setFailedEarly(false);
     setScore(0);
     setErrors(0);
+    quizCompleteSentRef.current = false;
   };
+
+  // En mode publié : notifier la fin du quiz pour les PP (une fois par session quiz)
+  useEffect(() => {
+    if (
+      !quizFinished ||
+      !currentQuiz?.length ||
+      targetLevel == null ||
+      isStudioMode ||
+      !personId ||
+      !siteId ||
+      quizCompleteSentRef.current
+    ) {
+      return;
+    }
+    quizCompleteSentRef.current = true;
+    const passed = score >= PASSING_SCORE;
+    fetch(`/api/sites/${siteId}/quiz/complete`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ targetLevel, passed }),
+    }).catch(() => {});
+  }, [quizFinished, currentQuiz?.length, targetLevel, isStudioMode, personId, siteId, score]);
 
   // Rendu du contenu du quizz (partie droite)
   const renderQuizContent = () => {

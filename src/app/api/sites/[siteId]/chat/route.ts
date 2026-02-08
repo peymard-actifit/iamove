@@ -103,7 +103,7 @@ export async function POST(
 
     const response = completion.choices[0]?.message?.content || "Désolé, je n'ai pas pu générer une réponse.";
 
-    // Sauvegarder les messages si personId fourni
+    // Sauvegarder les messages si personId fourni + 5 PP par prompt (formation)
     if (personId) {
       await prisma.chatMessage.createMany({
         data: [
@@ -122,6 +122,10 @@ export async function POST(
             model: "gpt-4-turbo-preview",
           },
         ],
+      });
+      await prisma.person.update({
+        where: { id: personId },
+        data: { participationPoints: { increment: 5 } },
       });
     }
 

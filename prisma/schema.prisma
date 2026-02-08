@@ -159,6 +159,9 @@ model Person {
   // Niveau IA
   currentLevel      Int       @default(0)
   
+  // Serious game : points de participation (usage site publié uniquement)
+  participationPoints Int     @default(0)
+  
   // Préférences
   language          String    @default("EN") // Langue préférée (EN par défaut en mode publié)
   

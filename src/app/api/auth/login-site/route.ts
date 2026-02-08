@@ -34,10 +34,14 @@ export async function POST(request: Request) {
     const personResult = await loginPerson(siteSlug, email, password);
 
     if (personResult.success) {
-      // Mettre à jour le status en ligne
+      const personId = personResult.person!.id;
+      // Mettre à jour le status en ligne + 10 PP (connexion site publié)
       await prisma.person.update({
-        where: { id: personResult.person!.id },
-        data: { isOnline: true },
+        where: { id: personId },
+        data: {
+          isOnline: true,
+          participationPoints: { increment: 10 },
+        },
       });
 
       return NextResponse.json({
