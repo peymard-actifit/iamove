@@ -107,20 +107,21 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
     );
   }
 
-  // Mode site publié
+  // Mode site publié : fenêtre divisée en deux verticalement
+  // Gauche = prompt / chat OpenAI ; Droite = autres éléments de formation
   return (
-    <div className="h-[600px] flex flex-col">
-      <Card className="flex-1 flex flex-col">
-        <CardHeader className="border-b">
-          <CardTitle className="flex items-center gap-2">
+    <div className="flex gap-4 h-[calc(100vh-12rem)] min-h-[400px]">
+      {/* Partie gauche : prompt / assistant OpenAI */}
+      <div className="w-1/2 min-w-0 flex flex-col border rounded-lg overflow-hidden bg-white dark:bg-gray-900 shadow-sm">
+        <div className="border-b px-4 py-3 bg-gray-50 dark:bg-gray-800/50">
+          <h3 className="font-semibold flex items-center gap-2">
             <Bot className="h-5 w-5 text-blue-500" />
             Assistant Formation IA
-          </CardTitle>
-        </CardHeader>
-        
-        <CardContent className="flex-1 overflow-auto p-4 space-y-4">
+          </h3>
+        </div>
+        <div className="flex-1 overflow-auto p-4 space-y-4">
           {messages.length === 0 ? (
-            <div className="h-full flex items-center justify-center text-center">
+            <div className="h-full flex items-center justify-center text-center min-h-[200px]">
               <div>
                 <Sparkles className="h-12 w-12 mx-auto text-yellow-500 mb-4" />
                 <h3 className="font-semibold text-lg">Bienvenue dans votre formation IA</h3>
@@ -137,7 +138,7 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
                 className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[80%] p-3 rounded-lg ${
+                  className={`max-w-[85%] p-3 rounded-lg ${
                     message.role === "user"
                       ? "bg-blue-600 text-white"
                       : "bg-gray-100 dark:bg-gray-800"
@@ -156,7 +157,7 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
                       })}
                     </span>
                   </div>
-                  <p className="whitespace-pre-wrap">{message.content}</p>
+                  <p className="whitespace-pre-wrap text-sm">{message.content}</p>
                 </div>
               </div>
             ))
@@ -166,14 +167,13 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
               <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
                 <div className="flex items-center gap-2">
                   <Bot className="h-4 w-4" />
-                  <span className="animate-pulse">En train de réfléchir...</span>
+                  <span className="animate-pulse text-sm">En train de réfléchir...</span>
                 </div>
               </div>
             </div>
           )}
-        </CardContent>
-
-        <div className="p-4 border-t">
+        </div>
+        <div className="p-4 border-t bg-gray-50/50 dark:bg-gray-800/30">
           <div className="flex gap-2">
             <Input
               value={input}
@@ -181,13 +181,28 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
               onKeyDown={handleKeyDown}
               placeholder="Posez votre question..."
               disabled={isLoading}
+              className="flex-1"
             />
             <Button onClick={handleSend} disabled={isLoading || !input.trim()}>
               <Send className="h-4 w-4" />
             </Button>
           </div>
         </div>
-      </Card>
+      </div>
+
+      {/* Partie droite : autres éléments de formation (à venir) */}
+      <div className="w-1/2 min-w-0 flex flex-col border rounded-lg overflow-hidden bg-white dark:bg-gray-900 shadow-sm">
+        <div className="border-b px-4 py-3 bg-gray-50 dark:bg-gray-800/50">
+          <h3 className="font-semibold">Formation</h3>
+        </div>
+        <div className="flex-1 overflow-auto p-6 flex items-center justify-center min-h-[200px]">
+          <div className="text-center text-gray-500 dark:text-gray-400 max-w-sm">
+            <p className="text-sm">
+              Modules, parcours et ressources de formation seront affichés ici.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
