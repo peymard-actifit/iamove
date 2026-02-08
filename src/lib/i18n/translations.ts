@@ -319,6 +319,10 @@ export function buildTranslationsObject(flatTranslations: Record<string, string>
       earlyReached: getValue("assessment.earlyReached", "Vous avez atteint le score de {n} bonnes réponses en seulement {q} questions !"),
       earlyFail: getValue("assessment.earlyFail", "Avec {n} erreurs, il n'est plus possible d'atteindre {min}/{total}."),
       passingReached: getValue("assessment.passingReached", "{n} atteint !"),
+      levelScaleTitle: getValue("assessment.levelScaleTitle", "Échelle des niveaux"),
+      doubleClickToStartQuiz: getValue("assessment.doubleClickToStartQuiz", "Double-cliquez pour lancer le quizz"),
+      baseLevelNoQuiz: getValue("assessment.baseLevelNoQuiz", "Niveau de base - pas de quizz disponible"),
+      unlockLevelHint: getValue("assessment.unlockLevelHint", "Validez le niveau {n} pour débloquer ce niveau"),
     },
     formation: {
       title: getValue("formation.title", "Formation"),
@@ -337,6 +341,7 @@ export function buildTranslationsObject(flatTranslations: Record<string, string>
       levelLabel: getValue("formation.levelLabel", "Niveau"),
       applicationsPlaceholder: getValue("formation.applicationsPlaceholder", "Applications et exercices seront affichés ici."),
       parcoursPlaceholder: getValue("formation.parcoursPlaceholder", "Parcours de formation seront affichés ici."),
+      resizeTitle: getValue("formation.resizeTitle", "Glisser pour modifier la largeur"),
     },
   };
 }
@@ -603,6 +608,10 @@ export interface Translations {
     earlyReached: string;
     earlyFail: string;
     passingReached: string;
+    levelScaleTitle: string;
+    doubleClickToStartQuiz: string;
+    baseLevelNoQuiz: string;
+    unlockLevelHint: string;
   };
   formation: {
     title: string;
@@ -621,6 +630,7 @@ export interface Translations {
     levelLabel: string;
     applicationsPlaceholder: string;
     parcoursPlaceholder: string;
+    resizeTitle: string;
   };
 }
 
@@ -870,6 +880,10 @@ export const FR: Translations = {
     earlyReached: "Vous avez atteint le score de {n} bonnes réponses en seulement {q} questions !",
     earlyFail: "Avec {n} erreurs, il n'est plus possible d'atteindre {min}/{total}.",
     passingReached: "{n} atteint !",
+    levelScaleTitle: "Échelle des niveaux",
+    doubleClickToStartQuiz: "Double-cliquez pour lancer le quizz",
+    baseLevelNoQuiz: "Niveau de base - pas de quizz disponible",
+    unlockLevelHint: "Validez le niveau {n} pour débloquer ce niveau",
   },
   formation: {
     title: "Formation",
@@ -888,6 +902,7 @@ export const FR: Translations = {
     levelLabel: "Niveau",
     applicationsPlaceholder: "Applications et exercices seront affichés ici.",
     parcoursPlaceholder: "Parcours de formation seront affichés ici.",
+    resizeTitle: "Glisser pour modifier la largeur",
   },
 };
 
@@ -1137,6 +1152,10 @@ export const EN: Translations = {
     earlyReached: "You reached {n} correct answers in just {q} questions!",
     earlyFail: "With {n} errors, it is no longer possible to reach {min}/{total}.",
     passingReached: "{n} reached!",
+    levelScaleTitle: "Level scale",
+    doubleClickToStartQuiz: "Double-click to start the quiz",
+    baseLevelNoQuiz: "Base level - no quiz available",
+    unlockLevelHint: "Validate level {n} to unlock this level",
   },
   formation: {
     title: "Training",
@@ -1155,6 +1174,7 @@ export const EN: Translations = {
     levelLabel: "Level",
     applicationsPlaceholder: "Applications and exercises will be displayed here.",
     parcoursPlaceholder: "Training paths will be displayed here.",
+    resizeTitle: "Drag to resize",
   },
 };
 

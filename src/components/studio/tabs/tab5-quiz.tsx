@@ -27,6 +27,7 @@ interface LevelScaleProps {
 
 // Composant échelle des niveaux
 function LevelScale({ onStartQuiz, selectedLevel, maxAllowedLevel }: LevelScaleProps) {
+  const { t } = useI18n();
   const [hoveredLevel, setHoveredLevel] = useState<number | null>(null);
 
   // En mode publié : jouable = niveau 1 à maxAllowedLevel (et niveau 0 toujours indisponible)
@@ -42,7 +43,7 @@ function LevelScale({ onStartQuiz, selectedLevel, maxAllowedLevel }: LevelScaleP
     <div className="w-56 h-full bg-gray-50 dark:bg-gray-900 border-r flex-shrink-0 flex flex-col">
       <div className="p-2 flex-shrink-0">
         <h3 className="text-sm font-semibold mb-2 text-center text-gray-600 dark:text-gray-400">
-          Échelle des niveaux
+          {t.assessment.levelScaleTitle}
         </h3>
       </div>
       
@@ -106,7 +107,7 @@ function LevelScale({ onStartQuiz, selectedLevel, maxAllowedLevel }: LevelScaleP
               {hoveredLevelInfo.category}
             </span>
             <span className="text-xs font-semibold">
-              Niveau {hoveredLevelInfo.number} - {hoveredLevelInfo.name}
+              {t.assessment.level} {hoveredLevelInfo.number} - {hoveredLevelInfo.name}
             </span>
           </div>
           <p className="text-[10px] text-gray-300 mb-1 italic">
@@ -118,17 +119,17 @@ function LevelScale({ onStartQuiz, selectedLevel, maxAllowedLevel }: LevelScaleP
           {onStartQuiz && isLevelPlayable(hoveredLevelInfo.number) && (
             <p className="text-[9px] text-blue-300 mt-2 flex items-center gap-1">
               <Play className="h-3 w-3" />
-              Double-cliquez pour lancer le quizz
+              {t.assessment.doubleClickToStartQuiz}
             </p>
           )}
           {onStartQuiz && hoveredLevelInfo.number === 0 && (
             <p className="text-[9px] text-gray-400 mt-2">
-              Niveau de base - pas de quizz disponible
+              {t.assessment.baseLevelNoQuiz}
             </p>
           )}
           {onStartQuiz && maxAllowedLevel !== undefined && hoveredLevelInfo.number > maxAllowedLevel && (
             <p className="text-[9px] text-gray-400 mt-2">
-              Validez le niveau {maxAllowedLevel} pour débloquer ce niveau
+              {t.assessment.unlockLevelHint.replace("{n}", String(maxAllowedLevel))}
             </p>
           )}
         </div>

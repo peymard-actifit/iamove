@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, Button, Input, Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui";
 import { Send, Bot, User, Sparkles } from "lucide-react";
 import { LEVELS, getLevelIcon } from "@/lib/levels";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, getLanguageInfo } from "@/lib/i18n";
 
 interface Tab4FormationProps {
   siteId: string;
@@ -20,7 +20,11 @@ interface Message {
 }
 
 export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationProps) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
+  const locale = (() => {
+    const info = getLanguageInfo(language);
+    return info ? `${language.toLowerCase()}-${info.countryCode.toUpperCase()}` : "fr-FR";
+  })();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -165,7 +169,7 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
       >
         {leftPercent > 0 && (
           <>
-            <div className="border-b px-4 py-1.5 bg-gray-50 dark:bg-gray-800/50 min-h-[2rem] flex items-center">
+            <div className="border-b px-4 bg-gray-50 dark:bg-gray-800/50 h-8 flex items-center flex-shrink-0">
               <h3 className="text-sm font-semibold flex items-center gap-2">
                 <Bot className="h-4 w-4 text-blue-500" />
                 {t.formation.assistantTitle}
@@ -202,7 +206,7 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
                           <User className="h-4 w-4" />
                         )}
                         <span className="text-xs opacity-70">
-                          {message.timestamp.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                          {message.timestamp.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}
                         </span>
                       </div>
                       <p className="whitespace-pre-wrap text-sm">{message.content}</p>
@@ -248,7 +252,7 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
         aria-valuemax={100}
         onMouseDown={handleDividerMouseDown}
         className="w-1.5 flex-shrink-0 bg-gray-200 dark:bg-gray-700 hover:bg-blue-400 dark:hover:bg-blue-600 cursor-col-resize flex items-center justify-center group transition-colors"
-        title="Glisser pour modifier la largeur"
+        title={t.formation.resizeTitle}
       >
         <div className="w-0.5 h-8 rounded-full bg-gray-400 group-hover:bg-white opacity-50 group-hover:opacity-100 transition-opacity" />
       </div>
@@ -263,7 +267,7 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
         }}
       >
         <Tabs defaultValue="parcours" className="flex flex-col flex-1 min-h-0">
-          <div className="border-b px-4 py-1.5 bg-gray-50 dark:bg-gray-800/50 flex items-center gap-4 flex-shrink-0 min-h-[2rem]">
+          <div className="border-b px-4 bg-gray-50 dark:bg-gray-800/50 flex items-center gap-4 flex-shrink-0 h-8">
             <h3 className="text-sm font-semibold">{t.formation.title}</h3>
             <TabsList className="h-6 bg-transparent p-0 gap-0 border-0 [&>button]:rounded [&>button]:px-2.5 [&>button]:py-0.5 [&>button]:text-xs [&>button]:data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 [&>button]:data-[state=active]:shadow-sm">
               <TabsTrigger value="parcours">{t.formation.tabParcours}</TabsTrigger>
