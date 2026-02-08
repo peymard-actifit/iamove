@@ -5,7 +5,7 @@ import { ensureTrainingArticlesSeeded } from "@/lib/training-seed-articles";
 /**
  * GET - Liste des articles (modules type ARTICLE) pour un niveau.
  * Public. Seed automatique des 20 articles au premier accès si besoin.
- * Query: levelId OU levelNumber (1-20)
+ * Query: levelId OU levelNumber (1-20), siteId (optionnel, pour filtrer par visibilité)
  */
 export async function GET(request: Request) {
   try {
@@ -15,6 +15,7 @@ export async function GET(request: Request) {
     const levelId = searchParams.get("levelId");
     const levelNumberParam = searchParams.get("levelNumber");
     const levelNumber = levelNumberParam ? parseInt(levelNumberParam, 10) : NaN;
+    const siteId = searchParams.get("siteId");
 
     let targetLevelId: string | null = levelId || null;
     if (!targetLevelId && Number.isFinite(levelNumber) && levelNumber >= 1 && levelNumber <= 20) {
@@ -35,11 +36,22 @@ export async function GET(request: Request) {
       return NextResponse.json({ articles: [] });
     }
 
+    // Récupérer les modules masqués pour ce site (si siteId fourni)
+    let hiddenModuleIds: string[] = [];
+    if (siteId) {
+      const settings = await prisma.siteSettings.findUnique({
+        where: { siteId },
+        select: { tab4HiddenModuleIds: true },
+      });
+      hiddenModuleIds = settings?.tab4HiddenModuleIds ?? [];
+    }
+
     const modules = await prisma.trainingModule.findMany({
       where: {
         methodId: method.id,
         levelId: targetLevelId,
         isActive: true,
+        ...(hiddenModuleIds.length > 0 ? { id: { notIn: hiddenModuleIds } } : {}),
       },
       orderBy: { order: "asc" },
       select: {

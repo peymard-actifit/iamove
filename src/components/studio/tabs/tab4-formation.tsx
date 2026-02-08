@@ -1,17 +1,11 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle, Button, Input, Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui";
-import { Send, Bot, User, Sparkles, FileText, Clock, ExternalLink, Loader2 } from "lucide-react";
+import { Button, Input, Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui";
+import { Send, Bot, User, Sparkles, FileText, Clock, ExternalLink, Loader2, Eye, EyeOff, GraduationCap } from "lucide-react";
 import { LEVELS, getLevelIcon } from "@/lib/levels";
 import { useI18n, getLanguageInfo } from "@/lib/i18n";
 import { usePP } from "@/components/published/site-app";
-import dynamic from "next/dynamic";
-
-const TrainingPageContent = dynamic(
-  () => import("@/components/studio/training-page-content").then((m) => m.TrainingPageContent),
-  { ssr: false, loading: () => <div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" /></div> }
-);
 
 interface LevelTranslation {
   id: string;
@@ -139,10 +133,29 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
     }
   };
 
-  // Mode studio : charger dynamiquement les méthodes, niveaux et parcours,
-  // puis afficher le vrai composant de gestion (Connaissances, Applications, Parcours).
-  const [studioData, setStudioData] = useState<{ methods: unknown[]; levels: unknown[]; paths: unknown[] } | null>(null);
+  // ─── Mode Studio : interface de sélection de visibilité des modules ───
+  interface StudioModule {
+    id: string;
+    title: string;
+    description?: string | null;
+    duration?: number;
+    difficulty?: number;
+    isActive?: boolean;
+    level?: { number: number; name: string } | null;
+    translations?: Array<{ language: string; title: string; description: string | null }>;
+  }
+  interface StudioMethod {
+    id: string;
+    name: string;
+    type: string;
+    icon?: string | null;
+    modules?: StudioModule[];
+    translations?: Array<{ language: string; name: string; description: string | null }>;
+  }
+  const [studioMethods, setStudioMethods] = useState<StudioMethod[]>([]);
+  const [hiddenModuleIds, setHiddenModuleIds] = useState<Set<string>>(new Set());
   const [studioLoading, setStudioLoading] = useState(isStudioMode);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isStudioMode) return;
@@ -150,41 +163,219 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
     setStudioLoading(true);
     Promise.all([
       fetch("/api/training/seed").then((r) => r.json()),
-      fetch("/api/levels").then((r) => r.json()),
-      fetch("/api/training/paths").then((r) => r.json()),
+      fetch(`/api/sites/${siteId}/training-visibility`).then((r) => r.json()),
     ])
-      .then(([methodsData, levelsData, pathsData]) => {
+      .then(([methodsData, visData]) => {
         if (cancelled) return;
-        setStudioData({
-          methods: methodsData.methods || [],
-          levels: Array.isArray(levelsData) ? levelsData : levelsData.levels || [],
-          paths: pathsData.paths || [],
-        });
+        setStudioMethods(methodsData.methods || []);
+        setHiddenModuleIds(new Set(visData.hiddenModuleIds || []));
       })
       .catch((err) => {
         console.error("Erreur chargement formation studio:", err);
-        if (!cancelled) setStudioData({ methods: [], levels: [], paths: [] });
+        if (!cancelled) {
+          setStudioMethods([]);
+          setHiddenModuleIds(new Set());
+        }
       })
       .finally(() => {
         if (!cancelled) setStudioLoading(false);
       });
     return () => { cancelled = true; };
-  }, [isStudioMode]);
+  }, [isStudioMode, siteId]);
+
+  const toggleModuleVisibility = async (moduleId: string, currentlyVisible: boolean) => {
+    setTogglingId(moduleId);
+    const newVisible = !currentlyVisible;
+    try {
+      const res = await fetch(`/api/sites/${siteId}/training-visibility`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ moduleId, visible: newVisible }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setHiddenModuleIds(new Set(data.hiddenModuleIds || []));
+      }
+    } catch (e) {
+      console.error("Erreur toggle visibilité:", e);
+    }
+    setTogglingId(null);
+  };
 
   if (isStudioMode) {
-    if (studioLoading || !studioData) {
+    if (studioLoading) {
       return (
         <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
         </div>
       );
     }
+
+    const knowledgeMethods = studioMethods.filter((m) =>
+      ["VIDEO", "ARTICLE", "TUTORIAL", "INTERACTIVE"].includes(m.type)
+    );
+    const applicationMethods = studioMethods.filter((m) =>
+      ["SERIOUS_GAME", "EXERCISE"].includes(m.type)
+    );
+
+    const renderMethodModules = (method: StudioMethod) => {
+      const modules = method.modules || [];
+      if (modules.length === 0) {
+        return (
+          <p className="text-xs text-gray-400 italic ml-4">Aucun module. Ajoutez-en via Actions → Gérer les formations.</p>
+        );
+      }
+      const allVisible = modules.every((m) => !hiddenModuleIds.has(m.id));
+      const allHidden = modules.every((m) => hiddenModuleIds.has(m.id));
+      return (
+        <div className="space-y-1">
+          {/* Bouton tout afficher / tout masquer */}
+          <div className="flex items-center gap-2 mb-2 ml-4">
+            <button
+              type="button"
+              className="text-xs text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-40"
+              disabled={allVisible || togglingId !== null}
+              onClick={async () => {
+                for (const m of modules) {
+                  if (hiddenModuleIds.has(m.id)) {
+                    await toggleModuleVisibility(m.id, false);
+                  }
+                }
+              }}
+            >
+              Tout afficher
+            </button>
+            <span className="text-gray-300">|</span>
+            <button
+              type="button"
+              className="text-xs text-gray-500 hover:underline disabled:opacity-40"
+              disabled={allHidden || togglingId !== null}
+              onClick={async () => {
+                for (const m of modules) {
+                  if (!hiddenModuleIds.has(m.id)) {
+                    await toggleModuleVisibility(m.id, true);
+                  }
+                }
+              }}
+            >
+              Tout masquer
+            </button>
+            <span className="text-xs text-gray-400 ml-2">
+              {modules.filter((m) => !hiddenModuleIds.has(m.id)).length}/{modules.length} visible(s)
+            </span>
+          </div>
+          {modules.map((mod) => {
+            const isVisible = !hiddenModuleIds.has(mod.id);
+            const lang = language?.toUpperCase() || "FR";
+            const tr = mod.translations?.find((x) => x.language.toUpperCase() === lang);
+            const title = tr?.title ?? mod.title;
+            const levelNum = mod.level?.number;
+            return (
+              <div
+                key={mod.id}
+                className={`flex items-center gap-3 px-4 py-2 rounded-md transition-colors ${
+                  isVisible
+                    ? "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                    : "bg-gray-100 dark:bg-gray-800/50 border border-dashed border-gray-300 dark:border-gray-600 opacity-60"
+                }`}
+              >
+                <button
+                  type="button"
+                  disabled={togglingId === mod.id}
+                  onClick={() => toggleModuleVisibility(mod.id, isVisible)}
+                  className={`flex-shrink-0 p-1 rounded transition-colors ${
+                    isVisible
+                      ? "text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30"
+                      : "text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
+                  }`}
+                  title={isVisible ? "Cliquer pour masquer du site publié" : "Cliquer pour rendre visible sur le site publié"}
+                >
+                  {togglingId === mod.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : isVisible ? (
+                    <Eye className="h-4 w-4" />
+                  ) : (
+                    <EyeOff className="h-4 w-4" />
+                  )}
+                </button>
+                {levelNum && (
+                  <span className="flex-shrink-0 text-xs font-mono bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded">
+                    Niv.{levelNum}
+                  </span>
+                )}
+                <span className={`text-sm flex-1 truncate ${isVisible ? "text-gray-900 dark:text-gray-100" : "text-gray-500 dark:text-gray-400 line-through"}`}>
+                  {title}
+                </span>
+                {mod.duration && mod.duration > 0 && (
+                  <span className="text-xs text-gray-400 flex-shrink-0">{mod.duration} min</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      );
+    };
+
     return (
-      <TrainingPageContent
-        methods={studioData.methods as never[]}
-        levels={studioData.levels as never[]}
-        paths={studioData.paths as never[]}
-      />
+      <div className="p-4 space-y-6 overflow-auto max-h-full">
+        <div className="flex items-center gap-2 mb-2">
+          <GraduationCap className="h-5 w-5 text-blue-600" />
+          <h2 className="text-lg font-semibold">Visibilité des formations sur ce site</h2>
+        </div>
+        <p className="text-sm text-gray-500 dark:text-gray-400 -mt-4">
+          Choisissez les modules visibles sur le site publié. Pour gérer le contenu des formations (créer, modifier, supprimer), utilisez le menu <strong>Actions → Gérer les formations</strong>.
+        </p>
+
+        {/* Connaissances */}
+        <section>
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">Connaissances</h3>
+          {knowledgeMethods.length === 0 ? (
+            <p className="text-sm text-gray-400 italic">Aucune méthode de type connaissances.</p>
+          ) : (
+            <div className="space-y-4">
+              {knowledgeMethods.map((method) => {
+                const lang = language?.toUpperCase() || "FR";
+                const mtr = method.translations?.find((x) => x.language.toUpperCase() === lang);
+                const name = mtr?.name ?? method.name;
+                return (
+                  <div key={method.id}>
+                    <h4 className="text-sm font-medium mb-1 flex items-center gap-2">
+                      <span>{method.icon || "📚"}</span> {name}
+                      <span className="text-xs text-gray-400">({method.type})</span>
+                    </h4>
+                    {renderMethodModules(method)}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        {/* Applications */}
+        <section>
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">Applications</h3>
+          {applicationMethods.length === 0 ? (
+            <p className="text-sm text-gray-400 italic">Aucune méthode de type application.</p>
+          ) : (
+            <div className="space-y-4">
+              {applicationMethods.map((method) => {
+                const lang = language?.toUpperCase() || "FR";
+                const mtr = method.translations?.find((x) => x.language.toUpperCase() === lang);
+                const name = mtr?.name ?? method.name;
+                return (
+                  <div key={method.id}>
+                    <h4 className="text-sm font-medium mb-1 flex items-center gap-2">
+                      <span>{method.icon || "🎮"}</span> {name}
+                      <span className="text-xs text-gray-400">({method.type})</span>
+                    </h4>
+                    {renderMethodModules(method)}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      </div>
     );
   }
 
@@ -212,7 +403,7 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
     let cancelled = false;
     setKnowledgeArticlesLoading(true);
     setKnowledgeArticles([]);
-    fetch(`/api/training/articles?levelNumber=${selectedKnowledgeLevel}`)
+    fetch(`/api/training/articles?levelNumber=${selectedKnowledgeLevel}&siteId=${siteId}`)
       .then((res) => (res.ok ? res.json() : { articles: [] }))
       .then((data) => {
         if (!cancelled && Array.isArray(data.articles)) setKnowledgeArticles(data.articles);

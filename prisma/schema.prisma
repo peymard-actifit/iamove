@@ -116,6 +116,7 @@ model SiteSettings {
   tab4Title             String   @default("Formation")
   tab4Enabled           Boolean  @default(true)
   tab4SystemPrompt      String   @default("Tu es un assistant spécialisé dans la formation aux compétences IA en entreprise.")
+  tab4HiddenModuleIds   String[] @default([])  // IDs de modules masqués (vide = tout visible)
   
   // Onglet 5 - Quizz
   tab5Title             String   @default("Évaluation")
