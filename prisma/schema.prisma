@@ -486,6 +486,9 @@ model TrainingModule {
   // Ressources (JSON)
   // Format: [{ type, title, url, description }]
   resources         Json?
+
+  // PDF généré à partir de la page source de l'article
+  pdfData           Bytes?
   
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt

@@ -74,6 +74,7 @@ interface KnowledgeArticle {
   content: string | null;
   duration: number;
   difficulty: number;
+  hasPdf?: boolean;
   resources?: Array<{ type?: string; title?: string; url?: string; description?: string }> | null;
   translations?: Array<{ language: string; title: string; description: string | null; content: string | null }>;
 }
@@ -199,6 +200,8 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
   const [selectedKnowledgeLevel, setSelectedKnowledgeLevel] = useState<number | null>(null);
   const [knowledgeArticles, setKnowledgeArticles] = useState<KnowledgeArticle[]>([]);
   const [knowledgeArticlesLoading, setKnowledgeArticlesLoading] = useState(false);
+  // Viewer PDF : moduleId de l'article actuellement affiché
+  const [viewingPdfId, setViewingPdfId] = useState<string | null>(null);
 
   // Charger les articles du niveau sélectionné (site publié uniquement)
   useEffect(() => {
@@ -458,6 +461,33 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
                         <p className="text-sm text-gray-500 dark:text-gray-400 py-4">
                           {t.formation.resourcesHint}
                         </p>
+                      ) : viewingPdfId ? (
+                        /* Viewer PDF intégré */
+                        (() => {
+                          const article = knowledgeArticles.find((a) => a.id === viewingPdfId);
+                          const lang = language?.toUpperCase() || "FR";
+                          const tr = article?.translations?.find((x) => x.language.toUpperCase() === lang);
+                          const title = tr?.title ?? article?.title ?? "";
+                          return (
+                            <div className="flex flex-col h-full min-h-0">
+                              <div className="flex items-center justify-between mb-2 flex-shrink-0">
+                                <h4 className="font-medium text-sm truncate flex-1">{title}</h4>
+                                <button
+                                  type="button"
+                                  onClick={() => setViewingPdfId(null)}
+                                  className="ml-2 text-xs text-blue-600 dark:text-blue-400 hover:underline flex-shrink-0"
+                                >
+                                  \u2190 Retour aux articles
+                                </button>
+                              </div>
+                              <iframe
+                                src={`/api/training/articles/${viewingPdfId}`}
+                                className="flex-1 w-full rounded-lg border border-gray-200 dark:border-gray-700 min-h-[400px]"
+                                title={title}
+                              />
+                            </div>
+                          );
+                        })()
                       ) : (
                         <ul className="space-y-3">
                           {knowledgeArticles.map((article) => {
@@ -491,14 +521,24 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
                                             {article.duration} min
                                           </span>
                                         )}
+                                        {article.hasPdf && (
+                                          <button
+                                            type="button"
+                                            onClick={() => setViewingPdfId(article.id)}
+                                            className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                                          >
+                                            <FileText className="h-3.5 w-3.5" />
+                                            Voir le PDF
+                                          </button>
+                                        )}
                                         {link && (
                                           <a
                                             href={link}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                                            className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400 hover:underline"
                                           >
-                                            Lire l’article
+                                            Source originale
                                             <ExternalLink className="h-3.5 w-3.5" />
                                           </a>
                                         )}

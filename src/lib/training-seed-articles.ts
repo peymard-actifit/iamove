@@ -1,4 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
+import { urlToPdf } from "@/lib/url-to-pdf";
 
 /**
  * Articles IA réels, catégorisés par niveau de l’échelle (1–20).
@@ -100,4 +101,56 @@ export async function ensureTrainingArticlesSeeded(prisma: PrismaClient): Promis
       },
     });
   }
+}
+
+/**
+ * Génère les PDF manquants pour les articles existants.
+ * Pour chaque module ARTICLE qui n'a pas encore de pdfData,
+ * on fetch l'URL source et on génère un PDF via Puppeteer.
+ * Appelé en arrière-plan (ne bloque pas le seed).
+ */
+export async function generateMissingArticlePdfs(prisma: PrismaClient): Promise<{ generated: number; errors: number }> {
+  const method = await prisma.trainingMethod.findFirst({
+    where: { type: "ARTICLE", isActive: true },
+  });
+  if (!method) return { generated: 0, errors: 0 };
+
+  const modulesWithoutPdf = await prisma.trainingModule.findMany({
+    where: {
+      methodId: method.id,
+      isActive: true,
+      pdfData: null,
+    },
+    include: { level: true },
+    orderBy: { level: { number: "asc" } },
+  });
+
+  let generated = 0;
+  let errors = 0;
+
+  for (const mod of modulesWithoutPdf) {
+    // Extraire l'URL depuis resources JSON
+    const resources = mod.resources as Array<{ url?: string }> | null;
+    const url = resources?.[0]?.url;
+    if (!url) {
+      errors++;
+      continue;
+    }
+
+    try {
+      console.log(`[PDF] Génération PDF pour "${mod.title}" (niveau ${mod.level.number}) depuis ${url}`);
+      const pdfBuffer = await urlToPdf(url);
+      await prisma.trainingModule.update({
+        where: { id: mod.id },
+        data: { pdfData: pdfBuffer },
+      });
+      generated++;
+      console.log(`[PDF] OK – ${mod.title} (${(pdfBuffer.length / 1024).toFixed(0)} Ko)`);
+    } catch (err) {
+      errors++;
+      console.error(`[PDF] Erreur pour "${mod.title}":`, err);
+    }
+  }
+
+  return { generated, errors };
 }

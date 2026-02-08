@@ -42,13 +42,34 @@ export async function GET(request: Request) {
         isActive: true,
       },
       orderBy: { order: "asc" },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        content: true,
+        duration: true,
+        difficulty: true,
+        resources: true,
+        pdfData: false, // ne pas transférer le blob, juste indiquer s'il existe
         level: true,
         translations: true,
       },
     });
 
-    return NextResponse.json({ articles: modules });
+    // Vérifier quels modules ont un PDF (sans charger le blob)
+    const moduleIds = modules.map((m) => m.id);
+    const withPdf = await prisma.trainingModule.findMany({
+      where: { id: { in: moduleIds }, pdfData: { not: null } },
+      select: { id: true },
+    });
+    const pdfSet = new Set(withPdf.map((m) => m.id));
+
+    const articles = modules.map((m) => ({
+      ...m,
+      hasPdf: pdfSet.has(m.id),
+    }));
+
+    return NextResponse.json({ articles });
   } catch (error) {
     console.error("[training/articles] GET:", error);
     return NextResponse.json({ error: String(error) }, { status: 500 });

@@ -398,6 +398,36 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
             );
           })}
         </div>
+        <div className="mt-3">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={isLoading}
+            onClick={async () => {
+              setIsLoading(true);
+              try {
+                const res = await fetch("/api/training/articles/generate-pdfs", { method: "POST", credentials: "include" });
+                const data = await res.json();
+                if (res.ok) {
+                  alert(`PDF : ${data.generated} généré(s), ${data.errors} erreur(s).`);
+                  router.refresh();
+                } else {
+                  alert(data.error || "Erreur");
+                }
+              } catch (e) {
+                console.error(e);
+                alert("Erreur lors de la génération des PDF.");
+              }
+              setIsLoading(false);
+            }}
+          >
+            <FileText className="h-4 w-4 mr-1" />
+            Générer les PDF des articles
+          </Button>
+          <span className="text-xs text-gray-500 ml-2">
+            Capture les pages web sources en PDF pour le viewer intégré.
+          </span>
+        </div>
       </section>
 
       {/* Applications : serious game, exercices */}
