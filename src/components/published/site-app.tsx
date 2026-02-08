@@ -92,79 +92,75 @@ export function PublishedSiteApp({
       {/* Favicon dynamique basé sur le niveau de la personne connectée */}
       {currentPerson && <DynamicFavicon level={currentPerson.currentLevel} />}
       
-      {/* Header */}
-      <header 
-        className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800"
-        style={{ backgroundColor: site.primaryColor }}
-      >
-        <div className="container mx-auto flex h-10 min-h-[2.5rem] items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
-              <span className="text-white font-bold">
-                {site.name.charAt(0)}
+      <Tabs defaultValue="tab3" className="w-full">
+        {/* Header avec onglets intégrés dans la barre */}
+        <header 
+          className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800"
+          style={{ backgroundColor: site.primaryColor }}
+        >
+          <div className="container mx-auto flex h-10 min-h-[2.5rem] items-center gap-2 px-2 sm:px-4">
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="h-7 w-7 rounded bg-white/20 flex items-center justify-center">
+                <span className="text-white font-bold text-sm">{site.name.charAt(0)}</span>
+              </div>
+              <span className="text-base font-semibold text-white truncate max-w-[120px] sm:max-w-none">
+                {site.name}
               </span>
             </div>
-            <span className="text-lg font-semibold text-white">
-              {site.name}
-            </span>
+            {/* Onglets au centre de la barre */}
+            <TabsList className="flex-1 justify-start h-8 mx-1 bg-white/10 border-0 gap-0.5 p-0.5 [&>button]:text-white/90 [&>button]:data-[state=active]:bg-white/20 [&>button]:rounded [&>button]:px-2 [&>button]:py-1 [&>button]:text-xs">
+              {settings.tab3Enabled && (
+                <TabsTrigger value="tab3" className="gap-1">
+                  <User className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">{t.tabs.profile}</span>
+                </TabsTrigger>
+              )}
+              {settings.tab2Enabled && (
+                <TabsTrigger value="tab2" className="gap-1">
+                  <Network className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">{t.tabs.organization}</span>
+                </TabsTrigger>
+              )}
+              {settings.tab5Enabled && (
+                <TabsTrigger value="tab5" className="gap-1">
+                  <ClipboardCheck className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">{t.tabs.assessment}</span>
+                </TabsTrigger>
+              )}
+              {settings.tab4Enabled && (
+                <TabsTrigger value="tab4" className="gap-1">
+                  <GraduationCap className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">{t.tabs.training}</span>
+                </TabsTrigger>
+              )}
+              <TabsTrigger value="tab6" className="gap-1">
+                <Route className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{t.published.trainingPaths}</span>
+              </TabsTrigger>
+            </TabsList>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {currentPerson && (
+                <span className="text-white/80 text-xs hidden sm:inline truncate max-w-[100px]">
+                  {currentPerson.name}
+                </span>
+              )}
+              <LanguageSelector />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="text-white hover:bg-white/20 h-8 px-2"
+              >
+                <LogOut className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">{t.published.logout}</span>
+              </Button>
+            </div>
           </div>
+        </header>
 
-          <div className="flex items-center gap-4">
-            {currentPerson && (
-              <span className="text-white/80 text-sm hidden sm:inline">
-                {currentPerson.name}
-              </span>
-            )}
-            <LanguageSelector />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              className="text-white hover:bg-white/20"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">{t.published.logout}</span>
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container mx-auto px-4 pt-0 pb-6">
-        <Tabs defaultValue="tab3" className="w-full">
-          <TabsList className="w-full justify-start mb-2">
-            {/* Ordre : Profil, Organigramme, Évaluation, Formation, Parcours — libellés traduits selon la langue UI */}
-            {settings.tab3Enabled && (
-              <TabsTrigger value="tab3" className="gap-2">
-                <User className="h-4 w-4" />
-                <span className="hidden sm:inline">{t.tabs.profile}</span>
-              </TabsTrigger>
-            )}
-            {settings.tab2Enabled && (
-              <TabsTrigger value="tab2" className="gap-2">
-                <Network className="h-4 w-4" />
-                <span className="hidden sm:inline">{t.tabs.organization}</span>
-              </TabsTrigger>
-            )}
-            {settings.tab5Enabled && (
-              <TabsTrigger value="tab5" className="gap-2">
-                <ClipboardCheck className="h-4 w-4" />
-                <span className="hidden sm:inline">{t.tabs.assessment}</span>
-              </TabsTrigger>
-            )}
-            {settings.tab4Enabled && (
-              <TabsTrigger value="tab4" className="gap-2">
-                <GraduationCap className="h-4 w-4" />
-                <span className="hidden sm:inline">{t.tabs.training}</span>
-              </TabsTrigger>
-            )}
-            <TabsTrigger value="tab6" className="gap-2">
-              <Route className="h-4 w-4" />
-              <span className="hidden sm:inline">{t.published.trainingPaths}</span>
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="tab2">
+        {/* Contenu des onglets */}
+        <main className="container mx-auto px-4 pt-2 pb-6">
+          <TabsContent value="tab2" className="mt-0">
             <Tab2Organigramme
               siteId={site.id}
               siteName={site.name}
@@ -177,7 +173,7 @@ export function PublishedSiteApp({
             />
           </TabsContent>
 
-          <TabsContent value="tab3">
+          <TabsContent value="tab3" className="mt-0">
             {currentPerson ? (
               <PersonalProfileEditor
                 siteId={site.id}
@@ -192,7 +188,7 @@ export function PublishedSiteApp({
             )}
           </TabsContent>
 
-          <TabsContent value="tab4">
+          <TabsContent value="tab4" className="mt-0">
             <Tab4Formation
               siteId={site.id}
               isStudioMode={false}
@@ -200,7 +196,7 @@ export function PublishedSiteApp({
             />
           </TabsContent>
 
-          <TabsContent value="tab5">
+          <TabsContent value="tab5" className="mt-0">
             <Tab5Quiz
               siteId={site.id}
               isStudioMode={false}
@@ -209,15 +205,15 @@ export function PublishedSiteApp({
             />
           </TabsContent>
 
-          <TabsContent value="tab6">
+          <TabsContent value="tab6" className="mt-0">
             <Tab6TrainingPaths
               siteId={site.id}
               personId={currentPerson?.id}
               currentLevel={currentPerson?.currentLevel || 0}
             />
           </TabsContent>
-        </Tabs>
-      </main>
+        </main>
+      </Tabs>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, Button, Input } from "@/components/ui";
 import { Send, Bot, User, Sparkles } from "lucide-react";
 
@@ -107,91 +107,157 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
     );
   }
 
-  // Mode site publié : fenêtre divisée en deux verticalement
+  // Mode site publié : fenêtre divisée en deux avec drag pour modifier la largeur
   // Gauche = prompt / chat OpenAI ; Droite = autres éléments de formation
+  // On peut tout masquer d'un côté en tirant le drag jusqu'au bord ; reprendre le drag pour réagrandir
+  const [leftPercent, setLeftPercent] = useState(50);
+  const [isDragging, setIsDragging] = useState(false);
+  const startXRef = useRef(0);
+  const startPercentRef = useRef(50);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleDividerMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    startXRef.current = e.clientX;
+    startPercentRef.current = leftPercent;
+  }, [leftPercent]);
+
+  useEffect(() => {
+    if (!isDragging) return;
+    const onMove = (e: MouseEvent) => {
+      const container = containerRef.current;
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const deltaX = e.clientX - startXRef.current;
+      const deltaPercent = (deltaX / rect.width) * 100;
+      let next = startPercentRef.current + deltaPercent;
+      next = Math.max(0, Math.min(100, next));
+      setLeftPercent(next);
+    };
+    const onUp = () => setIsDragging(false);
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    return () => {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+  }, [isDragging]);
+
   return (
-    <div className="flex gap-4 h-[calc(100vh-12rem)] min-h-[400px]">
+    <div
+      ref={containerRef}
+      className={`flex h-[calc(100vh-8rem)] min-h-[360px] ${isDragging ? "select-none" : ""}`}
+    >
       {/* Partie gauche : prompt / assistant OpenAI */}
-      <div className="w-1/2 min-w-0 flex flex-col border rounded-lg overflow-hidden bg-white dark:bg-gray-900 shadow-sm">
-        <div className="border-b px-4 py-3 bg-gray-50 dark:bg-gray-800/50">
-          <h3 className="font-semibold flex items-center gap-2">
-            <Bot className="h-5 w-5 text-blue-500" />
-            Assistant Formation IA
-          </h3>
-        </div>
-        <div className="flex-1 overflow-auto p-4 space-y-4">
-          {messages.length === 0 ? (
-            <div className="h-full flex items-center justify-center text-center min-h-[200px]">
-              <div>
-                <Sparkles className="h-12 w-12 mx-auto text-yellow-500 mb-4" />
-                <h3 className="font-semibold text-lg">Bienvenue dans votre formation IA</h3>
-                <p className="text-gray-500 mt-2 max-w-md">
-                  Posez vos questions sur l&apos;intelligence artificielle, les bonnes pratiques, 
-                  ou demandez des conseils pour progresser dans vos compétences.
-                </p>
-              </div>
+      <div
+        className="flex flex-col border rounded-l-lg overflow-hidden bg-white dark:bg-gray-900 shadow-sm flex-shrink-0 min-w-0"
+        style={{ width: leftPercent === 0 ? "0" : `calc(${leftPercent}% - 3px)` }}
+      >
+        {leftPercent > 0 && (
+          <>
+            <div className="border-b px-4 py-3 bg-gray-50 dark:bg-gray-800/50">
+              <h3 className="font-semibold flex items-center gap-2">
+                <Bot className="h-5 w-5 text-blue-500" />
+                Assistant Formation IA
+              </h3>
             </div>
-          ) : (
-            messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className={`max-w-[85%] p-3 rounded-lg ${
-                    message.role === "user"
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 dark:bg-gray-800"
-                  }`}
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    {message.role === "assistant" ? (
-                      <Bot className="h-4 w-4" />
-                    ) : (
-                      <User className="h-4 w-4" />
-                    )}
-                    <span className="text-xs opacity-70">
-                      {message.timestamp.toLocaleTimeString("fr-FR", { 
-                        hour: "2-digit", 
-                        minute: "2-digit" 
-                      })}
-                    </span>
+            <div className="flex-1 overflow-auto p-4 space-y-4 min-h-0">
+              {messages.length === 0 ? (
+                <div className="h-full flex items-center justify-center text-center min-h-[160px]">
+                  <div>
+                    <Sparkles className="h-12 w-12 mx-auto text-yellow-500 mb-4" />
+                    <h3 className="font-semibold text-lg">Bienvenue dans votre formation IA</h3>
+                    <p className="text-gray-500 mt-2 max-w-md text-sm">
+                      Posez vos questions sur l&apos;intelligence artificielle, les bonnes pratiques, 
+                      ou demandez des conseils pour progresser dans vos compétences.
+                    </p>
                   </div>
-                  <p className="whitespace-pre-wrap text-sm">{message.content}</p>
                 </div>
-              </div>
-            ))
-          )}
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Bot className="h-4 w-4" />
-                  <span className="animate-pulse text-sm">En train de réfléchir...</span>
+              ) : (
+                messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className={`max-w-[85%] p-3 rounded-lg ${
+                        message.role === "user"
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-100 dark:bg-gray-800"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        {message.role === "assistant" ? (
+                          <Bot className="h-4 w-4" />
+                        ) : (
+                          <User className="h-4 w-4" />
+                        )}
+                        <span className="text-xs opacity-70">
+                          {message.timestamp.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      </div>
+                      <p className="whitespace-pre-wrap text-sm">{message.content}</p>
+                    </div>
+                  </div>
+                ))
+              )}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Bot className="h-4 w-4" />
+                      <span className="animate-pulse text-sm">En train de réfléchir...</span>
+                    </div>
+                  </div>
                 </div>
+              )}
+            </div>
+            <div className="p-4 border-t bg-gray-50/50 dark:bg-gray-800/30">
+              <div className="flex gap-2">
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Posez votre question..."
+                  disabled={isLoading}
+                  className="flex-1"
+                />
+                <Button onClick={handleSend} disabled={isLoading || !input.trim()}>
+                  <Send className="h-4 w-4" />
+                </Button>
               </div>
             </div>
-          )}
-        </div>
-        <div className="p-4 border-t bg-gray-50/50 dark:bg-gray-800/30">
-          <div className="flex gap-2">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Posez votre question..."
-              disabled={isLoading}
-              className="flex-1"
-            />
-            <Button onClick={handleSend} disabled={isLoading || !input.trim()}>
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+          </>
+        )}
+      </div>
+
+      {/* Drag handle : toujours visible pour pouvoir réagrandir une partie masquée */}
+      <div
+        role="separator"
+        aria-valuenow={leftPercent}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        onMouseDown={handleDividerMouseDown}
+        className="w-1.5 flex-shrink-0 bg-gray-200 dark:bg-gray-700 hover:bg-blue-400 dark:hover:bg-blue-600 cursor-col-resize flex items-center justify-center group transition-colors"
+        title="Glisser pour modifier la largeur"
+      >
+        <div className="w-0.5 h-8 rounded-full bg-gray-400 group-hover:bg-white opacity-50 group-hover:opacity-100 transition-opacity" />
       </div>
 
       {/* Partie droite : autres éléments de formation (à venir) */}
-      <div className="w-1/2 min-w-0 flex flex-col border rounded-lg overflow-hidden bg-white dark:bg-gray-900 shadow-sm">
+      <div
+        className="flex flex-col border rounded-r-lg overflow-hidden bg-white dark:bg-gray-900 shadow-sm min-w-0"
+        style={{
+          flex: leftPercent >= 100 ? "0 0 0" : "1 1 0",
+          width: leftPercent >= 100 ? 0 : undefined,
+          minWidth: leftPercent >= 100 ? 0 : undefined,
+        }}
+      >
         <div className="border-b px-4 py-3 bg-gray-50 dark:bg-gray-800/50">
           <h3 className="font-semibold">Formation</h3>
         </div>
