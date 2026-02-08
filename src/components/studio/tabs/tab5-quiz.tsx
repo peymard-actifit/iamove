@@ -144,7 +144,7 @@ interface QuizQuestion {
 }
 
 export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: Tab5QuizProps) {
-  const { language } = useI18n();
+  const { language, t } = useI18n();
   const [currentQuiz, setCurrentQuiz] = useState<QuizQuestion[] | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
@@ -157,6 +157,9 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
   const [passedEarly, setPassedEarly] = useState(false);
   const [failedEarly, setFailedEarly] = useState(false);
   const [errors, setErrors] = useState(0);
+  // En mode publié : niveau de quiz choisi (1 à currentLevel+1), défaut = niveau cible
+  const maxQuizLevel = Math.min(20, currentLevel + 1);
+  const [selectedQuizLevel, setSelectedQuizLevel] = useState(maxQuizLevel);
 
   const startQuiz = async (level?: number) => {
     const levelToUse = level ?? currentLevel + 1;
@@ -282,15 +285,15 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="text-center text-gray-500">
             <ClipboardCheck className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-            <h3 className="text-lg font-medium mb-2">Sélectionnez un niveau</h3>
-            <p className="text-sm">Double-cliquez sur un niveau à gauche pour lancer le quizz correspondant</p>
+            <h3 className="text-lg font-medium mb-2">{t.assessment.selectLevelTitle}</h3>
+            <p className="text-sm">{t.assessment.doubleClickHint}</p>
             <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-left max-w-md mx-auto">
-              <p className="text-sm font-medium mb-2">Règles :</p>
+              <p className="text-sm font-medium mb-2">{t.assessment.rules}</p>
               <ul className="text-xs space-y-1">
-                <li>• 20 questions par niveau</li>
-                <li>• {PASSING_SCORE} bonnes réponses minimum pour valider</li>
-                <li>• Le quiz s&apos;arrête dès que vous atteignez {PASSING_SCORE}/20</li>
-                <li>• 1 à 4 réponses possibles par question</li>
+                <li>• {t.assessment.rulesQuestions}</li>
+                <li>• {t.assessment.rulesMinScore.replace("{n}", String(PASSING_SCORE))}</li>
+                <li>• {t.assessment.rulesStopAt.replace("{n}", String(PASSING_SCORE))}</li>
+                <li>• {t.assessment.rulesAnswers}</li>
               </ul>
             </div>
           </div>
@@ -304,7 +307,7 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4" />
-            <p className="text-gray-500">Chargement du quizz niveau {targetLevel}...</p>
+            <p className="text-gray-500">{t.assessment.loading.replace("{level}", String(targetLevel))}</p>
           </div>
         </div>
       );
@@ -316,10 +319,10 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="text-center text-gray-500">
             <XCircle className="h-16 w-16 mx-auto mb-4 text-orange-400" />
-            <h3 className="text-lg font-medium mb-2">Aucune question disponible</h3>
-            <p className="text-sm mb-4">Il n&apos;y a pas encore de questions pour le niveau {targetLevel}</p>
+            <h3 className="text-lg font-medium mb-2">{t.assessment.noQuestions}</h3>
+            <p className="text-sm mb-4">{t.assessment.noQuestionsForLevel.replace("{level}", String(targetLevel))}</p>
             <Button variant="outline" onClick={resetQuiz}>
-              Choisir un autre niveau
+              {t.assessment.chooseOtherLevel}
             </Button>
           </div>
         </div>
@@ -345,37 +348,37 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
             )}
             <h3 className="text-2xl font-bold mb-2">
               {passed 
-                ? (passedEarly ? "Bravo ! Niveau validé !" : "Félicitations !") 
-                : (failedEarly ? "Échec - Quiz terminé" : "Dommage...")}
+                ? (passedEarly ? t.assessment.congrats : t.assessment.felicitations) 
+                : (failedEarly ? t.assessment.fail : t.assessment.dommage)}
             </h3>
             <p className="text-4xl font-bold mb-4">
               {score} / {questionsAnswered}
               {passedEarly && <span className="text-lg text-green-500 ml-2">({PASSING_SCORE} atteint !)</span>}
-              {failedEarly && <span className="text-lg text-red-500 ml-2">({errors} erreurs)</span>}
+              {failedEarly && <span className="text-lg text-red-500 ml-2">({errors} {t.assessment.errorsLabel.replace(" :", "")})</span>}
             </p>
             {passedEarly && (
               <p className="text-lg mb-2 text-purple-600">
-                Vous avez atteint le score de {PASSING_SCORE} bonnes réponses en seulement {questionsAnswered} questions !
+                {t.assessment.earlyReached.replace("{n}", String(PASSING_SCORE)).replace("{q}", String(questionsAnswered))}
               </p>
             )}
             {failedEarly && (
               <p className="text-lg mb-2 text-red-600">
-                Avec {errors} erreurs, il n&apos;est plus possible d&apos;atteindre {PASSING_SCORE}/{TOTAL_QUESTIONS}.
+                {t.assessment.earlyFail.replace("{n}", String(errors)).replace("{min}", String(PASSING_SCORE)).replace("{total}", String(TOTAL_QUESTIONS))}
               </p>
             )}
             <p className={`text-lg mb-6 ${passed ? "text-green-600" : "text-red-600"}`}>
               {passed 
-                ? `Niveau ${targetLevel} validé !` 
-                : `Il faut ${PASSING_SCORE}/${TOTAL_QUESTIONS} minimum pour valider le niveau ${targetLevel}`
+                ? t.assessment.levelValidated.replace("{level}", String(targetLevel)) 
+                : t.assessment.needToValidate.replace("{min}", String(PASSING_SCORE)).replace("{total}", String(TOTAL_QUESTIONS)).replace("{level}", String(targetLevel))
               }
             </p>
             <div className="flex gap-4 justify-center">
               <Button variant="outline" onClick={resetQuiz}>
-                Choisir un autre niveau
+                {t.assessment.chooseOtherLevel}
               </Button>
               {!passed && (
                 <Button onClick={() => startQuiz(targetLevel!)}>
-                  Réessayer
+                  {t.assessment.retry}
                 </Button>
               )}
             </div>
@@ -454,17 +457,17 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
                   onClick={validateAnswer}
                   disabled={selectedAnswers.length === 0}
                 >
-                  Valider ma réponse
+                  {t.assessment.validateAnswer}
                 </Button>
               ) : (
                 <Button onClick={nextQuestion}>
                   {currentQuestionIndex < currentQuiz.length - 1 && !quizFinished ? (
                     <>
-                      Question suivante
+                      {t.assessment.nextQuestion}
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </>
                   ) : (
-                    "Voir les résultats"
+                    t.assessment.seeResults
                   )}
                 </Button>
               )}
@@ -478,14 +481,14 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
                     <>
                       <CheckCircle className="h-6 w-6 text-green-500" />
                       <span className="font-medium text-green-700 dark:text-green-300">
-                        Bonne réponse !
+                        {t.assessment.correctAnswer}
                       </span>
                     </>
                   ) : (
                     <>
                       <XCircle className="h-6 w-6 text-red-500" />
                       <span className="font-medium text-red-700 dark:text-red-300">
-                        Mauvaise réponse
+                        {t.assessment.wrongAnswer}
                       </span>
                     </>
                   )}
@@ -522,34 +525,50 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
       <div className="space-y-6">
         <Card className="p-8 text-center">
           <Trophy className="h-16 w-16 mx-auto text-yellow-500 mb-4" />
-          <h2 className="text-2xl font-bold mb-2">Évaluation des compétences IA</h2>
-          <p className="text-gray-500 mb-6">
-            Testez vos connaissances et validez le niveau {currentLevel + 1}
+          <h2 className="text-2xl font-bold mb-2">{t.assessment.title}</h2>
+          <p className="text-gray-500 mb-4">
+            {t.assessment.subtitleValidate.replace("{level}", String(selectedQuizLevel))}
           </p>
-          
+          {/* Sélecteur de niveau : cliquer pour choisir le niveau du quiz (1 à currentLevel+1) */}
+          <div className="mb-4 flex items-center justify-center gap-2 flex-wrap">
+            <span className="text-sm text-gray-600 dark:text-gray-400">{t.assessment.chooseQuizLevel}</span>
+            <select
+              value={selectedQuizLevel}
+              onChange={(e) => setSelectedQuizLevel(Number(e.target.value))}
+              className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-base font-semibold cursor-pointer focus:ring-2 focus:ring-blue-500"
+              title={t.assessment.clickToChooseLevel.replace("{max}", String(maxQuizLevel))}
+            >
+              {Array.from({ length: maxQuizLevel }, (_, i) => i + 1).map((n) => (
+                <option key={n} value={n}>
+                  {t.assessment.level} {n}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg inline-block">
             <p className="text-sm text-blue-700 dark:text-blue-300">
-              Votre niveau actuel : <strong>Niveau {currentLevel}</strong>
+              {t.assessment.yourCurrentLevel} <strong>{t.assessment.level} {currentLevel}</strong>
             </p>
           </div>
 
           <div className="space-y-4">
-            <Button size="lg" onClick={() => startQuiz()} isLoading={isLoading}>
-              Commencer le quiz
+            <Button size="lg" onClick={() => startQuiz(selectedQuizLevel)} isLoading={isLoading}>
+              {t.assessment.startQuiz}
             </Button>
             <p className="text-xs text-gray-400">
-              20 questions • {PASSING_SCORE} bonnes réponses requises pour valider
+              {t.assessment.quizParams.replace("{n}", String(PASSING_SCORE))}
             </p>
           </div>
 
           {score > 0 && (
             <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <p className="text-sm">
-                Dernier score : <strong>{score}/20</strong>
+                {t.assessment.lastScore} <strong>{score}/20</strong>
                 {score >= PASSING_SCORE ? (
-                  <span className="text-green-600 ml-2">✓ Niveau validé !</span>
+                  <span className="text-green-600 ml-2">{t.assessment.levelValidatedShort}</span>
                 ) : (
-                  <span className="text-orange-600 ml-2">Encore {PASSING_SCORE - score} points nécessaires</span>
+                  <span className="text-orange-600 ml-2">{t.assessment.pointsNeeded.replace("{n}", String(PASSING_SCORE - score))}</span>
                 )}
               </p>
             </div>
@@ -578,37 +597,37 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
           )}
           <h3 className="text-2xl font-bold mb-2">
             {passed 
-              ? (passedEarly ? "Bravo ! Niveau validé !" : "Félicitations !") 
-              : (failedEarly ? "Échec - Quiz terminé" : "Dommage...")}
+              ? (passedEarly ? t.assessment.congrats : t.assessment.felicitations) 
+              : (failedEarly ? t.assessment.fail : t.assessment.dommage)}
           </h3>
           <p className="text-4xl font-bold mb-4">
             {score} / {questionsAnswered}
             {passedEarly && <span className="text-lg text-green-500 ml-2">({PASSING_SCORE} atteint !)</span>}
-            {failedEarly && <span className="text-lg text-red-500 ml-2">({errors} erreurs)</span>}
+            {failedEarly && <span className="text-lg text-red-500 ml-2">({errors})</span>}
           </p>
           {passedEarly && (
             <p className="text-lg mb-2 text-purple-600">
-              Vous avez atteint {PASSING_SCORE} bonnes réponses en seulement {questionsAnswered} questions !
+              {t.assessment.earlyReached.replace("{n}", String(PASSING_SCORE)).replace("{q}", String(questionsAnswered))}
             </p>
           )}
           {failedEarly && (
             <p className="text-lg mb-2 text-red-600">
-              Avec {errors} erreurs, il n&apos;est plus possible d&apos;atteindre {PASSING_SCORE}/{TOTAL_QUESTIONS}.
+              {t.assessment.earlyFail.replace("{n}", String(errors)).replace("{min}", String(PASSING_SCORE)).replace("{total}", String(TOTAL_QUESTIONS))}
             </p>
           )}
           <p className={`text-lg mb-6 ${passed ? "text-green-600" : "text-red-600"}`}>
             {passed 
-              ? `Niveau ${currentLevel + 1} validé !` 
-              : `Il faut ${PASSING_SCORE}/${TOTAL_QUESTIONS} minimum pour valider`
+              ? t.assessment.levelValidated.replace("{level}", String(currentLevel + 1)) 
+              : t.assessment.needToValidate.replace("{min}", String(PASSING_SCORE)).replace("{total}", String(TOTAL_QUESTIONS)).replace("{level}", String(currentLevel + 1))
             }
           </p>
           <div className="flex gap-4 justify-center">
             <Button variant="outline" onClick={resetQuiz}>
-              Retour
+              {t.assessment.back}
             </Button>
             {!passed && (
-              <Button onClick={() => startQuiz()}>
-                Réessayer
+              <Button onClick={() => startQuiz(targetLevel!)}>
+                {t.assessment.retry}
               </Button>
             )}
           </div>
@@ -623,8 +642,8 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Progress */}
       <div className="flex items-center justify-between text-sm text-gray-500">
-        <span>Question {currentQuestionIndex + 1} / {currentQuiz.length}</span>
-        <span>Score : {score} / {currentQuestionIndex + (showResult ? 1 : 0)} | Erreurs : {errors}/{MAX_ERRORS + 1}</span>
+        <span>{t.assessment.questionProgress} {currentQuestionIndex + 1} / {currentQuiz.length}</span>
+        <span>{t.assessment.scoreLabel} {score} / {currentQuestionIndex + (showResult ? 1 : 0)} | {t.assessment.errorsLabel} {errors}/{MAX_ERRORS + 1}</span>
       </div>
       <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
         <div

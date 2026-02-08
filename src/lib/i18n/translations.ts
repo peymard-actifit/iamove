@@ -275,6 +275,50 @@ export function buildTranslationsObject(flatTranslations: Record<string, string>
       languagePreference: getValue("published.languagePreference", "Préférence de langue"),
       contentLanguage: getValue("published.contentLanguage", "Langue du contenu"),
     },
+    assessment: {
+      title: getValue("assessment.title", "Évaluation des compétences IA"),
+      subtitleValidate: getValue("assessment.subtitleValidate", "Testez vos connaissances et validez le niveau {level}"),
+      yourCurrentLevel: getValue("assessment.yourCurrentLevel", "Votre niveau actuel :"),
+      level: getValue("assessment.level", "Niveau"),
+      startQuiz: getValue("assessment.startQuiz", "Commencer le quiz"),
+      quizParams: getValue("assessment.quizParams", "20 questions • {n} bonnes réponses requises pour valider"),
+      chooseQuizLevel: getValue("assessment.chooseQuizLevel", "Quiz pour le niveau :"),
+      clickToChooseLevel: getValue("assessment.clickToChooseLevel", "Cliquez pour choisir le niveau du quiz (1 à {max})"),
+      loading: getValue("assessment.loading", "Chargement du quizz niveau {level}..."),
+      noQuestions: getValue("assessment.noQuestions", "Aucune question disponible"),
+      noQuestionsForLevel: getValue("assessment.noQuestionsForLevel", "Il n'y a pas encore de questions pour le niveau {level}"),
+      chooseOtherLevel: getValue("assessment.chooseOtherLevel", "Choisir un autre niveau"),
+      congrats: getValue("assessment.congrats", "Bravo ! Niveau validé !"),
+      felicitations: getValue("assessment.felicitations", "Félicitations !"),
+      fail: getValue("assessment.fail", "Échec - Quiz terminé"),
+      dommage: getValue("assessment.dommage", "Dommage..."),
+      levelValidated: getValue("assessment.levelValidated", "Niveau {level} validé !"),
+      needToValidate: getValue("assessment.needToValidate", "Il faut {min}/{total} minimum pour valider le niveau {level}"),
+      retry: getValue("assessment.retry", "Réessayer"),
+      back: getValue("assessment.back", "Retour"),
+      lastScore: getValue("assessment.lastScore", "Dernier score :"),
+      levelValidatedShort: getValue("assessment.levelValidatedShort", "✓ Niveau validé !"),
+      pointsNeeded: getValue("assessment.pointsNeeded", "Encore {n} points nécessaires"),
+      quit: getValue("assessment.quit", "Abandonner"),
+      validateAnswer: getValue("assessment.validateAnswer", "Valider ma réponse"),
+      nextQuestion: getValue("assessment.nextQuestion", "Question suivante"),
+      seeResults: getValue("assessment.seeResults", "Voir les résultats"),
+      correctAnswer: getValue("assessment.correctAnswer", "Bonne réponse !"),
+      wrongAnswer: getValue("assessment.wrongAnswer", "Mauvaise réponse"),
+      selectLevelTitle: getValue("assessment.selectLevelTitle", "Sélectionnez un niveau"),
+      doubleClickHint: getValue("assessment.doubleClickHint", "Double-cliquez sur un niveau à gauche pour lancer le quizz correspondant"),
+      rules: getValue("assessment.rules", "Règles :"),
+      rulesQuestions: getValue("assessment.rulesQuestions", "20 questions par niveau"),
+      rulesMinScore: getValue("assessment.rulesMinScore", "{n} bonnes réponses minimum pour valider"),
+      rulesStopAt: getValue("assessment.rulesStopAt", "Le quiz s'arrête dès que vous atteignez {n}/20"),
+      rulesAnswers: getValue("assessment.rulesAnswers", "1 à 4 réponses possibles par question"),
+      quizLevel: getValue("assessment.quizLevel", "Quizz Niveau"),
+      questionProgress: getValue("assessment.questionProgress", "Question"),
+      scoreLabel: getValue("assessment.scoreLabel", "Score :"),
+      errorsLabel: getValue("assessment.errorsLabel", "Erreurs :"),
+      earlyReached: getValue("assessment.earlyReached", "Vous avez atteint le score de {n} bonnes réponses en seulement {q} questions !"),
+      earlyFail: getValue("assessment.earlyFail", "Avec {n} erreurs, il n'est plus possible d'atteindre {min}/{total}."),
+    },
   };
 }
 
@@ -496,6 +540,50 @@ export interface Translations {
     languagePreference: string;
     contentLanguage: string;
   };
+  assessment: {
+    title: string;
+    subtitleValidate: string;
+    yourCurrentLevel: string;
+    level: string;
+    startQuiz: string;
+    quizParams: string;
+    chooseQuizLevel: string;
+    clickToChooseLevel: string;
+    loading: string;
+    noQuestions: string;
+    noQuestionsForLevel: string;
+    chooseOtherLevel: string;
+    congrats: string;
+    felicitations: string;
+    fail: string;
+    dommage: string;
+    levelValidated: string;
+    needToValidate: string;
+    retry: string;
+    back: string;
+    lastScore: string;
+    levelValidatedShort: string;
+    pointsNeeded: string;
+    quit: string;
+    validateAnswer: string;
+    nextQuestion: string;
+    seeResults: string;
+    correctAnswer: string;
+    wrongAnswer: string;
+    selectLevelTitle: string;
+    doubleClickHint: string;
+    rules: string;
+    rulesQuestions: string;
+    rulesMinScore: string;
+    rulesStopAt: string;
+    rulesAnswers: string;
+    quizLevel: string;
+    questionProgress: string;
+    scoreLabel: string;
+    errorsLabel: string;
+    earlyReached: string;
+    earlyFail: string;
+  };
 }
 
 // Traductions françaises (par défaut)
@@ -700,6 +788,50 @@ export const FR: Translations = {
     languagePreference: "Préférence de langue",
     contentLanguage: "Langue du contenu",
   },
+  assessment: {
+    title: "Évaluation des compétences IA",
+    subtitleValidate: "Testez vos connaissances et validez le niveau {level}",
+    yourCurrentLevel: "Votre niveau actuel :",
+    level: "Niveau",
+    startQuiz: "Commencer le quiz",
+    quizParams: "20 questions • {n} bonnes réponses requises pour valider",
+    chooseQuizLevel: "Quiz pour le niveau :",
+    clickToChooseLevel: "Cliquez pour choisir le niveau du quiz (1 à {max})",
+    loading: "Chargement du quizz niveau {level}...",
+    noQuestions: "Aucune question disponible",
+    noQuestionsForLevel: "Il n'y a pas encore de questions pour le niveau {level}",
+    chooseOtherLevel: "Choisir un autre niveau",
+    congrats: "Bravo ! Niveau validé !",
+    felicitations: "Félicitations !",
+    fail: "Échec - Quiz terminé",
+    dommage: "Dommage...",
+    levelValidated: "Niveau {level} validé !",
+    needToValidate: "Il faut {min}/{total} minimum pour valider le niveau {level}",
+    retry: "Réessayer",
+    back: "Retour",
+    lastScore: "Dernier score :",
+    levelValidatedShort: "✓ Niveau validé !",
+    pointsNeeded: "Encore {n} points nécessaires",
+    quit: "Abandonner",
+    validateAnswer: "Valider ma réponse",
+    nextQuestion: "Question suivante",
+    seeResults: "Voir les résultats",
+    correctAnswer: "Bonne réponse !",
+    wrongAnswer: "Mauvaise réponse",
+    selectLevelTitle: "Sélectionnez un niveau",
+    doubleClickHint: "Double-cliquez sur un niveau à gauche pour lancer le quizz correspondant",
+    rules: "Règles :",
+    rulesQuestions: "20 questions par niveau",
+    rulesMinScore: "{n} bonnes réponses minimum pour valider",
+    rulesStopAt: "Le quiz s'arrête dès que vous atteignez {n}/20",
+    rulesAnswers: "1 à 4 réponses possibles par question",
+    quizLevel: "Quizz Niveau",
+    questionProgress: "Question",
+    scoreLabel: "Score :",
+    errorsLabel: "Erreurs :",
+    earlyReached: "Vous avez atteint le score de {n} bonnes réponses en seulement {q} questions !",
+    earlyFail: "Avec {n} erreurs, il n'est plus possible d'atteindre {min}/{total}.",
+  },
 };
 
 // Traductions anglaises
@@ -903,6 +1035,50 @@ export const EN: Translations = {
     selectLanguage: "Select language",
     languagePreference: "Language preference",
     contentLanguage: "Content language",
+  },
+  assessment: {
+    title: "AI Skills Assessment",
+    subtitleValidate: "Test your knowledge and validate level {level}",
+    yourCurrentLevel: "Your current level:",
+    level: "Level",
+    startQuiz: "Start the quiz",
+    quizParams: "20 questions • {n} correct answers required to pass",
+    chooseQuizLevel: "Quiz for level:",
+    clickToChooseLevel: "Click to choose quiz level (1 to {max})",
+    loading: "Loading quiz for level {level}...",
+    noQuestions: "No questions available",
+    noQuestionsForLevel: "There are no questions yet for level {level}",
+    chooseOtherLevel: "Choose another level",
+    congrats: "Congratulations! Level validated!",
+    felicitations: "Congratulations!",
+    fail: "Failed - Quiz over",
+    dommage: "Too bad...",
+    levelValidated: "Level {level} validated!",
+    needToValidate: "You need {min}/{total} minimum to validate level {level}",
+    retry: "Retry",
+    back: "Back",
+    lastScore: "Last score:",
+    levelValidatedShort: "✓ Level validated!",
+    pointsNeeded: "{n} more points needed",
+    quit: "Quit",
+    validateAnswer: "Submit my answer",
+    nextQuestion: "Next question",
+    seeResults: "See results",
+    correctAnswer: "Correct answer!",
+    wrongAnswer: "Wrong answer",
+    selectLevelTitle: "Select a level",
+    doubleClickHint: "Double-click on a level on the left to start the corresponding quiz",
+    rules: "Rules:",
+    rulesQuestions: "20 questions per level",
+    rulesMinScore: "{n} correct answers minimum to pass",
+    rulesStopAt: "The quiz stops as soon as you reach {n}/20",
+    rulesAnswers: "1 to 4 possible answers per question",
+    quizLevel: "Quiz Level",
+    questionProgress: "Question",
+    scoreLabel: "Score:",
+    errorsLabel: "Errors:",
+    earlyReached: "You reached {n} correct answers in just {q} questions!",
+    earlyFail: "With {n} errors, it is no longer possible to reach {min}/{total}.",
   },
 };
 
