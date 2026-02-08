@@ -69,9 +69,22 @@ export async function loadTranslationsFromDB(lang: SupportedLanguage): Promise<R
   return {};
 }
 
-// Convertir les traductions plates en objet structuré
-export function buildTranslationsObject(flatTranslations: Record<string, string>): Translations {
-  const getValue = (key: string, fallback: string) => flatTranslations[key] || fallback;
+// Récupérer une valeur par clé plate (ex: "formation.title") depuis l'objet statique de la langue
+function getStaticValueByKey(lang: SupportedLanguage, dottedKey: string): string | undefined {
+  const obj = getTranslations(lang);
+  const parts = dottedKey.split(".");
+  let v: unknown = obj;
+  for (const p of parts) {
+    v = (v as Record<string, unknown>)?.[p];
+  }
+  return typeof v === "string" ? v : undefined;
+}
+
+// Convertir les traductions plates en objet structuré (DB + repli sur objets statiques FR/EN pour clés manquantes)
+export function buildTranslationsObject(flatTranslations: Record<string, string>, language?: SupportedLanguage): Translations {
+  const lang = language ?? "FR";
+  const getValue = (key: string, fallback: string) =>
+    flatTranslations[key] ?? getStaticValueByKey(lang, key) ?? fallback;
   
   return {
   nav: {

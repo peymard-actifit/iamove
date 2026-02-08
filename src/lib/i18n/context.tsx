@@ -79,10 +79,9 @@ export function I18nProvider({
     }
   };
 
-  // Construire l'objet de traductions
-  // Si on a des traductions de la DB, les utiliser, sinon fallback sur les constantes
+  // Construire l'objet de traductions : DB + repli sur objets statiques (FR/EN) pour clés manquantes (ex. formation.*)
   const t = Object.keys(dbTranslations).length > 0
-    ? buildTranslationsObject(dbTranslations)
+    ? buildTranslationsObject(dbTranslations, language)
     : getTranslations(language);
   
   const languageInfo = getLanguageInfo(language);
