@@ -353,8 +353,8 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
             </h3>
             <p className="text-4xl font-bold mb-4">
               {score} / {questionsAnswered}
-              {passedEarly && <span className="text-lg text-green-500 ml-2">({PASSING_SCORE} atteint !)</span>}
-              {failedEarly && <span className="text-lg text-red-500 ml-2">({errors} {t.assessment.errorsLabel.replace(" :", "")})</span>}
+            {passedEarly && <span className="text-lg text-green-500 ml-2">({t.assessment.passingReached.replace("{n}", String(PASSING_SCORE))})</span>}
+            {failedEarly && <span className="text-lg text-red-500 ml-2">({errors} {t.assessment.errorsLabel.replace(" :", "")})</span>}
             </p>
             {passedEarly && (
               <p className="text-lg mb-2 text-purple-600">
@@ -395,16 +395,16 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
           <div className="max-w-2xl mx-auto space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Quizz Niveau {targetLevel}</h3>
+              <h3 className="text-lg font-semibold">{t.assessment.quizLevel} {targetLevel}</h3>
               <Button variant="ghost" size="sm" onClick={resetQuiz}>
-                Abandonner
+                {t.assessment.quit}
               </Button>
             </div>
 
             {/* Progress */}
             <div className="flex items-center justify-between text-sm text-gray-500">
-              <span>Question {currentQuestionIndex + 1} / {currentQuiz.length}</span>
-              <span>Score : {score} / {currentQuestionIndex + (showResult ? 1 : 0)}</span>
+              <span>{t.assessment.questionProgress} {currentQuestionIndex + 1} / {currentQuiz.length}</span>
+              <span>{t.assessment.scoreLabel} {score} / {currentQuestionIndex + (showResult ? 1 : 0)}</span>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div
@@ -602,8 +602,8 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
           </h3>
           <p className="text-4xl font-bold mb-4">
             {score} / {questionsAnswered}
-            {passedEarly && <span className="text-lg text-green-500 ml-2">({PASSING_SCORE} atteint !)</span>}
-            {failedEarly && <span className="text-lg text-red-500 ml-2">({errors})</span>}
+          {passedEarly && <span className="text-lg text-green-500 ml-2">({t.assessment.passingReached.replace("{n}", String(PASSING_SCORE))})</span>}
+          {failedEarly && <span className="text-lg text-red-500 ml-2">({errors} {t.assessment.errorsLabel.replace(" :", "")})</span>}
           </p>
           {passedEarly && (
             <p className="text-lg mb-2 text-purple-600">
@@ -696,17 +696,17 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
             onClick={validateAnswer}
             disabled={selectedAnswers.length === 0}
           >
-            Valider ma réponse
+            {t.assessment.validateAnswer}
           </Button>
         ) : (
           <Button onClick={nextQuestion}>
             {currentQuestionIndex < currentQuiz.length - 1 && !quizFinished ? (
               <>
-                Question suivante
+                {t.assessment.nextQuestion}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </>
             ) : (
-              "Voir les résultats"
+              t.assessment.seeResults
             )}
           </Button>
         )}
@@ -720,14 +720,14 @@ export function Tab5Quiz({ siteId, isStudioMode, personId, currentLevel = 0 }: T
               <>
                 <CheckCircle className="h-6 w-6 text-green-500" />
                 <span className="font-medium text-green-700 dark:text-green-300">
-                  Bonne réponse !
+                  {t.assessment.correctAnswer}
                 </span>
               </>
             ) : (
               <>
                 <XCircle className="h-6 w-6 text-red-500" />
                 <span className="font-medium text-red-700 dark:text-red-300">
-                  Mauvaise réponse
+                  {t.assessment.wrongAnswer}
                 </span>
               </>
             )}

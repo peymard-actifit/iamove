@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, Button, Input, Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui";
 import { Send, Bot, User, Sparkles } from "lucide-react";
+import { LEVELS, getLevelIcon } from "@/lib/levels";
 
 interface Tab4FormationProps {
   siteId: string;
@@ -115,6 +116,8 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
   const startXRef = useRef(0);
   const startPercentRef = useRef(50);
   const containerRef = useRef<HTMLDivElement>(null);
+  // Niveau sélectionné dans l'onglet Connaissances (1-20), null = tous
+  const [selectedKnowledgeLevel, setSelectedKnowledgeLevel] = useState<number | null>(null);
 
   const handleDividerMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -160,7 +163,7 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
       >
         {leftPercent > 0 && (
           <>
-            <div className="border-b px-4 py-2 bg-gray-50 dark:bg-gray-800/50">
+            <div className="border-b px-4 py-1.5 bg-gray-50 dark:bg-gray-800/50 min-h-[2rem] flex items-center">
               <h3 className="text-sm font-semibold flex items-center gap-2">
                 <Bot className="h-4 w-4 text-blue-500" />
                 Assistant Formation IA
@@ -259,9 +262,9 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
         }}
       >
         <Tabs defaultValue="parcours" className="flex flex-col flex-1 min-h-0">
-          <div className="border-b px-4 py-2 bg-gray-50 dark:bg-gray-800/50 flex items-center gap-4 flex-shrink-0">
+          <div className="border-b px-4 py-1.5 bg-gray-50 dark:bg-gray-800/50 flex items-center gap-4 flex-shrink-0 min-h-[2rem]">
             <h3 className="text-sm font-semibold">Formation</h3>
-            <TabsList className="h-7 bg-transparent p-0 gap-0 border-0 [&>button]:rounded [&>button]:px-3 [&>button]:py-1 [&>button]:text-xs [&>button]:data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 [&>button]:data-[state=active]:shadow-sm">
+            <TabsList className="h-6 bg-transparent p-0 gap-0 border-0 [&>button]:rounded [&>button]:px-2.5 [&>button]:py-0.5 [&>button]:text-xs [&>button]:data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 [&>button]:data-[state=active]:shadow-sm">
               <TabsTrigger value="parcours">Parcours</TabsTrigger>
               <TabsTrigger value="applications">Applications</TabsTrigger>
               <TabsTrigger value="connaissances">Connaissances</TabsTrigger>
@@ -278,9 +281,62 @@ export function Tab4Formation({ siteId, isStudioMode, personId }: Tab4FormationP
                 <p className="text-sm">Applications et exercices seront affichés ici.</p>
               </div>
             </TabsContent>
-            <TabsContent value="connaissances" className="mt-0 p-4 h-full data-[state=inactive]:hidden">
-              <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                <p className="text-sm">Ressources et connaissances seront affichées ici.</p>
+            <TabsContent value="connaissances" className="mt-0 h-full data-[state=inactive]:hidden flex flex-col min-h-0">
+              <div className="flex flex-1 min-h-0 overflow-hidden">
+                {/* Barre verticale des 20 niveaux (1 à 20) pour filtrer le contenu */}
+                <div className="w-14 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col items-center py-2 gap-0.5 overflow-y-auto">
+                  {LEVELS.filter((l) => l.number >= 1 && l.number <= 20).map((level) => (
+                    <button
+                      key={level.number}
+                      type="button"
+                      onClick={() => setSelectedKnowledgeLevel(selectedKnowledgeLevel === level.number ? null : level.number)}
+                      className={`flex flex-col items-center justify-center w-10 h-10 rounded-lg transition-colors ${
+                        selectedKnowledgeLevel === level.number
+                          ? "bg-blue-100 dark:bg-blue-900/50 ring-1 ring-blue-500 dark:ring-blue-400"
+                          : "hover:bg-gray-200 dark:hover:bg-gray-700"
+                      }`}
+                      title={`Niveau ${level.number} - ${level.name} (${level.category})`}
+                    >
+                      {getLevelIcon(level.number, "h-5 w-5")}
+                      <span className="text-[10px] font-medium text-gray-600 dark:text-gray-400 mt-0.5">
+                        {level.number}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                {/* Zone contenu Connaissances (accessible à tous, triée par niveau si sélectionné) */}
+                <div className="flex-1 overflow-auto p-4 min-w-0">
+                  {selectedKnowledgeLevel === null ? (
+                    <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                      <p className="text-sm">Sélectionnez un niveau à gauche pour afficher le contenu adapté, ou parcourez toutes les ressources ci-dessous.</p>
+                      <p className="text-xs mt-4">Ressources et connaissances seront affichées ici (accessibles à tous les niveaux).</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 mb-4">
+                        {getLevelIcon(selectedKnowledgeLevel, "h-6 w-6")}
+                        <div>
+                          <p className="text-sm font-semibold">
+                            Niveau {selectedKnowledgeLevel} – {LEVELS[selectedKnowledgeLevel]?.name ?? ""}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {LEVELS[selectedKnowledgeLevel]?.category ?? ""}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedKnowledgeLevel(null)}
+                          className="text-xs text-blue-600 dark:text-blue-400 hover:underline ml-2"
+                        >
+                          Voir tout
+                        </button>
+                      </div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        Contenu adapté au niveau {selectedKnowledgeLevel} (à venir).
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </TabsContent>
           </div>

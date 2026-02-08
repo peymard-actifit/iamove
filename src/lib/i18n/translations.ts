@@ -318,6 +318,7 @@ export function buildTranslationsObject(flatTranslations: Record<string, string>
       errorsLabel: getValue("assessment.errorsLabel", "Erreurs :"),
       earlyReached: getValue("assessment.earlyReached", "Vous avez atteint le score de {n} bonnes réponses en seulement {q} questions !"),
       earlyFail: getValue("assessment.earlyFail", "Avec {n} erreurs, il n'est plus possible d'atteindre {min}/{total}."),
+      passingReached: getValue("assessment.passingReached", "{n} atteint !"),
     },
   };
 }
@@ -583,6 +584,7 @@ export interface Translations {
     errorsLabel: string;
     earlyReached: string;
     earlyFail: string;
+    passingReached: string;
   };
 }
 
@@ -831,6 +833,7 @@ export const FR: Translations = {
     errorsLabel: "Erreurs :",
     earlyReached: "Vous avez atteint le score de {n} bonnes réponses en seulement {q} questions !",
     earlyFail: "Avec {n} erreurs, il n'est plus possible d'atteindre {min}/{total}.",
+    passingReached: "{n} atteint !",
   },
 };
 
@@ -1079,6 +1082,7 @@ export const EN: Translations = {
     errorsLabel: "Errors:",
     earlyReached: "You reached {n} correct answers in just {q} questions!",
     earlyFail: "With {n} errors, it is no longer possible to reach {min}/{total}.",
+    passingReached: "{n} reached!",
   },
 };
 
