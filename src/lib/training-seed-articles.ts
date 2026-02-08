@@ -101,6 +101,29 @@ export async function ensureTrainingArticlesSeeded(prisma: PrismaClient): Promis
       },
     });
   }
+
+  // Lancer la génération des PDF manquants en arrière-plan (fire-and-forget)
+  triggerPdfGenerationInBackground(prisma);
+}
+
+/** Variable pour éviter de lancer plusieurs générations en parallèle */
+let pdfGenerationRunning = false;
+
+/**
+ * Lance la génération des PDF manquants en arrière-plan.
+ * Ne bloque pas l'appelant. S'exécute une seule fois à la fois.
+ */
+function triggerPdfGenerationInBackground(prisma: PrismaClient): void {
+  if (pdfGenerationRunning) return;
+  pdfGenerationRunning = true;
+  generateMissingArticlePdfs(prisma)
+    .then((result) => {
+      if (result.generated > 0 || result.errors > 0) {
+        console.log(`[PDF background] ${result.generated} PDF généré(s), ${result.errors} erreur(s).`);
+      }
+    })
+    .catch((err) => console.error("[PDF background] Erreur:", err))
+    .finally(() => { pdfGenerationRunning = false; });
 }
 
 /**
