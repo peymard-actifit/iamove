@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import pkg from "../../../package.json";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -92,7 +93,7 @@ export function StudioHeader({ session }: StudioHeaderProps) {
             iamove
           </span>
           <span className="text-xs text-gray-500">{t.nav.studio}</span>
-          <span className="text-[10px] text-gray-400 font-mono">v{process.env.NEXT_PUBLIC_APP_VERSION || "2.3.0"}</span>
+          <span className="text-[10px] text-gray-400 font-mono">v{pkg.version}</span>
         </Link>
 
         {/* Contenu central (flexible) */}
