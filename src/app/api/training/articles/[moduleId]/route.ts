@@ -72,7 +72,7 @@ export async function GET(
 
     const filename = `${mod.title.replace(/[^a-zA-Z0-9àâäéèêëïîôùûüÿçœæ ]/gi, "_").substring(0, 80)}.pdf`;
 
-    return new NextResponse(Buffer.from(pdfData), {
+    return new NextResponse(new Uint8Array(pdfData), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
