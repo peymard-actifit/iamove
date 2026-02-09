@@ -542,4 +542,15 @@ et augmente d'un le compteur des évolutions majeures après cette vérification
 → Déploiement version mineure (stabilisation)
 
 ---
+
+### Prompt #61 (2026-02-09) - Correction chat IA non fonctionnel
+```
+L'IA ne répond pas à mes questions ???
+```
+→ Problème identifié : modèle OpenAI `gpt-4-turbo-preview` obsolète
+→ **Correction** : Mise à jour vers `gpt-4o-mini` (modèle actuel recommandé)
+→ **Amélioration** : Messages d'erreur plus détaillés pour le debug
+→ Fichier corrigé : `src/app/api/sites/[siteId]/chat/route.ts`
+
+---
 *Dernière mise à jour: 2026-02-09*

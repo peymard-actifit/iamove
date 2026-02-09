@@ -93,9 +93,9 @@ export async function POST(
       { role: "user", content: message },
     ];
 
-    // Appeler OpenAI
+    // Appeler OpenAI - gpt-4o-mini est le modèle actuel recommandé
     const completion = await openai.chat.completions.create({
-      model: "gpt-4-turbo-preview",
+      model: "gpt-4o-mini",
       messages,
       max_tokens: OPENAI_CONFIG.maxTokens.default,
       temperature: 0.7,
@@ -112,14 +112,14 @@ export async function POST(
             role: "USER",
             content: message,
             tokens: completion.usage?.prompt_tokens ?? null,
-            model: "gpt-4-turbo-preview",
+            model: "gpt-4o-mini",
           },
           {
             personId,
             role: "ASSISTANT",
             content: response,
             tokens: completion.usage?.completion_tokens ?? null,
-            model: "gpt-4-turbo-preview",
+            model: "gpt-4o-mini",
           },
         ],
       });
@@ -132,8 +132,9 @@ export async function POST(
     return NextResponse.json({ response });
   } catch (error) {
     console.error("Chat error:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: "Erreur lors de la génération de la réponse" },
+      { error: `Erreur lors de la génération de la réponse: ${errorMessage}` },
       { status: 500 }
     );
   }
