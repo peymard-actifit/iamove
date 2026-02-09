@@ -8,6 +8,10 @@
 // =============================================================================
 
 interface EnvConfig {
+  // Sécurité
+  JWT_SECRET: string;
+  ADMIN_CODE: string;
+
   // API Keys
   OPENAI_API_KEY: string;
   DEEPL_API_KEY: string;
@@ -56,6 +60,10 @@ function getEnvVar(key: string, required: boolean = true): string {
  */
 export function getEnv(): EnvConfig {
   return {
+    // Sécurité
+    JWT_SECRET: getEnvVar("JWT_SECRET"),
+    ADMIN_CODE: getEnvVar("ADMIN_CODE", false) || "1241", // Valeur par défaut pour compatibilité
+
     // API Keys
     OPENAI_API_KEY: getEnvVar("OPENAI_API_KEY"),
     DEEPL_API_KEY: getEnvVar("DEEPL_API_KEY"),

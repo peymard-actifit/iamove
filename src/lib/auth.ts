@@ -3,8 +3,14 @@ import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 import prisma from "./prisma";
 
+// Vérifier que JWT_SECRET est défini en production
+const jwtSecretValue = process.env.JWT_SECRET;
+if (!jwtSecretValue && process.env.NODE_ENV === "production") {
+  throw new Error("JWT_SECRET doit être défini en production");
+}
+
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "iamove-secret-key-change-in-production"
+  jwtSecretValue || "iamove-dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
 );
 
 const COOKIE_NAME = "iamove-session";
@@ -242,7 +248,8 @@ export async function initializePersonPassword(token: string, password: string) 
 // ADMIN CODE CHECK
 // =============================================================================
 
-const ADMIN_CODE = "1241";
+// Code admin configurable via variable d'environnement
+const ADMIN_CODE = process.env.ADMIN_CODE || "1241";
 
 export async function upgradeToAdmin(userId: string, code: string) {
   if (code !== ADMIN_CODE) {
