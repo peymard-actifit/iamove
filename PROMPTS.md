@@ -496,4 +496,27 @@ Vérifie que le worktree local de Cursor est bien synchronisé avec le dépôt G
 → Rapport d’initialisation généré ; déploiement via script
 
 ---
-*Dernière mise à jour: 2026-02-08*
+### Prompt #59 (2026-02-09) - Initialisation session complète
+```
+Ceci est le prompt d'initialisation de la session de travail sur Cursor
+Les commandes suivantes doivent être faites à la suite puis un rapport doit être généré :
+- Repasse en revue le code pour bien le comprendre
+- Vérifie que tu as bien les tokens Git et Vercel nécessaires et qu'ils sont valides
+- Vérifie que le worktree local de Cursor est bien synchronisé avec le dépôt Git dans le cloud
+- S'il y a du retard entre le local et la source Git, il faut aligner le repository local immédiatement
+- Vérifie que les prompts successifs sont bien enregistrés dans un fichier spécifique dans le Git
+- Vérifie que le script de commit, build, déploiement est utilisable
+- Utilise le script systématiquement après chaque prompt
+- Rapport : LoC, Tokens, API_KEYs, DB, Sync, Script déploiement, Limites
+```
+→ Revue du code complet (33 549 lignes de code)
+→ Tokens vérifiés : GitHub et Vercel valides
+→ Worktree local synchronisé avec origin/main (aucun retard)
+→ PROMPTS.md confirmé avec 59 prompts documentés
+→ Script commit-and-deploy.ps1 opérationnel (version 2.8.11)
+→ Limites maximisées dans api-config.ts (OpenAI, DeepL, DB, Fetch)
+→ Base Neon PostgreSQL : 20 connexions max, 30s timeout
+→ Rapport d'initialisation généré
+
+---
+*Dernière mise à jour: 2026-02-09*
