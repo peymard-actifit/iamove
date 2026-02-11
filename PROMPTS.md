@@ -588,4 +588,63 @@ son niveau via auto-évaluation avec vue de tous les niveaux et descriptions san
   - `src/lib/i18n/translations.ts` (traductions)
 
 ---
+
+### Prompt #64 (2026-02-09) - Liens d'invitation et réinitialisation mot de passe
+```
+Copie du lien d'invitation : emmène vers connexion (si mot de passe existant) ou 
+création mot de passe. Icône pour réinitialiser mot de passe d'une personne.
+```
+→ Logique de lien d'invitation améliorée dans `tab1-persons.tsx`
+→ Bouton réinitialisation mot de passe (KeyRound) toujours visible
+→ Nouvelle API : `/api/sites/[siteId]/persons/[personId]/reset-password`
+→ Sécurité : password hash remplacé par `"[SET]"` côté client
+
+---
+
+### Prompt #65 (2026-02-09) - Inscription publique avec lien permanent
+```
+Bouton pour générer une URL fixe unique pour l'auto-inscription sur un site.
+Le nouvel utilisateur peut s'inscrire avec email, mot de passe et infos personnelles.
+```
+→ Nouvelle page : `/s/[slug]/register` - Formulaire d'inscription publique
+→ Nouveau paramètre site : `allowPublicRegistration` dans SiteSettings
+→ Nouvelle API : `/api/sites/[siteId]/register` - Création de compte
+→ UI dans SiteSettingsPanel pour activer/copier le lien d'inscription
+
+---
+
+### Prompt #66 (2026-02-09) - Choix du responsable à l'inscription publique
+```
+Par défaut, la personne qui s'auto-enregistre n'est rattachée à personne, 
+mais peut choisir un responsable parmi les personnes existantes.
+```
+→ Dropdown de sélection du responsable dans le formulaire d'inscription
+→ Validation du managerId côté API
+→ Option "Aucun (pas de responsable)" par défaut
+
+---
+
+### Prompt #67 (2026-02-09) - Liens d'inscription à usage unique
+```
+Générer un lien unique qui ne peut servir qu'à une seule inscription.
+Nouveau lien régénéré automatiquement à chaque copie.
+Le lien permanent reste disponible en parallèle.
+```
+→ **Nouveau modèle Prisma** : `RegistrationToken` - Tokens à usage unique
+→ **Nouvelle API** : `/api/sites/[siteId]/registration-token` - Génération de tokens
+→ **Nouvelle page** : `/s/[slug]/register/[token]` - Inscription avec token
+→ **Fonctionnalités** :
+  - Chaque token expire après 7 jours
+  - Token marqué comme utilisé après inscription
+  - Nouveau token généré automatiquement à chaque clic sur copier
+  - Deux types de liens : permanent (vert) et usage unique (ambre)
+→ **Fichiers créés/modifiés** :
+  - `prisma/schema.prisma` (modèle RegistrationToken)
+  - `src/app/api/sites/[siteId]/registration-token/route.ts` (nouveau)
+  - `src/app/s/[slug]/register/[token]/page.tsx` (nouveau)
+  - `src/app/api/sites/[siteId]/register/route.ts` (support token)
+  - `src/components/published/site-register.tsx` (prop registrationToken)
+  - `src/components/studio/site-settings-panel.tsx` (UI liens)
+
+---
 *Dernière mise à jour: 2026-02-09*
