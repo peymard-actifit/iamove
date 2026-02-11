@@ -567,4 +567,25 @@ Rapport : LoC, Tokens, API_KEYs, DB, Sync, Script déploiement, Limites
 → 61 prompts documentés dans PROMPTS.md
 
 ---
+
+### Prompt #63 (2026-02-09) - Auto-évaluation niveau 0
+```
+Quand un utilisateur arrive sur un site avec un niveau de 0, lui proposer de choisir 
+son niveau via auto-évaluation avec vue de tous les niveaux et descriptions sans scroll.
+```
+→ **Nouveau composant** : `LevelSelfAssessment` - Modal d'auto-évaluation
+→ **Nouvelle API** : `/api/sites/[siteId]/self-assessment` - Endpoint sécurisé
+→ **Fonctionnalités** :
+  - Grille 7x3 avec tous les niveaux (0-20)
+  - Affichage icône, nom, catégorie pour chaque niveau
+  - Zone de détails au survol avec description complète
+  - Support multilingue (traductions i18n)
+  - Sécurité : uniquement pour les utilisateurs niveau 0
+→ **Fichiers créés/modifiés** :
+  - `src/components/published/level-self-assessment.tsx` (nouveau)
+  - `src/app/api/sites/[siteId]/self-assessment/route.ts` (nouveau)
+  - `src/components/published/site-app.tsx` (intégration)
+  - `src/lib/i18n/translations.ts` (traductions)
+
+---
 *Dernière mise à jour: 2026-02-09*

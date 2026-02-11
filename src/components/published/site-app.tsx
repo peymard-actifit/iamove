@@ -9,6 +9,7 @@ import { Tab4Formation } from "@/components/studio/tabs/tab4-formation";
 import { Tab5Quiz } from "@/components/studio/tabs/tab5-quiz";
 import { PersonalProfileEditor } from "./personal-profile-editor";
 import { DynamicFavicon } from "./dynamic-favicon";
+import { LevelSelfAssessment } from "./level-self-assessment";
 import { LanguageSelector } from "@/components/studio/language-selector";
 import { useI18n } from "@/lib/i18n";
 import type { PPAction } from "@/lib/pp-rules";
@@ -76,6 +77,7 @@ interface Level {
   name: string;
   category?: string;
   seriousGaming?: string;
+  description?: string;
   translations?: LevelTranslation[];
 }
 
@@ -102,6 +104,9 @@ export function PublishedSiteApp({
   const { t } = useI18n();
   const [pp, setPp] = useState(initialPP);
   const [rank, setRank] = useState(initialRank);
+  const [showSelfAssessment, setShowSelfAssessment] = useState(
+    currentPerson?.currentLevel === 0
+  );
 
   const addPP = useCallback(
     async (action: PPAction) => {
@@ -145,6 +150,18 @@ export function PublishedSiteApp({
   return (
     <PPContext.Provider value={ppValue}>
       {currentPerson && <PPClickTracker />}
+      
+      {/* Modal d'auto-évaluation pour les utilisateurs de niveau 0 */}
+      {showSelfAssessment && currentPerson && (
+        <LevelSelfAssessment
+          siteId={site.id}
+          personId={currentPerson.id}
+          personName={currentPerson.firstName || currentPerson.name}
+          levels={levels}
+          onLevelSelected={() => setShowSelfAssessment(false)}
+        />
+      )}
+      
       <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
         {/* Favicon dynamique basé sur le niveau de la personne connectée */}
         {currentPerson && <DynamicFavicon level={currentPerson.currentLevel} />}

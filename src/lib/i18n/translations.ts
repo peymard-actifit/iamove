@@ -874,6 +874,13 @@ export function buildTranslationsObject(flatTranslations: Record<string, string>
       parcoursPlaceholder: getValue("formation.parcoursPlaceholder", "Parcours de formation seront affichés ici."),
       resizeTitle: getValue("formation.resizeTitle", "Glisser pour modifier la largeur"),
     },
+    selfAssessment: {
+      welcome: getValue("selfAssessment.welcome", "Bienvenue"),
+      chooseLevel: getValue("selfAssessment.chooseLevel", "Sélectionnez le niveau qui correspond le mieux à vos compétences en IA"),
+      hoverHint: getValue("selfAssessment.hoverHint", "Survolez un niveau pour voir sa description"),
+      confirmLevel: getValue("selfAssessment.confirmLevel", "Confirmer le niveau"),
+      selectLevel: getValue("selfAssessment.selectLevel", "Sélectionnez un niveau"),
+    },
   };
 }
 
@@ -1163,6 +1170,14 @@ export interface Translations {
     parcoursPlaceholder: string;
     resizeTitle: string;
   };
+  // Auto-évaluation (pour les utilisateurs niveau 0)
+  selfAssessment: {
+    welcome: string;
+    chooseLevel: string;
+    hoverHint: string;
+    confirmLevel: string;
+    selectLevel: string;
+  };
 }
 
 // Traductions françaises (par défaut)
@@ -1435,6 +1450,13 @@ export const FR: Translations = {
     parcoursPlaceholder: "Parcours de formation seront affichés ici.",
     resizeTitle: "Glisser pour modifier la largeur",
   },
+  selfAssessment: {
+    welcome: "Bienvenue",
+    chooseLevel: "Sélectionnez le niveau qui correspond le mieux à vos compétences en IA",
+    hoverHint: "Survolez un niveau pour voir sa description",
+    confirmLevel: "Confirmer le niveau",
+    selectLevel: "Sélectionnez un niveau",
+  },
 };
 
 // Traductions anglaises
@@ -1706,6 +1728,13 @@ export const EN: Translations = {
     applicationsPlaceholder: "Applications and exercises will be displayed here.",
     parcoursPlaceholder: "Training paths will be displayed here.",
     resizeTitle: "Drag to resize",
+  },
+  selfAssessment: {
+    welcome: "Welcome",
+    chooseLevel: "Select the level that best matches your AI skills",
+    hoverHint: "Hover over a level to see its description",
+    confirmLevel: "Confirm level",
+    selectLevel: "Select a level",
   },
 };
 
