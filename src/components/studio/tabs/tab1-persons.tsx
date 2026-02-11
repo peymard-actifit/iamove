@@ -236,9 +236,9 @@ function ManagerSelector({
         e.stopPropagation();
         setIsEditing(true);
       }}
-      className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 px-1 py-0 rounded text-xs"
+      className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 px-1 py-0 rounded text-xs italic"
     >
-      {manager?.name || <span className="text-gray-400">-</span>}
+      {manager?.name || <span className="text-gray-400 not-italic">-</span>}
     </span>
   );
 }

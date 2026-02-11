@@ -119,20 +119,20 @@ export function LevelSelfAssessment({
   return (
     <div className="fixed inset-0 z-50 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-6xl bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 text-white">
-          <h1 className="text-xl font-bold text-center">
+        {/* Header - plus compact */}
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2 text-white">
+          <h1 className="text-lg font-bold text-center">
             {t.selfAssessment?.welcome || "Bienvenue"} {personName} !
           </h1>
-          <p className="text-center text-white/80 text-sm mt-1">
+          <p className="text-center text-white/80 text-xs mt-0.5">
             {t.selfAssessment?.chooseLevel || "Sélectionnez le niveau qui correspond le mieux à vos compétences en IA"}
           </p>
         </div>
 
-        {/* Contenu principal */}
-        <div className="p-4 flex flex-col gap-4" style={{ maxHeight: "calc(100vh - 200px)" }}>
+        {/* Contenu principal - hauteur réduite pour écrans 16/9 */}
+        <div className="p-3 flex flex-col gap-2" style={{ maxHeight: "calc(100vh - 140px)" }}>
           {/* Grille des niveaux - 7 colonnes x 3 lignes */}
-          <div className="grid grid-cols-7 gap-2">
+          <div className="grid grid-cols-7 gap-1.5">
             {levels.map((level) => {
               const translated = getTranslatedLevel(level);
               const colors = categoryColors[translated.category] || categoryColors["Néophyte"];
@@ -146,17 +146,17 @@ export function LevelSelfAssessment({
                   onMouseEnter={() => setHoveredLevel(level.number)}
                   onMouseLeave={() => setHoveredLevel(null)}
                   className={`
-                    relative flex flex-col items-center p-2 rounded-lg border-2 transition-all cursor-pointer
+                    relative flex flex-col items-center p-1.5 rounded-lg border-2 transition-all cursor-pointer
                     ${colors.bg} ${isSelected ? "border-green-500 ring-2 ring-green-500/50" : isHovered ? "border-blue-400 scale-105" : colors.border}
                     hover:shadow-md
                   `}
                 >
                   {isSelected && (
-                    <CheckCircle2 className="absolute -top-1 -right-1 h-5 w-5 text-green-500 bg-white rounded-full" />
+                    <CheckCircle2 className="absolute -top-1 -right-1 h-4 w-4 text-green-500 bg-white rounded-full" />
                   )}
                   
                   {/* Icône du niveau */}
-                  <div className="w-10 h-10 relative mb-1">
+                  <div className="w-8 h-8 relative mb-0.5">
                     <Image
                       src={`/images/levels/level-${level.number}.png`}
                       alt={translated.name}
@@ -166,12 +166,12 @@ export function LevelSelfAssessment({
                   </div>
                   
                   {/* Numéro */}
-                  <span className={`text-xs font-bold ${colors.text}`}>
+                  <span className={`text-[10px] font-bold ${colors.text}`}>
                     {level.number}
                   </span>
                   
                   {/* Nom court */}
-                  <span className={`text-[9px] text-center leading-tight line-clamp-2 ${colors.text}`}>
+                  <span className={`text-[8px] text-center leading-tight line-clamp-2 ${colors.text}`}>
                     {translated.name}
                   </span>
                 </button>
@@ -179,12 +179,12 @@ export function LevelSelfAssessment({
             })}
           </div>
 
-          {/* Zone de détails du niveau sélectionné/survolé */}
-          <div className="flex-1 min-h-[120px] bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+          {/* Zone de détails du niveau sélectionné/survolé - plus compacte */}
+          <div className="flex-1 min-h-[100px] bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
             {displayLevelData && translatedDisplay ? (
-              <div className="flex gap-4 items-start h-full">
+              <div className="flex gap-3 items-start h-full">
                 {/* Grande icône */}
-                <div className="w-20 h-20 relative flex-shrink-0">
+                <div className="w-16 h-16 relative flex-shrink-0">
                   <Image
                     src={`/images/levels/level-${displayLevelData.number}.png`}
                     alt={translatedDisplay.name}
@@ -195,8 +195,8 @@ export function LevelSelfAssessment({
                 
                 {/* Infos */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-xl font-bold text-gray-900 dark:text-white">
                       {t.levels?.level || "Niveau"} {displayLevelData.number}
                     </span>
                     <span className={`px-2 py-0.5 rounded text-xs font-medium ${
@@ -206,22 +206,22 @@ export function LevelSelfAssessment({
                     </span>
                   </div>
                   
-                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-0.5">
+                  <h3 className="text-base font-semibold text-gray-800 dark:text-gray-200">
                     {translatedDisplay.name}
                   </h3>
                   
-                  <p className="text-xs text-purple-600 dark:text-purple-400 italic mb-2">
+                  <p className="text-[10px] text-purple-600 dark:text-purple-400 italic mb-1">
                     🎮 {translatedDisplay.seriousGaming}
                   </p>
                   
-                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 leading-snug line-clamp-3">
                     {translatedDisplay.description}
                   </p>
                 </div>
               </div>
             ) : (
               <div className="h-full flex items-center justify-center text-gray-400">
-                <p className="text-center">
+                <p className="text-center text-sm">
                   {t.selfAssessment?.hoverHint || "Survolez un niveau pour voir sa description"}
                 </p>
               </div>
@@ -230,16 +230,16 @@ export function LevelSelfAssessment({
 
           {/* Message d'erreur */}
           {error && (
-            <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg text-red-700 dark:text-red-300 text-sm">
-              <AlertTriangle className="h-5 w-5 flex-shrink-0" />
+            <div className="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg text-red-700 dark:text-red-300 text-xs">
+              <AlertTriangle className="h-4 w-4 flex-shrink-0" />
               <p>{error}</p>
             </div>
           )}
 
           {/* Avertissement si niveau 0 sélectionné */}
           {selectedLevel === 0 && !error && (
-            <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg text-amber-700 dark:text-amber-300 text-sm">
-              <AlertTriangle className="h-5 w-5 flex-shrink-0" />
+            <div className="flex items-center gap-2 p-2 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg text-amber-700 dark:text-amber-300 text-xs">
+              <AlertTriangle className="h-4 w-4 flex-shrink-0" />
               <p>
                 {t.selfAssessment?.level0Warning || 
                   "En choisissant le niveau 0, cette auto-évaluation vous sera proposée à chaque connexion jusqu'à ce que vous sélectionniez un autre niveau."}
@@ -248,12 +248,11 @@ export function LevelSelfAssessment({
           )}
 
           {/* Bouton de validation */}
-          <div className="flex justify-center">
+          <div className="flex justify-center pt-1">
             <Button
               onClick={handleSubmit}
               disabled={selectedLevel === null || isSubmitting}
-              className="px-8 py-2 text-base"
-              size="lg"
+              className="px-6 py-1.5 text-sm"
             >
               {isSubmitting ? (
                 <>
