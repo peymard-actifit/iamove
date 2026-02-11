@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { Button, Card, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Input } from "@/components/ui";
 import { 
   Gamepad2, BookOpen, Wrench, Video, FileText, Layers, 
-  Plus, Edit, Trash2, ChevronRight, Sparkles, Route, ArrowUp, ArrowDown
+  Plus, Edit, Trash2, ChevronRight, Sparkles, Route, ArrowUp, ArrowDown,
+  RefreshCw, Loader2, Check, AlertCircle
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useHeaderContent } from "./header-context";
@@ -124,6 +125,10 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
   const [showAddPathItemDialog, setShowAddPathItemDialog] = useState<TrainingPath | null>(null);
   // Viewer PDF pour un module ARTICLE
   const [viewingPdfModuleId, setViewingPdfModuleId] = useState<string | null>(null);
+  // Génération automatique des parcours
+  const [isGeneratingPaths, setIsGeneratingPaths] = useState(false);
+  const [generationResults, setGenerationResults] = useState<{ level: number; pathId: string; created: boolean; itemsCount: number }[] | null>(null);
+  const [generationError, setGenerationError] = useState<string | null>(null);
 
   const knowledgeMethods = methods.filter((m) => TYPOLOGY_KNOWLEDGE.includes(m.type));
   const applicationMethods = methods.filter((m) => TYPOLOGY_APPLICATIONS.includes(m.type));
@@ -141,6 +146,32 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
     }
     setIsLoading(false);
   }, []);
+
+  // Générer automatiquement les parcours avec l'IA
+  const handleGeneratePaths = useCallback(async (regenerate = false) => {
+    setIsGeneratingPaths(true);
+    setGenerationResults(null);
+    setGenerationError(null);
+    try {
+      const res = await fetch("/api/training/paths/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ regenerate }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Erreur lors de la génération");
+      }
+      const data = await res.json();
+      setGenerationResults(data.results || []);
+      router.refresh();
+    } catch (e) {
+      setGenerationError(String(e));
+    } finally {
+      setIsGeneratingPaths(false);
+    }
+  }, [router]);
 
   // Titre et sous-titre au centre du header, bouton "Initialiser" à droite si besoin
   useEffect(() => {
@@ -453,11 +484,57 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
               Enchaînements de formations pour guider vers des objectifs précis.
             </p>
           </div>
-          <Button size="sm" onClick={() => { setPathForm({ name: "", description: "" }); setEditingPath(null); setShowPathDialog(true); }}>
-            <Plus className="h-4 w-4 mr-1" />
-            Nouveau parcours
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={() => handleGeneratePaths(false)} disabled={isGeneratingPaths}>
+              {isGeneratingPaths ? (
+                <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Génération...</>
+              ) : (
+                <><Sparkles className="h-4 w-4 mr-1" /> Générer avec l&apos;IA</>
+              )}
+            </Button>
+            <Button size="sm" onClick={() => { setPathForm({ name: "", description: "" }); setEditingPath(null); setShowPathDialog(true); }}>
+              <Plus className="h-4 w-4 mr-1" />
+              Nouveau parcours
+            </Button>
+          </div>
         </div>
+
+        {/* Résultats de génération */}
+        {generationResults && (
+          <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+            <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
+              <Check className="h-4 w-4" />
+              <span className="text-sm font-medium">
+                {generationResults.filter(r => r.created).length} parcours créés, 
+                {" "}{generationResults.filter(r => !r.created).length} existants
+              </span>
+              <button
+                type="button"
+                onClick={() => setGenerationResults(null)}
+                className="ml-auto text-xs hover:underline"
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Erreur de génération */}
+        {generationError && (
+          <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
+            <div className="flex items-center gap-2 text-red-700 dark:text-red-300">
+              <AlertCircle className="h-4 w-4" />
+              <span className="text-sm">{generationError}</span>
+              <button
+                type="button"
+                onClick={() => setGenerationError(null)}
+                className="ml-auto text-xs hover:underline"
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        )}
         {paths.length === 0 ? (
           <Card className="p-6 text-center text-gray-500">
             <Route className="h-12 w-12 mx-auto mb-2 opacity-50" />

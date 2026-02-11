@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Button, Input, Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui";
-import { Send, Bot, User, Sparkles, FileText, Clock, ExternalLink, Loader2, Eye, EyeOff, GraduationCap } from "lucide-react";
+import { Send, Bot, User, Sparkles, FileText, Clock, ExternalLink, Loader2, Eye, EyeOff, GraduationCap, Route, ChevronRight, Target, BookOpen, CheckCircle2 } from "lucide-react";
 import { LEVELS, getLevelIcon } from "@/lib/levels";
 import { useI18n, getLanguageInfo } from "@/lib/i18n";
 import { usePP } from "@/components/published/site-app";
@@ -71,6 +71,29 @@ interface KnowledgeArticle {
   hasPdf?: boolean;
   resources?: Array<{ type?: string; title?: string; url?: string; description?: string }> | null;
   translations?: Array<{ language: string; title: string; description: string | null; content: string | null }>;
+}
+
+/** Parcours de formation */
+interface TrainingPathModule {
+  id: string;
+  title: string;
+  duration?: number;
+  level?: { number: number };
+  method?: { name: string; type: string };
+}
+
+interface TrainingPathItem {
+  id: string;
+  order: number;
+  module: TrainingPathModule;
+}
+
+interface TrainingPath {
+  id: string;
+  name: string;
+  description: string | null;
+  order: number;
+  items: TrainingPathItem[];
 }
 
 export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTranslations }: Tab4FormationProps) {
@@ -393,6 +416,29 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
   const [knowledgeArticlesLoading, setKnowledgeArticlesLoading] = useState(false);
   // Viewer PDF : moduleId de l'article actuellement affiché
   const [viewingPdfId, setViewingPdfId] = useState<string | null>(null);
+  // Parcours de formation
+  const [trainingPaths, setTrainingPaths] = useState<TrainingPath[]>([]);
+  const [pathsLoading, setPathsLoading] = useState(false);
+  const [selectedPathId, setSelectedPathId] = useState<string | null>(null);
+
+  // Charger les parcours de formation (site publié uniquement)
+  useEffect(() => {
+    if (isStudioMode) return;
+    let cancelled = false;
+    setPathsLoading(true);
+    fetch("/api/training/paths")
+      .then((res) => (res.ok ? res.json() : { paths: [] }))
+      .then((data) => {
+        if (!cancelled && Array.isArray(data.paths)) setTrainingPaths(data.paths);
+      })
+      .catch(() => {
+        if (!cancelled) setTrainingPaths([]);
+      })
+      .finally(() => {
+        if (!cancelled) setPathsLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [isStudioMode]);
 
   // Charger les articles du niveau sélectionné (site publié uniquement)
   useEffect(() => {
@@ -568,10 +614,130 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
             </TabsList>
           </div>
           <div className="flex-1 overflow-auto min-h-0">
-            <TabsContent value="parcours" className="mt-0 p-4 h-full data-[state=inactive]:hidden">
-              <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                <p className="text-sm">{t.formation.parcoursPlaceholder}</p>
-              </div>
+            <TabsContent value="parcours" className="mt-0 h-full data-[state=inactive]:hidden flex flex-col min-h-0">
+              {pathsLoading ? (
+                <div className="flex items-center justify-center py-8 flex-1">
+                  <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+                </div>
+              ) : trainingPaths.length === 0 ? (
+                <div className="text-center text-gray-500 dark:text-gray-400 py-8 flex-1 flex flex-col items-center justify-center">
+                  <Route className="h-12 w-12 mb-3 opacity-30" />
+                  <p className="text-sm">{t.formation.parcoursPlaceholder}</p>
+                </div>
+              ) : selectedPathId ? (
+                /* Détail d'un parcours sélectionné */
+                (() => {
+                  const path = trainingPaths.find((p) => p.id === selectedPathId);
+                  if (!path) return null;
+                  // Extraire le numéro de niveau si présent dans le nom
+                  const levelMatch = path.name.match(/Niveau (\d+)/);
+                  const levelNumber = levelMatch ? parseInt(levelMatch[1], 10) : null;
+                  return (
+                    <div className="flex flex-col h-full min-h-0 p-4">
+                      <div className="flex items-center gap-3 mb-4 flex-shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedPathId(null)}
+                          className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                        >
+                          ← Retour aux parcours
+                        </button>
+                      </div>
+                      <div className="flex items-start gap-3 mb-4 flex-shrink-0">
+                        {levelNumber && getLevelIcon(levelNumber, "h-8 w-8")}
+                        <div>
+                          <h3 className="font-semibold text-lg">{path.name}</h3>
+                          {path.description && (
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 whitespace-pre-line">
+                              {path.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      {path.items.length === 0 ? (
+                        <p className="text-sm text-gray-400 italic">Aucun module dans ce parcours</p>
+                      ) : (
+                        <div className="flex-1 overflow-auto space-y-2">
+                          <p className="text-xs font-medium text-gray-500 uppercase mb-2">
+                            {path.items.length} étapes dans ce parcours
+                          </p>
+                          {path.items.map((item, idx) => (
+                            <div
+                              key={item.id}
+                              className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700"
+                            >
+                              <div className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-xs font-bold flex-shrink-0">
+                                {idx + 1}
+                              </div>
+                              <BookOpen className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-sm truncate">{item.module.title}</p>
+                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                  {item.module.method && <span>{item.module.method.name}</span>}
+                                  {item.module.duration && <span>· {item.module.duration} min</span>}
+                                </div>
+                              </div>
+                              <CheckCircle2 className="h-4 w-4 text-gray-300 flex-shrink-0" />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()
+              ) : (
+                /* Liste des parcours */
+                <div className="flex-1 overflow-auto p-4 space-y-3">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    {t.formation.parcoursIntro || "Suivez des parcours structurés pour progresser étape par étape."}
+                  </p>
+                  {trainingPaths.map((path) => {
+                    // Extraire le numéro de niveau si présent dans le nom
+                    const levelMatch = path.name.match(/Niveau (\d+)/);
+                    const levelNumber = levelMatch ? parseInt(levelMatch[1], 10) : null;
+                    const totalDuration = path.items.reduce((sum, i) => sum + (i.module.duration || 0), 0);
+                    return (
+                      <button
+                        key={path.id}
+                        type="button"
+                        onClick={() => setSelectedPathId(path.id)}
+                        className="w-full text-left p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                      >
+                        <div className="flex items-start gap-3">
+                          {levelNumber ? (
+                            getLevelIcon(levelNumber, "h-6 w-6 flex-shrink-0")
+                          ) : (
+                            <Route className="h-6 w-6 text-purple-500 flex-shrink-0" />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                              {path.name}
+                            </h4>
+                            {path.description && (
+                              <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">
+                                {path.description.split("\n")[0]}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
+                              <span className="flex items-center gap-1">
+                                <Target className="h-3 w-3" />
+                                {path.items.length} étapes
+                              </span>
+                              {totalDuration > 0 && (
+                                <span className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  {totalDuration} min
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </TabsContent>
             <TabsContent value="applications" className="mt-0 p-4 h-full data-[state=inactive]:hidden">
               <div className="text-center text-gray-500 dark:text-gray-400 py-8">

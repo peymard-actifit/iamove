@@ -4,17 +4,17 @@ import prisma from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const session = await getSession();
-    if (!session || session.role !== "ADMIN") {
-      return NextResponse.json({ error: "Accès réservé aux administrateurs" }, { status: 403 });
-    }
+    // Accès public pour lire les parcours (utilisé par le site publié)
+    // Les utilisateurs connectés (admin ou site publié) peuvent voir les parcours
     const paths = await prisma.trainingPath.findMany({
+      where: { isActive: true },
       orderBy: [{ order: "asc" }, { createdAt: "asc" }],
       include: {
         items: {
           orderBy: { order: "asc" },
           include: {
             module: {
+              where: { isActive: true },
               include: {
                 level: { select: { number: true } },
                 method: { select: { id: true, name: true, type: true } },
