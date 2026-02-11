@@ -689,7 +689,7 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
                 /* Liste des parcours */
                 <div className="flex-1 overflow-auto p-4 space-y-3">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    {t.formation.parcoursIntro || "Suivez des parcours structurés pour progresser étape par étape."}
+                    Suivez des parcours structurés pour progresser étape par étape.
                   </p>
                   {trainingPaths.map((path) => {
                     // Extraire le numéro de niveau si présent dans le nom

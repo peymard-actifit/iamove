@@ -14,8 +14,11 @@ export async function GET() {
           orderBy: { order: "asc" },
           include: {
             module: {
-              where: { isActive: true },
-              include: {
+              select: {
+                id: true,
+                title: true,
+                duration: true,
+                isActive: true,
                 level: { select: { number: true } },
                 method: { select: { id: true, name: true, type: true } },
               },
@@ -24,7 +27,12 @@ export async function GET() {
         },
       },
     });
-    return NextResponse.json({ paths });
+    // Filtrer les items dont le module est actif
+    const filteredPaths = paths.map((path) => ({
+      ...path,
+      items: path.items.filter((item) => item.module?.isActive !== false),
+    }));
+    return NextResponse.json({ paths: filteredPaths });
   } catch (e) {
     console.error("[training/paths] GET:", e);
     return NextResponse.json({ error: String(e) }, { status: 500 });
