@@ -29,7 +29,7 @@ export async function GET() {
     const methods = await prisma.trainingMethod.findMany({
       where: { isActive: true },
     });
-    const methodsByType = new Map(methods.map(m => [m.type, m]));
+    const methodsByType = new Map<string, typeof methods[0]>(methods.map(m => [m.type, m]));
 
     const results: { 
       pathName: string; 
@@ -50,7 +50,7 @@ export async function GET() {
       );
 
       // Types à ajouter pour avoir de la variété
-      const allTypes = ["ARTICLE", "VIDEO", "TUTORIAL", "EXERCISE", "SERIOUS_GAME", "INTERACTIVE"];
+      const allTypes = ["ARTICLE", "VIDEO", "TUTORIAL", "EXERCISE", "SERIOUS_GAME", "INTERACTIVE"] as const;
       const typesToAdd = allTypes.filter(t => !existingTypes.has(t));
 
       const addedModules: { title: string; type: string }[] = [];

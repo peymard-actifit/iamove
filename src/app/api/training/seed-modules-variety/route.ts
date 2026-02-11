@@ -128,7 +128,7 @@ export async function GET() {
     const methods = await prisma.trainingMethod.findMany({ where: { isActive: true } });
     const levels = await prisma.level.findMany({ orderBy: { number: "asc" } });
     
-    const methodMap = new Map(methods.map(m => [m.type, m.id]));
+    const methodMap = new Map<string, string>(methods.map(m => [m.type, m.id]));
     const levelMap = new Map(levels.map(l => [l.number, l.id]));
 
     const results: { type: string; created: number; existing: number }[] = [];
