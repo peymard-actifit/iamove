@@ -81,5 +81,17 @@ export default async function PublishedSiteRegisterPage({ params }: PageProps) {
     );
   }
 
-  return <PublishedSiteRegister site={site} />;
+  // Récupérer la liste des personnes existantes pour le choix du responsable
+  const existingPersons = await prisma.person.findMany({
+    where: { siteId: site.id },
+    select: {
+      id: true,
+      name: true,
+      jobTitle: true,
+      department: true,
+    },
+    orderBy: { name: "asc" },
+  });
+
+  return <PublishedSiteRegister site={site} existingPersons={existingPersons} />;
 }

@@ -14,11 +14,19 @@ interface Site {
   logo: string | null;
 }
 
-interface PublishedSiteRegisterProps {
-  site: Site;
+interface ExistingPerson {
+  id: string;
+  name: string;
+  jobTitle: string | null;
+  department: string | null;
 }
 
-export function PublishedSiteRegister({ site }: PublishedSiteRegisterProps) {
+interface PublishedSiteRegisterProps {
+  site: Site;
+  existingPersons?: ExistingPerson[];
+}
+
+export function PublishedSiteRegister({ site, existingPersons = [] }: PublishedSiteRegisterProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -32,6 +40,7 @@ export function PublishedSiteRegister({ site }: PublishedSiteRegisterProps) {
     lastName: "",
     jobTitle: "",
     department: "",
+    managerId: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -63,6 +72,7 @@ export function PublishedSiteRegister({ site }: PublishedSiteRegisterProps) {
           lastName: formData.lastName,
           jobTitle: formData.jobTitle || null,
           department: formData.department || null,
+          managerId: formData.managerId || null,
         }),
       });
 
@@ -211,6 +221,32 @@ export function PublishedSiteRegister({ site }: PublishedSiteRegisterProps) {
                 />
               </div>
             </div>
+
+            {existingPersons.length > 0 && (
+              <div className="space-y-2">
+                <label htmlFor="managerId" className="text-sm font-medium">
+                  Responsable hiérarchique
+                </label>
+                <select
+                  id="managerId"
+                  value={formData.managerId}
+                  onChange={(e) => setFormData({ ...formData, managerId: e.target.value })}
+                  className="w-full h-10 px-3 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm"
+                >
+                  <option value="">Aucun (pas de responsable)</option>
+                  {existingPersons.map((person) => (
+                    <option key={person.id} value={person.id}>
+                      {person.name}
+                      {person.jobTitle && ` - ${person.jobTitle}`}
+                      {person.department && ` (${person.department})`}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500">
+                  Optionnel : Sélectionnez votre responsable dans l&apos;organisation
+                </p>
+              </div>
+            )}
 
             <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium">

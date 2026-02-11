@@ -10,7 +10,7 @@ export async function POST(
   try {
     const { siteId } = await params;
     const body = await request.json();
-    const { email, password, firstName, lastName, jobTitle, department } = body;
+    const { email, password, firstName, lastName, jobTitle, department, managerId } = body;
 
     // Validation des champs requis
     if (!email || !password || !firstName || !lastName) {
@@ -68,6 +68,19 @@ export async function POST(
       );
     }
 
+    // Valider le managerId s'il est fourni
+    if (managerId) {
+      const manager = await prisma.person.findUnique({
+        where: { id: managerId },
+      });
+      if (!manager || manager.siteId !== siteId) {
+        return NextResponse.json(
+          { error: "Responsable invalide" },
+          { status: 400 }
+        );
+      }
+    }
+
     // Hasher le mot de passe
     const hashedPassword = await hashPassword(password);
 
@@ -84,6 +97,7 @@ export async function POST(
         password: hashedPassword,
         jobTitle: jobTitle || null,
         department: department || null,
+        managerId: managerId || null,
         siteId,
         currentLevel: 0, // Niveau 0 par défaut pour déclencher l'auto-évaluation
         lastLoginAt: new Date(),
