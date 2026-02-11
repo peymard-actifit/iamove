@@ -553,4 +553,18 @@ L'IA ne répond pas à mes questions ???
 → Fichier corrigé : `src/app/api/sites/[siteId]/chat/route.ts`
 
 ---
+
+### Prompt #62 (2026-02-09) - Initialisation session
+```
+Ceci est le prompt d'initialisation de la session de travail sur Cursor
+Rapport : LoC, Tokens, API_KEYs, DB, Sync, Script déploiement, Limites
+```
+→ Revue code : 19 780 lignes (src uniquement)
+→ Worktree synchronisé avec origin/main
+→ Tokens et API Keys vérifiés et valides
+→ Script commit-and-deploy.ps1 opérationnel
+→ Version actuelle : 2.9.1
+→ 61 prompts documentés dans PROMPTS.md
+
+---
 *Dernière mise à jour: 2026-02-09*
