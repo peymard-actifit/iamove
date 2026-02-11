@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2, AlertTriangle } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 interface LevelTranslation {
@@ -215,6 +215,17 @@ export function LevelSelfAssessment({
               </div>
             )}
           </div>
+
+          {/* Avertissement si niveau 0 sélectionné */}
+          {selectedLevel === 0 && (
+            <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg text-amber-700 dark:text-amber-300 text-sm">
+              <AlertTriangle className="h-5 w-5 flex-shrink-0" />
+              <p>
+                {t.selfAssessment?.level0Warning || 
+                  "En choisissant le niveau 0, cette auto-évaluation vous sera proposée à chaque connexion jusqu'à ce que vous sélectionniez un autre niveau."}
+              </p>
+            </div>
+          )}
 
           {/* Bouton de validation */}
           <div className="flex justify-center">

@@ -880,6 +880,7 @@ export function buildTranslationsObject(flatTranslations: Record<string, string>
       hoverHint: getValue("selfAssessment.hoverHint", "Survolez un niveau pour voir sa description"),
       confirmLevel: getValue("selfAssessment.confirmLevel", "Confirmer le niveau"),
       selectLevel: getValue("selfAssessment.selectLevel", "Sélectionnez un niveau"),
+      level0Warning: getValue("selfAssessment.level0Warning", "En choisissant le niveau 0, cette auto-évaluation vous sera proposée à chaque connexion jusqu'à ce que vous sélectionniez un autre niveau."),
     },
   };
 }
@@ -1177,6 +1178,7 @@ export interface Translations {
     hoverHint: string;
     confirmLevel: string;
     selectLevel: string;
+    level0Warning: string;
   };
 }
 
@@ -1456,6 +1458,7 @@ export const FR: Translations = {
     hoverHint: "Survolez un niveau pour voir sa description",
     confirmLevel: "Confirmer le niveau",
     selectLevel: "Sélectionnez un niveau",
+    level0Warning: "En choisissant le niveau 0, cette auto-évaluation vous sera proposée à chaque connexion jusqu'à ce que vous sélectionniez un autre niveau.",
   },
 };
 
@@ -1735,6 +1738,7 @@ export const EN: Translations = {
     hoverHint: "Hover over a level to see its description",
     confirmLevel: "Confirm level",
     selectLevel: "Select a level",
+    level0Warning: "By choosing level 0, this self-assessment will be presented to you at each login until you select another level.",
   },
 };
 

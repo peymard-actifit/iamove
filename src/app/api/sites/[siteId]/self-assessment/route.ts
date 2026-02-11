@@ -42,6 +42,7 @@ export async function PATCH(
       }
 
       // Autoriser l'auto-évaluation uniquement si le niveau actuel est 0
+      // Note: Si l'utilisateur choisit 0, l'auto-évaluation se redéclenchera au prochain login
       if (person.currentLevel !== 0) {
         return NextResponse.json(
           { error: "L'auto-évaluation n'est disponible que pour les utilisateurs de niveau 0" },
@@ -58,6 +59,8 @@ export async function PATCH(
       return NextResponse.json({
         success: true,
         newLevel: updatedPerson.currentLevel,
+        // Indiquer si l'auto-évaluation se redéclenchera (niveau 0 choisi)
+        willRetrigger: currentLevel === 0,
       });
     }
 
