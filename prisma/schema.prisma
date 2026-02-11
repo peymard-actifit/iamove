@@ -235,6 +235,7 @@ model Level {
   quizzes         Quiz[]
   skills          Skill[]
   trainingModules TrainingModule[]
+  trainingPaths   TrainingPath[]
   translations    LevelTranslation[]
 
   @@map("levels")
@@ -552,9 +553,11 @@ model TrainingPath {
   description String?   @db.Text
   order       Int       @default(0)
   isActive    Boolean   @default(true)
+  levelId     String?   // Niveau recommandé pour ce parcours (optionnel)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
+  level       Level?    @relation(fields: [levelId], references: [id])
   items       TrainingPathItem[]
 
   @@map("training_paths")

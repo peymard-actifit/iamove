@@ -2,14 +2,21 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const maxLevel = searchParams.get("maxLevel"); // Niveau max de l'utilisateur (optionnel)
+    
     // Accès public pour lire les parcours (utilisé par le site publié)
-    // Les utilisateurs connectés (admin ou site publié) peuvent voir les parcours
     const paths = await prisma.trainingPath.findMany({
       where: { isActive: true },
-      orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+      orderBy: [
+        { level: { number: "asc" } }, // Trier par niveau recommandé
+        { order: "asc" },
+        { createdAt: "asc" },
+      ],
       include: {
+        level: { select: { number: true, name: true } }, // Inclure le niveau recommandé
         items: {
           orderBy: { order: "asc" },
           include: {
@@ -27,11 +34,23 @@ export async function GET() {
         },
       },
     });
+    
     // Filtrer les items dont le module est actif
-    const filteredPaths = paths.map((path) => ({
+    let filteredPaths = paths.map((path) => ({
       ...path,
       items: path.items.filter((item) => item.module?.isActive !== false),
     }));
+    
+    // Si un niveau max est spécifié, filtrer les parcours accessibles
+    if (maxLevel) {
+      const maxLevelNum = parseInt(maxLevel, 10);
+      if (!isNaN(maxLevelNum)) {
+        filteredPaths = filteredPaths.filter(
+          (path) => !path.level || path.level.number <= maxLevelNum
+        );
+      }
+    }
+    
     return NextResponse.json({ paths: filteredPaths });
   } catch (e) {
     console.error("[training/paths] GET:", e);
