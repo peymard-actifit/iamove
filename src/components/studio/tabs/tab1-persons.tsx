@@ -558,22 +558,23 @@ export function Tab1Persons({
                       >
                         <Copy className={`h-3 w-3 ${copiedId === person.id ? "text-green-500" : ""}`} />
                       </Button>
-                      {person.password && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-5 w-5 text-amber-500 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-900/20"
-                          onClick={() => resetPassword(person.id)}
-                          disabled={isResettingPassword && resetPasswordId === person.id}
-                          title="Réinitialiser le mot de passe"
-                        >
-                          {isResettingPassword && resetPasswordId === person.id ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : (
-                            <KeyRound className="h-3 w-3" />
-                          )}
-                        </Button>
-                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5 text-amber-500 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+                        onClick={() => resetPassword(person.id)}
+                        disabled={isResettingPassword && resetPasswordId === person.id}
+                        title={person.password 
+                          ? "Réinitialiser le mot de passe" 
+                          : "Régénérer le lien d'invitation"
+                        }
+                      >
+                        {isResettingPassword && resetPasswordId === person.id ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <KeyRound className="h-3 w-3" />
+                        )}
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
