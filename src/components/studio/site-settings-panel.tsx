@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Input, Card } from "@/components/ui";
-import { X, Save } from "lucide-react";
+import { Button, Input } from "@/components/ui";
+import { X, Save, Copy, UserPlus, Check } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 interface Site {
@@ -24,6 +24,7 @@ interface Site {
     tab4Enabled: boolean;
     tab5Title: string;
     tab5Enabled: boolean;
+    allowPublicRegistration?: boolean;
   } | null;
 }
 
@@ -49,7 +50,19 @@ export function SiteSettingsPanel({
     description: site.description || "",
     primaryColor: site.primaryColor,
     secondaryColor: site.secondaryColor,
+    allowPublicRegistration: site.settings?.allowPublicRegistration || false,
   });
+  const [copiedLink, setCopiedLink] = useState<string | null>(null);
+
+  const copyLink = (type: "login" | "register") => {
+    const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+    const link = type === "register" 
+      ? `${baseUrl}/s/${site.slug}/register`
+      : `${baseUrl}/s/${site.slug}`;
+    navigator.clipboard.writeText(link);
+    setCopiedLink(type);
+    setTimeout(() => setCopiedLink(null), 2000);
+  };
 
   const handleSave = async () => {
     onSaveStart();
@@ -57,7 +70,13 @@ export function SiteSettingsPanel({
       await fetch(`/api/sites/${site.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          name: formData.name,
+          description: formData.description,
+          primaryColor: formData.primaryColor,
+          secondaryColor: formData.secondaryColor,
+          allowPublicRegistration: formData.allowPublicRegistration,
+        }),
       });
       onSaveDone();
       router.refresh();
@@ -143,13 +162,81 @@ export function SiteSettingsPanel({
         </div>
 
         {/* URL du site */}
-        <div className="space-y-2">
+        <div className="space-y-3">
           <h4 className="text-sm font-medium text-gray-500">{t.settings.publishedUrl}</h4>
+          
+          {/* Lien de connexion */}
           <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
-            <code className="text-sm break-all">
-              {typeof window !== "undefined" ? window.location.origin : ""}/s/{site.slug}
-            </code>
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-gray-500 mb-1">Lien de connexion</p>
+                <code className="text-xs break-all">
+                  {typeof window !== "undefined" ? window.location.origin : ""}/s/{site.slug}
+                </code>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 flex-shrink-0"
+                onClick={() => copyLink("login")}
+              >
+                {copiedLink === "login" ? (
+                  <Check className="h-4 w-4 text-green-500" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
           </div>
+        </div>
+
+        {/* Inscription publique */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium text-gray-500">Inscription publique</h4>
+          
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.allowPublicRegistration}
+              onChange={(e) => setFormData({ ...formData, allowPublicRegistration: e.target.checked })}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm">
+              Autoriser l&apos;auto-inscription
+            </span>
+          </label>
+          
+          <p className="text-xs text-gray-500">
+            Permet à n&apos;importe qui de créer un compte sur ce site via un lien public.
+          </p>
+
+          {formData.allowPublicRegistration && (
+            <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-green-700 dark:text-green-400 mb-1 flex items-center gap-1">
+                    <UserPlus className="h-3 w-3" />
+                    Lien d&apos;inscription
+                  </p>
+                  <code className="text-xs break-all text-green-800 dark:text-green-300">
+                    {typeof window !== "undefined" ? window.location.origin : ""}/s/{site.slug}/register
+                  </code>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-8 w-8 flex-shrink-0 text-green-600 hover:text-green-700 hover:bg-green-100 dark:hover:bg-green-900/30"
+                  onClick={() => copyLink("register")}
+                >
+                  {copiedLink === "register" ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Bouton sauvegarder */}

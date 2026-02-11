@@ -68,15 +68,30 @@ export async function PATCH(
       return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
     }
 
+    // Préparer les données du site
+    const siteData: Record<string, unknown> = {};
+    if (body.name !== undefined) siteData.name = body.name;
+    if (body.description !== undefined) siteData.description = body.description;
+    if (body.logo !== undefined) siteData.logo = body.logo;
+    if (body.primaryColor !== undefined) siteData.primaryColor = body.primaryColor;
+    if (body.secondaryColor !== undefined) siteData.secondaryColor = body.secondaryColor;
+
+    // Si des paramètres de settings sont fournis, les mettre à jour
+    if (body.allowPublicRegistration !== undefined) {
+      await prisma.siteSettings.upsert({
+        where: { siteId },
+        update: { allowPublicRegistration: body.allowPublicRegistration },
+        create: {
+          siteId,
+          allowPublicRegistration: body.allowPublicRegistration,
+        },
+      });
+    }
+
     const updatedSite = await prisma.site.update({
       where: { id: siteId },
-      data: {
-        name: body.name,
-        description: body.description,
-        logo: body.logo,
-        primaryColor: body.primaryColor,
-        secondaryColor: body.secondaryColor,
-      },
+      data: siteData,
+      include: { settings: true },
     });
 
     return NextResponse.json(updatedSite);

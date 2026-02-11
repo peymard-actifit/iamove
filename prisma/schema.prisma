@@ -124,6 +124,9 @@ model SiteSettings {
   tab5QuestionsPerQuiz  Int      @default(20)
   tab5PassThreshold     Int      @default(10)
   
+  // Inscription publique
+  allowPublicRegistration Boolean @default(false)
+  
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
