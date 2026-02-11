@@ -44,5 +44,14 @@ export default async function SiteEditorPage({ params }: PageProps) {
     orderBy: { number: "asc" },
   });
 
-  return <SiteEditor site={site} levels={levels} currentUserEmail={session.email} />;
+  // Transformer les données du site pour ne pas exposer le hash du password
+  const safeSite = {
+    ...site,
+    persons: site.persons.map((person) => ({
+      ...person,
+      password: person.password ? "[SET]" : null, // Indique si un password existe sans exposer le hash
+    })),
+  };
+
+  return <SiteEditor site={safeSite} levels={levels} currentUserEmail={session.email} />;
 }

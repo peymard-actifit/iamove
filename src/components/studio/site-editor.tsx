@@ -45,6 +45,8 @@ interface Person {
   participationPoints?: number;
   manager: { id: string; name: string } | null;
   subordinates: { id: string; name: string }[];
+  inviteToken: string | null;
+  password: string | null;
 }
 
 interface Site {
@@ -198,6 +200,7 @@ export function SiteEditor({ site, levels, currentUserEmail }: SiteEditorProps) 
             <TabsContent value="tab1" className="mt-2">
               <Tab1Persons
                 siteId={site.id}
+                siteSlug={site.slug}
                 persons={site.persons}
                 levels={levels}
                 onSaveStart={startSaving}

@@ -92,7 +92,14 @@ export async function GET(
       orderBy: { name: "asc" },
     });
 
-    return NextResponse.json(persons);
+    // Transformer les données pour ne pas exposer le hash du password
+    // mais indiquer si un password existe (pour l'UI)
+    const safePersons = persons.map((person) => ({
+      ...person,
+      password: person.password ? "[SET]" : null, // Indique si un password existe sans exposer le hash
+    }));
+
+    return NextResponse.json(safePersons);
   } catch (error) {
     console.error("Error fetching persons:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

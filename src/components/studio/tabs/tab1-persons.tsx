@@ -17,7 +17,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui";
-import { Trash2, Copy, Eye, ArrowUp, ArrowDown } from "lucide-react";
+import { Trash2, Copy, Eye, ArrowUp, ArrowDown, KeyRound, Loader2 } from "lucide-react";
 import { getLevelIcon, getLevelInfo } from "@/lib/levels";
 import { useI18n } from "@/lib/i18n";
 import { PersonProfileDialog } from "../person-profile-dialog";
@@ -35,6 +35,8 @@ interface Person {
   managerId: string | null;
   participationPoints?: number;
   manager: { id: string; name: string } | null;
+  inviteToken: string | null;
+  password: string | null;
 }
 
 interface Level {
@@ -45,6 +47,7 @@ interface Level {
 
 interface Tab1PersonsProps {
   siteId: string;
+  siteSlug?: string;
   persons: Person[];
   levels: Level[];
   onSaveStart: () => void;
@@ -245,6 +248,7 @@ type SortDirection = "asc" | "desc";
 
 export function Tab1Persons({
   siteId,
+  siteSlug,
   persons,
   levels,
   onSaveStart,
@@ -256,6 +260,8 @@ export function Tab1Persons({
   const [showDeleteDialog, setShowDeleteDialog] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [resetPasswordId, setResetPasswordId] = useState<string | null>(null);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [sortColumn, setSortColumn] = useState<SortColumn>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
@@ -354,11 +360,49 @@ export function Tab1Persons({
     }
   };
 
-  const copyInviteLink = (personId: string) => {
-    const link = `${window.location.origin}/invite/${personId}`;
-    navigator.clipboard.writeText(link);
-    setCopiedId(personId);
-    setTimeout(() => setCopiedId(null), 2000);
+  const copyInviteLink = (person: Person) => {
+    // Si la personne a déjà un mot de passe, le lien va vers la page de connexion du site
+    // Sinon, on utilise le token d'invitation
+    if (person.password) {
+      // Compte déjà activé - lien vers la page de connexion
+      const link = siteSlug 
+        ? `${window.location.origin}/s/${siteSlug}`
+        : `${window.location.origin}/s/${siteId}`;
+      navigator.clipboard.writeText(link);
+      setCopiedId(person.id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } else if (person.inviteToken) {
+      // Compte non activé - lien d'invitation avec token
+      const link = `${window.location.origin}/invite/${person.inviteToken}`;
+      navigator.clipboard.writeText(link);
+      setCopiedId(person.id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } else {
+      // Pas de token, il faut régénérer
+      resetPassword(person.id);
+    }
+  };
+
+  const resetPassword = async (personId: string) => {
+    setIsResettingPassword(true);
+    setResetPasswordId(personId);
+    try {
+      const res = await fetch(`/api/sites/${siteId}/persons/${personId}/reset-password`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        // Copier le nouveau lien d'invitation
+        const link = `${window.location.origin}/invite/${data.inviteToken}`;
+        navigator.clipboard.writeText(link);
+        setCopiedId(personId);
+        setTimeout(() => setCopiedId(null), 2000);
+        router.refresh();
+      }
+    } finally {
+      setIsResettingPassword(false);
+      setResetPasswordId(null);
+    }
   };
 
   return (
@@ -506,11 +550,30 @@ export function Tab1Persons({
                         variant="ghost"
                         size="icon"
                         className="h-5 w-5"
-                        onClick={() => copyInviteLink(person.id)}
-                        title={t.persons.copyInviteLink}
+                        onClick={() => copyInviteLink(person)}
+                        title={person.password 
+                          ? "Copier le lien de connexion"
+                          : (t.persons?.copyInviteLink || "Copier le lien d'invitation")
+                        }
                       >
                         <Copy className={`h-3 w-3 ${copiedId === person.id ? "text-green-500" : ""}`} />
                       </Button>
+                      {person.password && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-5 w-5 text-amber-500 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+                          onClick={() => resetPassword(person.id)}
+                          disabled={isResettingPassword && resetPasswordId === person.id}
+                          title="Réinitialiser le mot de passe"
+                        >
+                          {isResettingPassword && resetPasswordId === person.id ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <KeyRound className="h-3 w-3" />
+                          )}
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"
