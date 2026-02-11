@@ -53,6 +53,7 @@ export function LevelSelfAssessment({
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
   const [hoveredLevel, setHoveredLevel] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Fonction pour obtenir les données traduites d'un niveau
   const getTranslatedLevel = (level: Level) => {
@@ -80,6 +81,8 @@ export function LevelSelfAssessment({
     if (selectedLevel === null) return;
     
     setIsSubmitting(true);
+    setError(null);
+    
     try {
       const res = await fetch(`/api/sites/${siteId}/self-assessment`, {
         method: "PATCH",
@@ -88,10 +91,19 @@ export function LevelSelfAssessment({
         body: JSON.stringify({ currentLevel: selectedLevel }),
       });
 
+      const data = await res.json();
+
       if (res.ok) {
         onLevelSelected?.(selectedLevel);
         router.refresh();
+      } else {
+        // Afficher l'erreur retournée par l'API
+        setError(data.error || "Une erreur est survenue");
+        console.error("Self-assessment error:", data);
       }
+    } catch (err) {
+      console.error("Self-assessment fetch error:", err);
+      setError("Erreur de connexion au serveur");
     } finally {
       setIsSubmitting(false);
     }
@@ -216,8 +228,16 @@ export function LevelSelfAssessment({
             )}
           </div>
 
+          {/* Message d'erreur */}
+          {error && (
+            <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg text-red-700 dark:text-red-300 text-sm">
+              <AlertTriangle className="h-5 w-5 flex-shrink-0" />
+              <p>{error}</p>
+            </div>
+          )}
+
           {/* Avertissement si niveau 0 sélectionné */}
-          {selectedLevel === 0 && (
+          {selectedLevel === 0 && !error && (
             <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg text-amber-700 dark:text-amber-300 text-sm">
               <AlertTriangle className="h-5 w-5 flex-shrink-0" />
               <p>

@@ -64,13 +64,42 @@ export async function PATCH(
       });
     }
 
-    // Utilisateur STUDIO_USER (peut modifier via le studio)
+    // Utilisateur STUDIO_USER - trouver la personne correspondante par email
     if (session.userType === "STUDIO_USER") {
-      // Le studio utilise l'API standard /api/sites/[siteId]/persons/[personId]
-      return NextResponse.json(
-        { error: "Utilisez l'API standard pour le studio" },
-        { status: 400 }
-      );
+      // Chercher si l'utilisateur studio correspond à une personne du site (par email)
+      const person = await prisma.person.findFirst({
+        where: {
+          siteId: siteId,
+          email: session.email,
+        },
+      });
+
+      if (!person) {
+        return NextResponse.json(
+          { error: "Aucun profil associé à votre email sur ce site. Connectez-vous via la page du site publié." },
+          { status: 400 }
+        );
+      }
+
+      // Autoriser l'auto-évaluation uniquement si le niveau actuel est 0
+      if (person.currentLevel !== 0) {
+        return NextResponse.json(
+          { error: "L'auto-évaluation n'est disponible que pour les utilisateurs de niveau 0" },
+          { status: 400 }
+        );
+      }
+
+      // Mettre à jour le niveau
+      const updatedPerson = await prisma.person.update({
+        where: { id: person.id },
+        data: { currentLevel },
+      });
+
+      return NextResponse.json({
+        success: true,
+        newLevel: updatedPerson.currentLevel,
+        willRetrigger: currentLevel === 0,
+      });
     }
 
     return NextResponse.json({ error: "Type d'utilisateur non supporté" }, { status: 400 });
