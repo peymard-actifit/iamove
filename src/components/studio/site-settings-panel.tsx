@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Input } from "@/components/ui";
-import { X, Save, Copy, UserPlus, Check } from "lucide-react";
+import { X, Save, Copy, UserPlus, Check, Loader2, Link2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 interface Site {
@@ -53,6 +53,29 @@ export function SiteSettingsPanel({
     allowPublicRegistration: site.settings?.allowPublicRegistration || false,
   });
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
+  const [isGeneratingToken, setIsGeneratingToken] = useState(false);
+
+  // Génère un nouveau token à usage unique et le copie
+  const copyOneTimeLink = async () => {
+    setIsGeneratingToken(true);
+    try {
+      const res = await fetch(`/api/sites/${site.id}/registration-token`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+        const link = `${baseUrl}/s/${site.slug}/register/${data.token}`;
+        navigator.clipboard.writeText(link);
+        setCopiedLink("one-time");
+        setTimeout(() => setCopiedLink(null), 2000);
+      }
+    } catch (error) {
+      console.error("Error generating one-time link:", error);
+    } finally {
+      setIsGeneratingToken(false);
+    }
+  };
 
   const copyLink = (type: "login" | "register") => {
     const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
@@ -216,7 +239,7 @@ export function SiteSettingsPanel({
                 <div className="min-w-0 flex-1">
                   <p className="text-xs text-green-700 dark:text-green-400 mb-1 flex items-center gap-1">
                     <UserPlus className="h-3 w-3" />
-                    Lien d&apos;inscription
+                    Lien d&apos;inscription permanent
                   </p>
                   <code className="text-xs break-all text-green-800 dark:text-green-300">
                     {typeof window !== "undefined" ? window.location.origin : ""}/s/{site.slug}/register
@@ -237,6 +260,45 @@ export function SiteSettingsPanel({
               </div>
             </div>
           )}
+        </div>
+
+        {/* Lien d'inscription à usage unique */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium text-gray-500">Lien à usage unique</h4>
+          
+          <p className="text-xs text-gray-500">
+            Génère un lien d&apos;inscription qui ne peut être utilisé qu&apos;une seule fois.
+            Un nouveau lien est créé à chaque copie.
+          </p>
+
+          <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-amber-700 dark:text-amber-400 mb-1 flex items-center gap-1">
+                  <Link2 className="h-3 w-3" />
+                  Lien à usage unique
+                </p>
+                <p className="text-xs text-amber-600 dark:text-amber-300">
+                  Cliquez pour générer et copier un nouveau lien
+                </p>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 flex-shrink-0 text-amber-600 hover:text-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/30"
+                onClick={copyOneTimeLink}
+                disabled={isGeneratingToken}
+              >
+                {isGeneratingToken ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : copiedLink === "one-time" ? (
+                  <Check className="h-4 w-4 text-green-500" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Bouton sauvegarder */}

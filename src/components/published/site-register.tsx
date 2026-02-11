@@ -24,9 +24,10 @@ interface ExistingPerson {
 interface PublishedSiteRegisterProps {
   site: Site;
   existingPersons?: ExistingPerson[];
+  registrationToken?: string; // Token à usage unique (optionnel)
 }
 
-export function PublishedSiteRegister({ site, existingPersons = [] }: PublishedSiteRegisterProps) {
+export function PublishedSiteRegister({ site, existingPersons = [], registrationToken }: PublishedSiteRegisterProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -73,6 +74,7 @@ export function PublishedSiteRegister({ site, existingPersons = [] }: PublishedS
           jobTitle: formData.jobTitle || null,
           department: formData.department || null,
           managerId: formData.managerId || null,
+          registrationToken: registrationToken || null,
         }),
       });
 

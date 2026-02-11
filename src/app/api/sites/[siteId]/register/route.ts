@@ -10,7 +10,7 @@ export async function POST(
   try {
     const { siteId } = await params;
     const body = await request.json();
-    const { email, password, firstName, lastName, jobTitle, department, managerId } = body;
+    const { email, password, firstName, lastName, jobTitle, department, managerId, registrationToken } = body;
 
     // Validation des champs requis
     if (!email || !password || !firstName || !lastName) {
@@ -46,12 +46,44 @@ export async function POST(
       );
     }
 
-    // Vérifier que l'inscription publique est activée
-    if (!site.settings?.allowPublicRegistration) {
-      return NextResponse.json(
-        { error: "L'inscription publique n'est pas activée pour ce site" },
-        { status: 403 }
-      );
+    // Vérifier l'autorisation d'inscription
+    // Soit via token à usage unique, soit via inscription publique activée
+    let tokenRecord = null;
+    
+    if (registrationToken) {
+      // Vérifier le token à usage unique
+      tokenRecord = await prisma.registrationToken.findUnique({
+        where: { token: registrationToken },
+      });
+
+      if (!tokenRecord || tokenRecord.siteId !== siteId) {
+        return NextResponse.json(
+          { error: "Lien d'inscription invalide" },
+          { status: 403 }
+        );
+      }
+
+      if (tokenRecord.usedAt) {
+        return NextResponse.json(
+          { error: "Ce lien d'inscription a déjà été utilisé" },
+          { status: 403 }
+        );
+      }
+
+      if (tokenRecord.expiresAt < new Date()) {
+        return NextResponse.json(
+          { error: "Ce lien d'inscription a expiré" },
+          { status: 403 }
+        );
+      }
+    } else {
+      // Pas de token - vérifier que l'inscription publique est activée
+      if (!site.settings?.allowPublicRegistration) {
+        return NextResponse.json(
+          { error: "L'inscription publique n'est pas activée pour ce site" },
+          { status: 403 }
+        );
+      }
     }
 
     // Vérifier que l'email n'existe pas déjà dans ce site
@@ -105,6 +137,14 @@ export async function POST(
         lastSeenAt: new Date(),
       },
     });
+
+    // Si un token à usage unique a été utilisé, le marquer comme utilisé
+    if (tokenRecord) {
+      await prisma.registrationToken.update({
+        where: { id: tokenRecord.id },
+        data: { usedAt: new Date() },
+      });
+    }
 
     // Créer automatiquement une session pour l'utilisateur
     await createSession({

@@ -87,8 +87,22 @@ model Site {
   folderId      String?
   persons       Person[]
   settings      SiteSettings?
+  registrationTokens RegistrationToken[]
 
   @@map("sites")
+}
+
+// Token d'inscription à usage unique
+model RegistrationToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  siteId    String
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  usedAt    DateTime? // null = non utilisé, date = utilisé
+  createdAt DateTime @default(now())
+  expiresAt DateTime // Expiration après 7 jours
+
+  @@map("registration_tokens")
 }
 
 // =============================================================================
