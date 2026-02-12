@@ -5,7 +5,7 @@ import prisma from "@/lib/prisma";
  * GET - Enrichit les modules variés avec du contenu détaillé
  * Ajoute du content, des exercises et des resources selon le type
  */
-export async function GET() {
+export async function GET(request: Request) {
   try {
     // Récupérer tous les modules qui ne sont pas des articles
     // et qui n'ont pas de contenu substantiel (moins de 100 caractères)
@@ -21,8 +21,14 @@ export async function GET() {
       },
     });
 
+    // Option: forcer la mise à jour de tous (via ?force=true)
+    const url = new URL(request.url);
+    const force = url.searchParams.get("force") === "true";
+    
     // Filtrer ceux qui n'ont pas de contenu ou un contenu minimal
-    const modulesToUpdate = modules.filter(m => !m.content || m.content.length < 100);
+    const modulesToUpdate = force 
+      ? modules 
+      : modules.filter(m => !m.content || m.content.length < 100);
 
     let updated = 0;
     const skipped = modules.length - modulesToUpdate.length;
