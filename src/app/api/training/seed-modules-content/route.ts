@@ -7,13 +7,13 @@ import prisma from "@/lib/prisma";
  */
 export async function GET() {
   try {
-    // Récupérer tous les modules sans contenu (ou avec contenu vide)
+    // Récupérer tous les modules qui ne sont pas des articles
+    // et qui n'ont pas de contenu substantiel (moins de 100 caractères)
     const modules = await prisma.trainingModule.findMany({
       where: {
-        OR: [
-          { content: null },
-          { content: "" },
-        ],
+        method: {
+          type: { not: "ARTICLE" },
+        },
       },
       include: {
         method: true,
@@ -21,13 +21,15 @@ export async function GET() {
       },
     });
 
-    let updated = 0;
-    let skipped = 0;
+    // Filtrer ceux qui n'ont pas de contenu ou un contenu minimal
+    const modulesToUpdate = modules.filter(m => !m.content || m.content.length < 100);
 
-    for (const mod of modules) {
+    let updated = 0;
+    const skipped = modules.length - modulesToUpdate.length;
+
+    for (const mod of modulesToUpdate) {
       const methodType = mod.method?.type;
-      if (!methodType || methodType === "ARTICLE") {
-        skipped++;
+      if (!methodType) {
         continue;
       }
 
@@ -50,9 +52,10 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      message: `${updated} modules enrichis, ${skipped} ignorés (articles ou déjà avec contenu)`,
+      message: `${updated} modules enrichis, ${skipped} ignorés (déjà avec contenu)`,
       updated,
       skipped,
+      total: modules.length,
     });
   } catch (error) {
     console.error("[training/seed-modules-content] GET:", error);
