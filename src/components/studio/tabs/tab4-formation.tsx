@@ -682,49 +682,12 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
                                 {mod.method && <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">{mod.method.name}</span>}
                                 {mod.duration && <span>{mod.duration} min</span>}
                               </div>
-                              {/* Contenu selon le type */}
-                              {methodType === "ARTICLE" ? (
-                                <iframe
-                                  src={`/api/training/articles/${mod.id}`}
-                                  className="flex-1 w-full rounded-lg border border-gray-200 dark:border-gray-700 min-h-[300px]"
-                                  title={mod.title}
-                                />
-                              ) : methodType === "VIDEO" ? (
-                                <div className="flex-1 flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg p-8">
-                                  <FileText className="h-12 w-12 text-red-500 mb-4" />
-                                  <p className="text-center font-medium">{mod.title}</p>
-                                  <p className="text-sm text-gray-500 mt-2">Vidéo de formation - {mod.duration} min</p>
-                                  <p className="text-xs text-gray-400 mt-4">Contenu vidéo à venir</p>
-                                </div>
-                              ) : methodType === "TUTORIAL" ? (
-                                <div className="flex-1 flex flex-col items-center justify-center bg-blue-50 dark:bg-blue-900/20 rounded-lg p-8">
-                                  <BookOpen className="h-12 w-12 text-blue-500 mb-4" />
-                                  <p className="text-center font-medium">{mod.title}</p>
-                                  <p className="text-sm text-gray-500 mt-2">Tutoriel guidé - {mod.duration} min</p>
-                                  <p className="text-xs text-gray-400 mt-4">Contenu tutoriel à venir</p>
-                                </div>
-                              ) : methodType === "EXERCISE" ? (
-                                <div className="flex-1 flex flex-col items-center justify-center bg-green-50 dark:bg-green-900/20 rounded-lg p-8">
-                                  <Target className="h-12 w-12 text-green-500 mb-4" />
-                                  <p className="text-center font-medium">{mod.title}</p>
-                                  <p className="text-sm text-gray-500 mt-2">Exercice pratique - {mod.duration} min</p>
-                                  <p className="text-xs text-gray-400 mt-4">Contenu exercice à venir</p>
-                                </div>
-                              ) : methodType === "SERIOUS_GAME" ? (
-                                <div className="flex-1 flex flex-col items-center justify-center bg-purple-50 dark:bg-purple-900/20 rounded-lg p-8">
-                                  <Sparkles className="h-12 w-12 text-purple-500 mb-4" />
-                                  <p className="text-center font-medium">{mod.title}</p>
-                                  <p className="text-sm text-gray-500 mt-2">Serious Game - {mod.duration} min</p>
-                                  <p className="text-xs text-gray-400 mt-4">Contenu jeu à venir</p>
-                                </div>
-                              ) : (
-                                <div className="flex-1 flex flex-col items-center justify-center bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-8">
-                                  <GraduationCap className="h-12 w-12 text-indigo-500 mb-4" />
-                                  <p className="text-center font-medium">{mod.title}</p>
-                                  <p className="text-sm text-gray-500 mt-2">Module interactif - {mod.duration} min</p>
-                                  <p className="text-xs text-gray-400 mt-4">Contenu interactif à venir</p>
-                                </div>
-                              )}
+                              {/* Contenu unifié via iframe pour tous les types */}
+                              <iframe
+                                src={`/api/training/modules/${mod.id}/view`}
+                                className="flex-1 w-full rounded-lg border border-gray-200 dark:border-gray-700 min-h-[400px]"
+                                title={mod.title}
+                              />
                             </div>
                           );
                         })()
