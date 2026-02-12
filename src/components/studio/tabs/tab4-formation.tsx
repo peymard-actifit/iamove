@@ -420,6 +420,8 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
   const [trainingPaths, setTrainingPaths] = useState<TrainingPath[]>([]);
   const [pathsLoading, setPathsLoading] = useState(false);
   const [selectedPathId, setSelectedPathId] = useState<string | null>(null);
+  // Module sélectionné dans un parcours
+  const [selectedPathModuleId, setSelectedPathModuleId] = useState<string | null>(null);
 
   // Charger les parcours de formation (site publié uniquement)
   useEffect(() => {
@@ -637,7 +639,7 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
                       <div className="flex items-center gap-3 mb-4 flex-shrink-0">
                         <button
                           type="button"
-                          onClick={() => setSelectedPathId(null)}
+                          onClick={() => { setSelectedPathId(null); setSelectedPathModuleId(null); }}
                           className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
                         >
                           ← Retour aux parcours
@@ -656,15 +658,87 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
                       </div>
                       {path.items.length === 0 ? (
                         <p className="text-sm text-gray-400 italic">Aucun module dans ce parcours</p>
+                      ) : selectedPathModuleId ? (
+                        /* Affichage du contenu d'un module sélectionné */
+                        (() => {
+                          const selectedItem = path.items.find(i => i.module.id === selectedPathModuleId);
+                          if (!selectedItem) return null;
+                          const mod = selectedItem.module;
+                          const methodType = mod.method?.type;
+                          return (
+                            <div className="flex-1 flex flex-col min-h-0">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedPathModuleId(null)}
+                                className="text-xs text-blue-600 dark:text-blue-400 hover:underline mb-3 text-left"
+                              >
+                                ← Retour aux étapes
+                              </button>
+                              <div className="flex items-center gap-2 mb-3">
+                                <BookOpen className="h-5 w-5 text-amber-500" />
+                                <h4 className="font-semibold">{mod.title}</h4>
+                              </div>
+                              <div className="flex items-center gap-3 text-xs text-gray-500 mb-4">
+                                {mod.method && <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">{mod.method.name}</span>}
+                                {mod.duration && <span>{mod.duration} min</span>}
+                              </div>
+                              {/* Contenu selon le type */}
+                              {methodType === "ARTICLE" ? (
+                                <iframe
+                                  src={`/api/training/articles/${mod.id}`}
+                                  className="flex-1 w-full rounded-lg border border-gray-200 dark:border-gray-700 min-h-[300px]"
+                                  title={mod.title}
+                                />
+                              ) : methodType === "VIDEO" ? (
+                                <div className="flex-1 flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg p-8">
+                                  <FileText className="h-12 w-12 text-red-500 mb-4" />
+                                  <p className="text-center font-medium">{mod.title}</p>
+                                  <p className="text-sm text-gray-500 mt-2">Vidéo de formation - {mod.duration} min</p>
+                                  <p className="text-xs text-gray-400 mt-4">Contenu vidéo à venir</p>
+                                </div>
+                              ) : methodType === "TUTORIAL" ? (
+                                <div className="flex-1 flex flex-col items-center justify-center bg-blue-50 dark:bg-blue-900/20 rounded-lg p-8">
+                                  <BookOpen className="h-12 w-12 text-blue-500 mb-4" />
+                                  <p className="text-center font-medium">{mod.title}</p>
+                                  <p className="text-sm text-gray-500 mt-2">Tutoriel guidé - {mod.duration} min</p>
+                                  <p className="text-xs text-gray-400 mt-4">Contenu tutoriel à venir</p>
+                                </div>
+                              ) : methodType === "EXERCISE" ? (
+                                <div className="flex-1 flex flex-col items-center justify-center bg-green-50 dark:bg-green-900/20 rounded-lg p-8">
+                                  <Target className="h-12 w-12 text-green-500 mb-4" />
+                                  <p className="text-center font-medium">{mod.title}</p>
+                                  <p className="text-sm text-gray-500 mt-2">Exercice pratique - {mod.duration} min</p>
+                                  <p className="text-xs text-gray-400 mt-4">Contenu exercice à venir</p>
+                                </div>
+                              ) : methodType === "SERIOUS_GAME" ? (
+                                <div className="flex-1 flex flex-col items-center justify-center bg-purple-50 dark:bg-purple-900/20 rounded-lg p-8">
+                                  <Sparkles className="h-12 w-12 text-purple-500 mb-4" />
+                                  <p className="text-center font-medium">{mod.title}</p>
+                                  <p className="text-sm text-gray-500 mt-2">Serious Game - {mod.duration} min</p>
+                                  <p className="text-xs text-gray-400 mt-4">Contenu jeu à venir</p>
+                                </div>
+                              ) : (
+                                <div className="flex-1 flex flex-col items-center justify-center bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-8">
+                                  <GraduationCap className="h-12 w-12 text-indigo-500 mb-4" />
+                                  <p className="text-center font-medium">{mod.title}</p>
+                                  <p className="text-sm text-gray-500 mt-2">Module interactif - {mod.duration} min</p>
+                                  <p className="text-xs text-gray-400 mt-4">Contenu interactif à venir</p>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()
                       ) : (
                         <div className="flex-1 overflow-auto space-y-2">
                           <p className="text-xs font-medium text-gray-500 uppercase mb-2">
                             {path.items.length} étapes dans ce parcours
                           </p>
                           {path.items.map((item, idx) => (
-                            <div
+                            <button
                               key={item.id}
-                              className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700"
+                              type="button"
+                              onClick={() => setSelectedPathModuleId(item.module.id)}
+                              className="w-full flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-700 transition-colors text-left"
                             >
                               <div className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-xs font-bold flex-shrink-0">
                                 {idx + 1}
@@ -677,8 +751,8 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
                                   {item.module.duration && <span>· {item.module.duration} min</span>}
                                 </div>
                               </div>
-                              <CheckCircle2 className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                            </div>
+                              <ChevronRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                            </button>
                           ))}
                         </div>
                       )}
