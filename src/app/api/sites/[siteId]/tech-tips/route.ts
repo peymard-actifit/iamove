@@ -76,7 +76,7 @@ export async function POST(
   }
 }
 
-/** PATCH : liker/unliker un tech tip */
+/** PATCH : liker/unliker ou modifier un tech tip */
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ siteId: string }> }
@@ -89,6 +89,7 @@ export async function PATCH(
     const { siteId } = await params;
     const body = await request.json();
 
+    // Like/unlike
     if (body.action === "like" && body.techTipId) {
       let personId = session.userId;
       if (session.userType === "STUDIO_USER") {
@@ -114,6 +115,38 @@ export async function PATCH(
         });
         return NextResponse.json({ liked: true });
       }
+    }
+
+    // Update tech tip (owner only, if no likes)
+    if (body.id) {
+      let personId = session.userId;
+      if (session.userType === "STUDIO_USER") {
+        const person = await prisma.person.findFirst({ where: { siteId, email: session.email } });
+        if (!person) return NextResponse.json({ error: "Personne non trouvée" }, { status: 404 });
+        personId = person.id;
+      }
+
+      const existing = await prisma.techTip.findUnique({
+        where: { id: body.id },
+        include: { likes: { select: { id: true } } },
+      });
+      if (!existing) return NextResponse.json({ error: "Tech tip non trouvé" }, { status: 404 });
+      if (existing.personId !== personId) return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+      if (existing.likes.length > 0) return NextResponse.json({ error: "Modification impossible : ce tip a déjà reçu des avis" }, { status: 403 });
+
+      const tip = await prisma.techTip.update({
+        where: { id: body.id },
+        data: {
+          ...(body.title && { title: body.title }),
+          ...(body.content && { content: body.content }),
+          ...(body.category !== undefined && { category: body.category }),
+        },
+        include: {
+          person: { select: { id: true, name: true, jobTitle: true, avatar: true } },
+          likes: { select: { personId: true } },
+        },
+      });
+      return NextResponse.json(tip);
     }
 
     return NextResponse.json({ error: "Action non reconnue" }, { status: 400 });

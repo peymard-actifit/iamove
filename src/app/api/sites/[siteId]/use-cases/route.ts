@@ -119,8 +119,23 @@ export async function PATCH(
       }
     }
 
-    // Update use case
-    if (body.id) {
+    // Update use case (owner only, if no likes)
+    if (body.id && body.action !== "like") {
+      let personId = session.userId;
+      if (session.userType === "STUDIO_USER") {
+        const person = await prisma.person.findFirst({ where: { siteId, email: session.email } });
+        if (!person) return NextResponse.json({ error: "Personne non trouvée" }, { status: 404 });
+        personId = person.id;
+      }
+
+      const existing = await prisma.useCase.findUnique({
+        where: { id: body.id },
+        include: { likes: { select: { id: true } } },
+      });
+      if (!existing) return NextResponse.json({ error: "Use case non trouvé" }, { status: 404 });
+      if (existing.personId !== personId) return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+      if (existing.likes.length > 0) return NextResponse.json({ error: "Modification impossible : ce use case a déjà reçu des avis" }, { status: 403 });
+
       const useCase = await prisma.useCase.update({
         where: { id: body.id },
         data: {

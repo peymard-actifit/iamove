@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui";
-import { Plus, Heart, Trash2, Code2, X } from "lucide-react";
+import { Plus, Heart, Trash2, Code2, X, Pencil } from "lucide-react";
 
 interface Person {
   id: string;
@@ -32,6 +32,7 @@ export function TechTipsTab({ siteId, currentPersonId }: TechTipsTabProps) {
   const [tips, setTips] = useState<TechTip[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: "", content: "", category: "" });
   const [filter, setFilter] = useState("");
   const [selectedTip, setSelectedTip] = useState<TechTip | null>(null);
@@ -46,16 +47,26 @@ export function TechTipsTab({ siteId, currentPersonId }: TechTipsTabProps) {
 
   const handleSubmit = async () => {
     if (!form.title || !form.content) return;
+    const method = editId ? "PATCH" : "POST";
+    const body = editId ? { ...form, id: editId } : form;
     const res = await fetch(`/api/sites/${siteId}/tech-tips`, {
-      method: "POST",
+      method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify(body),
     });
     if (res.ok) {
       setShowForm(false);
+      setEditId(null);
       setForm({ title: "", content: "", category: "" });
       fetchTips();
     }
+  };
+
+  const startEdit = (tip: TechTip) => {
+    setForm({ title: tip.title, content: tip.content, category: tip.category || "" });
+    setEditId(tip.id);
+    setSelectedTip(null);
+    setShowForm(true);
   };
 
   const handleLike = async (techTipId: string) => {
@@ -94,7 +105,7 @@ export function TechTipsTab({ siteId, currentPersonId }: TechTipsTabProps) {
             <option value="">Toutes catégories</option>
             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
-          <Button size="sm" onClick={() => { setShowForm(true); setForm({ title: "", content: "", category: "" }); }} className="h-8 gap-1">
+          <Button size="sm" onClick={() => { setShowForm(true); setEditId(null); setForm({ title: "", content: "", category: "" }); }} className="h-8 gap-1">
             <Plus className="h-3.5 w-3.5" /> Partager
           </Button>
         </div>
@@ -104,8 +115,8 @@ export function TechTipsTab({ siteId, currentPersonId }: TechTipsTabProps) {
       {showForm && (
         <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-medium text-sm">Nouveau conseil technique</h3>
-            <Button variant="ghost" size="sm" onClick={() => setShowForm(false)}><X className="h-4 w-4" /></Button>
+            <h3 className="font-medium text-sm">{editId ? "Modifier le conseil technique" : "Nouveau conseil technique"}</h3>
+            <Button variant="ghost" size="sm" onClick={() => { setShowForm(false); setEditId(null); }}><X className="h-4 w-4" /></Button>
           </div>
           <Input placeholder="Titre *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="h-8 text-sm" />
           <textarea
@@ -124,7 +135,7 @@ export function TechTipsTab({ siteId, currentPersonId }: TechTipsTabProps) {
               <option value="">Catégorie</option>
               {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
-            <Button size="sm" onClick={handleSubmit} className="h-8">Publier</Button>
+            <Button size="sm" onClick={handleSubmit} className="h-8">{editId ? "Enregistrer" : "Publier"}</Button>
           </div>
         </div>
       )}
@@ -162,7 +173,12 @@ export function TechTipsTab({ siteId, currentPersonId }: TechTipsTabProps) {
                     <span className="text-xs">{tip.likes.length}</span>
                   </Button>
                   {isMine && (
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(tip.id)} className="h-7 px-1.5 text-red-500"><Trash2 className="h-3 w-3" /></Button>
+                    <>
+                      {tip.likes.length === 0 && (
+                        <Button variant="ghost" size="sm" onClick={() => startEdit(tip)} className="h-7 px-1.5"><Pencil className="h-3 w-3" /></Button>
+                      )}
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(tip.id)} className="h-7 px-1.5 text-red-500"><Trash2 className="h-3 w-3" /></Button>
+                    </>
                   )}
                 </div>
               </div>
@@ -186,9 +202,16 @@ export function TechTipsTab({ siteId, currentPersonId }: TechTipsTabProps) {
                   )}
                 </DialogTitle>
               </DialogHeader>
-              <p className="text-xs text-gray-500">
-                {selectedTip.person.name} · {new Date(selectedTip.createdAt).toLocaleDateString("fr-FR")}
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-gray-500">
+                  {selectedTip.person.name} · {new Date(selectedTip.createdAt).toLocaleDateString("fr-FR")}
+                </p>
+                {selectedTip.person.id === currentPersonId && selectedTip.likes.length === 0 && (
+                  <Button variant="outline" size="sm" onClick={() => startEdit(selectedTip)} className="h-7 gap-1 text-xs">
+                    <Pencil className="h-3 w-3" /> Modifier
+                  </Button>
+                )}
+              </div>
               <div className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded max-h-[60vh] overflow-auto">
                 {selectedTip.content}
               </div>

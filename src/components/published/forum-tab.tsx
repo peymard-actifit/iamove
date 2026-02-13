@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Button, Input } from "@/components/ui";
-import { Plus, MessageCircle, Send, Trash2, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, MessageCircle, Send, Trash2, X, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 
 interface Person {
   id: string;
@@ -39,6 +39,7 @@ export function ForumTab({ siteId, currentPersonId }: ForumTabProps) {
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: "", content: "", category: "" });
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
@@ -54,16 +55,25 @@ export function ForumTab({ siteId, currentPersonId }: ForumTabProps) {
 
   const handleSubmit = async () => {
     if (!form.title || !form.content) return;
+    const method = editId ? "PATCH" : "POST";
+    const body = editId ? { ...form, id: editId } : form;
     const res = await fetch(`/api/sites/${siteId}/forum`, {
-      method: "POST",
+      method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify(body),
     });
     if (res.ok) {
       setShowForm(false);
+      setEditId(null);
       setForm({ title: "", content: "", category: "" });
       fetchPosts();
     }
+  };
+
+  const startEdit = (post: ForumPost) => {
+    setForm({ title: post.title, content: post.content, category: post.category || "" });
+    setEditId(post.id);
+    setShowForm(true);
   };
 
   const handleReply = async (postId: string) => {
@@ -105,7 +115,7 @@ export function ForumTab({ siteId, currentPersonId }: ForumTabProps) {
           <h2 className="text-lg font-semibold">Forum</h2>
           <span className="text-xs text-gray-500">({posts.length} discussion{posts.length > 1 ? "s" : ""})</span>
         </div>
-        <Button size="sm" onClick={() => setShowForm(true)} className="h-8 gap-1">
+        <Button size="sm" onClick={() => { setShowForm(true); setEditId(null); setForm({ title: "", content: "", category: "" }); }} className="h-8 gap-1">
           <Plus className="h-3.5 w-3.5" /> Nouvelle discussion
         </Button>
       </div>
@@ -114,8 +124,8 @@ export function ForumTab({ siteId, currentPersonId }: ForumTabProps) {
       {showForm && (
         <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-medium text-sm">Nouvelle discussion</h3>
-            <Button variant="ghost" size="sm" onClick={() => setShowForm(false)}><X className="h-4 w-4" /></Button>
+            <h3 className="font-medium text-sm">{editId ? "Modifier la discussion" : "Nouvelle discussion"}</h3>
+            <Button variant="ghost" size="sm" onClick={() => { setShowForm(false); setEditId(null); }}><X className="h-4 w-4" /></Button>
           </div>
           <Input placeholder="Titre de la discussion *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="h-8 text-sm" />
           <textarea
@@ -134,7 +144,7 @@ export function ForumTab({ siteId, currentPersonId }: ForumTabProps) {
               <option value="">Catégorie</option>
               {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
-            <Button size="sm" onClick={handleSubmit} className="h-8">Publier</Button>
+            <Button size="sm" onClick={handleSubmit} className="h-8">{editId ? "Enregistrer" : "Publier"}</Button>
           </div>
         </div>
       )}
@@ -170,7 +180,12 @@ export function ForumTab({ siteId, currentPersonId }: ForumTabProps) {
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
                       {isMine && (
-                        <Button variant="ghost" size="sm" onClick={() => handleDelete(post.id)} className="h-7 px-1.5 text-red-500"><Trash2 className="h-3 w-3" /></Button>
+                        <>
+                          {post.replies.length === 0 && (
+                            <Button variant="ghost" size="sm" onClick={() => startEdit(post)} className="h-7 px-1.5"><Pencil className="h-3 w-3" /></Button>
+                          )}
+                          <Button variant="ghost" size="sm" onClick={() => handleDelete(post.id)} className="h-7 px-1.5 text-red-500"><Trash2 className="h-3 w-3" /></Button>
+                        </>
                       )}
                     </div>
                   </div>

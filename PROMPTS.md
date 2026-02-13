@@ -874,4 +874,16 @@ Le prompt n'était pas visible car `flex-1 min-h-0` ne suffisait pas : la chaîn
 → Fichier : `src/components/studio/tabs/tab4-formation.tsx`
 
 ---
+
+## Prompt #78 – Édition conditionnelle Use Cases / Forum / Tech Tips
+
+Ajout de la possibilité pour le propriétaire d'un contenu de le modifier ultérieurement, à condition qu'il n'ait reçu aucune interaction :
+- **Use Cases** : modifiable si aucun like reçu. Guard API (ownership + 0 likes). Bouton Modifier masqué si likes > 0.
+- **Forum** : modifiable si aucune réponse. Nouveau endpoint PATCH avec guard (ownership + 0 replies). Bouton Modifier + formulaire d'édition ajoutés.
+- **Tech Tips** : modifiable si aucun like reçu. Ajout update dans le PATCH existant avec guard (ownership + 0 likes). Bouton Modifier dans la liste + dans la pop-up de détail.
+
+→ API : `use-cases/route.ts`, `forum/route.ts`, `tech-tips/route.ts`
+→ UI : `use-cases-tab.tsx`, `forum-tab.tsx`, `tech-tips-tab.tsx`
+
+---
 *Dernière mise à jour: 2026-02-13*

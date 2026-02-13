@@ -180,7 +180,9 @@ export function UseCasesTab({ siteId, currentPersonId }: UseCasesTabProps) {
                     </Button>
                     {isMine && (
                       <>
-                        <Button variant="ghost" size="sm" onClick={() => startEdit(uc)} className="h-7 px-1.5"><Pencil className="h-3 w-3" /></Button>
+                        {uc.likes.length === 0 && (
+                          <Button variant="ghost" size="sm" onClick={() => startEdit(uc)} className="h-7 px-1.5"><Pencil className="h-3 w-3" /></Button>
+                        )}
                         <Button variant="ghost" size="sm" onClick={() => handleDelete(uc.id)} className="h-7 px-1.5 text-red-500"><Trash2 className="h-3 w-3" /></Button>
                       </>
                     )}
