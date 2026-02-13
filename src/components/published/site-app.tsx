@@ -3,12 +3,15 @@
 import { useState, useCallback, createContext, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger, TabsContent, Button } from "@/components/ui";
-import { Network, User, GraduationCap, ClipboardCheck, LogOut, Users } from "lucide-react";
+import { Network, User, GraduationCap, ClipboardCheck, LogOut, Users, Lightbulb, MessageCircle, Code2 } from "lucide-react";
 import { Tab2Organigramme } from "@/components/studio/tabs/tab2-organigramme";
 import { Tab4Formation } from "@/components/studio/tabs/tab4-formation";
 import { Tab5Quiz } from "@/components/studio/tabs/tab5-quiz";
 import { PersonalProfileEditor } from "./personal-profile-editor";
 import { AdminPersonsManager } from "./admin-persons-manager";
+import { UseCasesTab } from "./use-cases-tab";
+import { ForumTab } from "./forum-tab";
+import { TechTipsTab } from "./tech-tips-tab";
 import { DynamicFavicon } from "./dynamic-favicon";
 import { LevelSelfAssessment } from "./level-self-assessment";
 import { LanguageSelector } from "@/components/studio/language-selector";
@@ -217,6 +220,18 @@ export function PublishedSiteApp({
                   <span className="hidden sm:inline">{t.tabs.training}</span>
                 </TabsTrigger>
               )}
+              <TabsTrigger value="tab-usecases" className="gap-1" data-pp-menu="tab-usecases">
+                <Lightbulb className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Use Cases</span>
+              </TabsTrigger>
+              <TabsTrigger value="tab-forum" className="gap-1" data-pp-menu="tab-forum">
+                <MessageCircle className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Forum</span>
+              </TabsTrigger>
+              <TabsTrigger value="tab-tech" className="gap-1" data-pp-menu="tab-tech">
+                <Code2 className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Tech</span>
+              </TabsTrigger>
               {isPersonAdmin && (
                 <TabsTrigger value="tab-admin" className="gap-1" data-pp-menu="tab-admin">
                   <Users className="h-3.5 w-3.5" />
@@ -295,6 +310,24 @@ export function PublishedSiteApp({
               currentLevel={currentPerson?.currentLevel || 0}
               levelsWithTranslations={levels}
             />
+          </TabsContent>
+
+          <TabsContent value="tab-usecases" className="mt-0 flex-1 min-h-0 data-[state=inactive]:hidden flex flex-col">
+            {currentPerson && (
+              <UseCasesTab siteId={site.id} currentPersonId={currentPerson.id} />
+            )}
+          </TabsContent>
+
+          <TabsContent value="tab-forum" className="mt-0 flex-1 min-h-0 data-[state=inactive]:hidden flex flex-col">
+            {currentPerson && (
+              <ForumTab siteId={site.id} currentPersonId={currentPerson.id} />
+            )}
+          </TabsContent>
+
+          <TabsContent value="tab-tech" className="mt-0 flex-1 min-h-0 data-[state=inactive]:hidden flex flex-col">
+            {currentPerson && (
+              <TechTipsTab siteId={site.id} currentPersonId={currentPerson.id} />
+            )}
           </TabsContent>
 
           {isPersonAdmin && (

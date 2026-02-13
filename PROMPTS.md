@@ -789,4 +789,50 @@ Renommer l'onglet "Utilisateurs" en "Personnes" pour les admins en site publié.
   - `src/app/s/[slug]/app/page.tsx`
 
 ---
+
+## Prompt #74 – Use Cases, Forum, Tech, Activité, Badges (Serious Game complet)
+
+**Demande** : Créer un écosystème complet de collaboration et de gamification :
+- Onglet **Use Cases** : personnes partagent leurs cas d'usage IA (création, likes, catégories, outils, impact)
+- Onglet **Forum** : discussions par site avec réponses imbriquées
+- Onglet **Tech** : partage de conseils techniques (API, outils, méthodes, prompts)
+- **Résumé d'activité** dans l'onglet Profil (formations, quiz, chat, use cases, forum, tech, badges)
+- Onglet **Serious G** dans le Studio pour gérer les badges (création, attribution, PP reward)
+- **Intégration PP** : chaque action (créer, liker, poster, répondre) rapporte des PP
+
+**Schema Prisma** (nouveaux modèles) :
+- `UseCase` + `UseCaseLike` (use cases IA + likes)
+- `ForumPost` + `ForumReply` (forum + réponses)
+- `TechTip` + `TechTipLike` (conseils techniques + likes)
+- `Badge` + `PersonBadge` (badges + attribution)
+
+**API Routes** (nouvelles) :
+- `/api/sites/[siteId]/use-cases` (GET, POST, PATCH, DELETE)
+- `/api/sites/[siteId]/forum` (GET, POST, DELETE)
+- `/api/sites/[siteId]/forum/[postId]/replies` (POST)
+- `/api/sites/[siteId]/tech-tips` (GET, POST, PATCH, DELETE)
+- `/api/sites/[siteId]/badges` (GET, POST, PATCH, DELETE)
+- `/api/sites/[siteId]/activity` (GET - résumé activité d'une personne)
+
+**PP Gains** (nouvelles actions) :
+- Use case créé : +50 PP, liké : +5 PP
+- Forum post : +20 PP, réponse : +10 PP
+- Tech tip : +30 PP, liké : +5 PP
+- Badge PP reward configurable par badge
+
+**Composants UI** (nouveaux fichiers) :
+- `src/components/published/use-cases-tab.tsx`
+- `src/components/published/forum-tab.tsx`
+- `src/components/published/tech-tips-tab.tsx`
+- `src/components/published/activity-summary.tsx`
+- `src/components/studio/tabs/tab6-serious-game.tsx`
+
+**Fichiers modifiés** :
+- `prisma/schema.prisma` (8 nouveaux modèles + relations Person/Site)
+- `src/lib/pp-rules.ts` (6 nouvelles actions PP)
+- `src/components/published/site-app.tsx` (3 nouveaux onglets)
+- `src/components/published/personal-profile-editor.tsx` (ActivitySummary)
+- `src/components/studio/site-editor.tsx` (onglet Serious G)
+
+---
 *Dernière mise à jour: 2026-02-13*

@@ -22,11 +22,13 @@ import {
   GraduationCap,
   ClipboardCheck,
   Plus,
+  Gamepad2,
 } from "lucide-react";
 import { Tab1Persons } from "./tabs/tab1-persons";
 import { Tab2Organigramme } from "./tabs/tab2-organigramme";
 import { Tab4Formation } from "./tabs/tab4-formation";
 import { Tab5Quiz } from "./tabs/tab5-quiz";
+import { Tab6SeriousGame } from "./tabs/tab6-serious-game";
 import { SiteSettingsPanel } from "./site-settings-panel";
 import { SiteHeaderContent } from "./site-header-content";
 import { useI18n } from "@/lib/i18n";
@@ -195,6 +197,10 @@ export function SiteEditor({ site, levels, currentUserEmail }: SiteEditorProps) 
                     <span className="hidden sm:inline">{settings.tab4Title}</span>
                   </TabsTrigger>
                 )}
+                <TabsTrigger value="tab6" className="gap-2">
+                  <Gamepad2 className="h-4 w-4" />
+                  <span className="hidden sm:inline">Serious G</span>
+                </TabsTrigger>
               </TabsList>
               <Button size="sm" onClick={() => setShowAddPersonDialog(true)}>
                 <Plus className="h-4 w-4 mr-1" />
@@ -237,6 +243,13 @@ export function SiteEditor({ site, levels, currentUserEmail }: SiteEditorProps) 
               <Tab4Formation
                 siteId={site.id}
                 isStudioMode={true}
+              />
+            </TabsContent>
+
+            <TabsContent value="tab6" className="mt-2">
+              <Tab6SeriousGame
+                siteId={site.id}
+                persons={site.persons.map((p) => ({ id: p.id, name: p.name }))}
               />
             </TabsContent>
           </Tabs>

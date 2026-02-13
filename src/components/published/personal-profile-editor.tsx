@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, Button, Input } from "@/compo
 import { Mail, Briefcase, Building, Edit, Save, X, User, ShieldCheck } from "lucide-react";
 import { getLevelIcon, getLevelInfo } from "@/lib/levels";
 import { useI18n } from "@/lib/i18n";
+import { ActivitySummary } from "./activity-summary";
 
 interface Person {
   id: string;
@@ -332,6 +333,13 @@ export function PersonalProfileEditor({
               {t.published.categoryUpdatedAuto}
             </p>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Résumé d'activité */}
+      <Card>
+        <CardContent className="pt-4">
+          <ActivitySummary siteId={siteId} personId={person.id} />
         </CardContent>
       </Card>
     </div>

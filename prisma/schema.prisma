@@ -93,6 +93,10 @@ model Site {
   persons       Person[]
   settings      SiteSettings?
   registrationTokens RegistrationToken[]
+  useCases      UseCase[]
+  forumPosts    ForumPost[]
+  techTips      TechTip[]
+  badges        Badge[]
 
   @@map("sites")
 }
@@ -218,6 +222,21 @@ model Person {
   
   // Progression de formation
   trainingProgress  PersonTrainingProgress[]
+
+  // Use cases IA
+  useCases          UseCase[]
+  useCaseLikes      UseCaseLike[]
+
+  // Forum
+  forumPosts        ForumPost[]
+  forumReplies      ForumReply[]
+
+  // Tech tips
+  techTips          TechTip[]
+  techTipLikes      TechTipLike[]
+
+  // Badges
+  badges            PersonBadge[]
 
   @@unique([siteId, email])
   @@map("persons")
@@ -657,4 +676,156 @@ model Translation {
 enum TranslationType {
   GLOBAL
   LOCAL
+}
+
+// =============================================================================
+// USE CASES IA (partage d'expériences entre personnes)
+// =============================================================================
+
+model UseCase {
+  id          String        @id @default(cuid())
+  title       String
+  description String        @db.Text
+  category    String?       // "Automatisation", "Analyse", "Génération", "Productivité", etc.
+  tools       String?       // Outils utilisés (ChatGPT, Copilot, etc.)
+  impact      String?       // Impact observé
+  status      UseCaseStatus @default(PUBLISHED)
+
+  person      Person        @relation(fields: [personId], references: [id], onDelete: Cascade)
+  personId    String
+  site        Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  siteId      String
+
+  likes       UseCaseLike[]
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("use_cases")
+}
+
+enum UseCaseStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model UseCaseLike {
+  id        String   @id @default(cuid())
+  useCase   UseCase  @relation(fields: [useCaseId], references: [id], onDelete: Cascade)
+  useCaseId String
+  person    Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  personId  String
+  createdAt DateTime @default(now())
+
+  @@unique([useCaseId, personId])
+  @@map("use_case_likes")
+}
+
+// =============================================================================
+// FORUM (discussions par site)
+// =============================================================================
+
+model ForumPost {
+  id        String   @id @default(cuid())
+  title     String
+  content   String   @db.Text
+  category  String?  // "Question", "Discussion", "Partage", "Aide"
+
+  person    Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  personId  String
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  siteId    String
+
+  replies   ForumReply[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("forum_posts")
+}
+
+model ForumReply {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+
+  person    Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  personId  String
+  post      ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("forum_replies")
+}
+
+// =============================================================================
+// TECH TIPS (conseils techniques partagés)
+// =============================================================================
+
+model TechTip {
+  id        String   @id @default(cuid())
+  title     String
+  content   String   @db.Text
+  category  String?  // "API", "Outil", "Méthode", "Service Web", "Prompt"
+
+  person    Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  personId  String
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  siteId    String
+
+  likes     TechTipLike[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tech_tips")
+}
+
+model TechTipLike {
+  id        String   @id @default(cuid())
+  techTip   TechTip  @relation(fields: [techTipId], references: [id], onDelete: Cascade)
+  techTipId String
+  person    Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  personId  String
+  createdAt DateTime @default(now())
+
+  @@unique([techTipId, personId])
+  @@map("tech_tip_likes")
+}
+
+// =============================================================================
+// BADGES (Serious Game)
+// =============================================================================
+
+model Badge {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  icon        String?  // Emoji ou nom d'icône
+  category    String?  // "Formation", "Quiz", "UseCase", "Forum", "Tech", "PP"
+  criteria    String?  @db.Text // JSON : conditions d'obtention
+  ppReward    Int      @default(0) // PP gagnés en obtenant ce badge
+
+  site        Site?    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  siteId      String?  // null = badge global
+
+  earnedBy    PersonBadge[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("badges")
+}
+
+model PersonBadge {
+  id        String   @id @default(cuid())
+  person    Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  personId  String
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  badgeId   String
+  earnedAt  DateTime @default(now())
+
+  @@unique([personId, badgeId])
+  @@map("person_badges")
 }

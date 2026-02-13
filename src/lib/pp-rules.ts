@@ -14,7 +14,13 @@ export type PPAction =
   | "quiz_all_questions_level"
   | "quiz_all_questions_all_levels"
   | "formation_prompt"
-  | "knowledge_view";
+  | "knowledge_view"
+  | "usecase_create"
+  | "usecase_like"
+  | "forum_post"
+  | "forum_reply"
+  | "tech_tip_create"
+  | "tech_tip_like";
 
 export interface PPGainRow {
   action: PPAction;
@@ -81,6 +87,12 @@ export const PP_GAINS: PPGainRow[] = [
     description: "Consulter un élément de la base de connaissances (ex. un niveau)",
     pp: 10,
   },
+  { action: "usecase_create", label: "Publier un Use Case", description: "Partager un cas d'usage IA", pp: 50 },
+  { action: "usecase_like", label: "Liker un Use Case", description: "Apprécier le use case d'un collègue", pp: 5 },
+  { action: "forum_post", label: "Poster sur le Forum", description: "Créer une discussion sur le forum", pp: 20 },
+  { action: "forum_reply", label: "Répondre sur le Forum", description: "Répondre à une discussion", pp: 10 },
+  { action: "tech_tip_create", label: "Partager un Tech Tip", description: "Partager un conseil technique", pp: 30 },
+  { action: "tech_tip_like", label: "Liker un Tech Tip", description: "Apprécier un conseil technique", pp: 5 },
 ];
 
 const ppByAction: Record<PPAction, number> = {
@@ -95,6 +107,12 @@ const ppByAction: Record<PPAction, number> = {
   quiz_all_questions_all_levels: 100000,
   formation_prompt: 5,
   knowledge_view: 10,
+  usecase_create: 50,
+  usecase_like: 5,
+  forum_post: 20,
+  forum_reply: 10,
+  tech_tip_create: 30,
+  tech_tip_like: 5,
 };
 
 export function getPPForAction(action: PPAction): number {
