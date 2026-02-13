@@ -647,4 +647,24 @@ Le lien permanent reste disponible en parallèle.
   - `src/components/studio/site-settings-panel.tsx` (UI liens)
 
 ---
-*Dernière mise à jour: 2026-02-09*
+
+### Prompt #68 (2026-02-13) - Initialisation de session (revue complète)
+```
+Ceci est le prompt d'initialisation de la session de travail sur Cursor.
+Revue du code, vérification tokens Git/Vercel, synchronisation worktree,
+vérification PROMPTS.md, vérification script de déploiement,
+identification de toutes les limites, rapport complet.
+```
+→ **Revue complète** : Architecture Next.js 16, Prisma 6.5, Neon PostgreSQL, Vercel
+→ **Tokens vérifiés** : GitHub PAT (valide), Vercel Token (valide), DeepL Pro (valide)
+→ **Synchronisation** : Worktree parfaitement synchronisé avec GitHub
+→ **Lignes de code** : ~22 224 (src/) / ~26 359 (total projet)
+→ **Version** : 2.16.2 → 2.16.3
+→ **Limites identifiées** :
+  - OpenAI default maxTokens : 4096 (pourrait être 16384)
+  - Neon pool max : 20 (pourrait être augmenté)
+  - maxBodySize code (10 MB) vs limite réelle Vercel (4.5 MB)
+→ **PROMPTS.md** : 68 prompts historisés
+
+---
+*Dernière mise à jour: 2026-02-13*
