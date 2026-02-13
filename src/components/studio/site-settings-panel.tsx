@@ -11,6 +11,7 @@ interface Site {
   name: string;
   slug: string;
   description: string | null;
+  ownerId: string;
   primaryColor: string;
   secondaryColor: string;
   settings: {
@@ -424,7 +425,7 @@ export function SiteSettingsPanel({
                       <p className="text-xs text-gray-400 italic py-2">Chargement...</p>
                     ) : (
                       <div className="border rounded-lg divide-y divide-gray-100 dark:divide-gray-800 max-h-80 overflow-auto">
-                        {allUsers.map((user) => {
+                        {allUsers.filter((u) => u.id !== site.ownerId).map((user) => {
                           const isShared = sharedUserIds.has(user.id);
                           return (
                             <label

@@ -61,6 +61,7 @@ interface Site {
   slug: string;
   description: string | null;
   isPublished: boolean;
+  ownerId: string;
   primaryColor: string;
   secondaryColor: string;
   settings: {
