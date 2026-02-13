@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import OpenAI from "openai";
 import { OPENAI_CONFIG } from "@/lib/api-config";
+import { checkAndAwardBadges } from "@/lib/badges";
 import levelsData from "@/data/levels.json";
 
 const openai = new OpenAI({
@@ -127,6 +128,7 @@ export async function POST(
         where: { id: personId },
         data: { participationPoints: { increment: 5 }, lastSeenAt: new Date() },
       });
+      checkAndAwardBadges(personId, siteId).catch(() => {});
     }
 
     return NextResponse.json({ response });

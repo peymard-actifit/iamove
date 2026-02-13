@@ -27,14 +27,30 @@ interface Tab6SeriousGameProps {
   persons: Person[];
 }
 
-const BADGE_CATEGORIES = ["Formation", "Quiz", "UseCase", "Forum", "Tech", "PP", "Spécial"];
+const BADGE_CATEGORIES = ["PP", "UseCase", "Forum", "Tech", "Quiz", "Spécial"];
 const BADGE_ICONS = ["🏆", "⭐", "🎯", "🚀", "💡", "🔥", "💎", "🎓", "🏅", "👑", "🌟", "⚡"];
+
+const CRITERIA_LABELS: Record<string, string> = {
+  PP: "PP minimum",
+  UseCase: "Nb use cases",
+  Forum: "Nb posts forum",
+  Tech: "Nb tech tips",
+  Quiz: "Nb questions",
+};
+
+const CRITERIA_TYPES: Record<string, string> = {
+  PP: "pp_threshold",
+  UseCase: "usecase_count",
+  Forum: "forum_count",
+  Tech: "tech_count",
+  Quiz: "quiz_count",
+};
 
 export function Tab6SeriousGame({ siteId, persons }: Tab6SeriousGameProps) {
   const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ name: "", description: "", icon: "🏆", category: "", ppReward: 0 });
+  const [form, setForm] = useState({ name: "", description: "", icon: "🏆", category: "", ppReward: 0, threshold: 0 });
   const [awardBadgeId, setAwardBadgeId] = useState<string | null>(null);
   const [awardPersonId, setAwardPersonId] = useState("");
 
@@ -48,14 +64,19 @@ export function Tab6SeriousGame({ siteId, persons }: Tab6SeriousGameProps) {
 
   const handleCreate = async () => {
     if (!form.name) return;
+    // Construire le criteria JSON si catégorie et seuil définis
+    const criteriaType = form.category ? CRITERIA_TYPES[form.category] : null;
+    const criteria = criteriaType && form.threshold > 0
+      ? { type: criteriaType, value: form.threshold }
+      : undefined;
     const res = await fetch(`/api/sites/${siteId}/badges`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ ...form, criteria }),
     });
     if (res.ok) {
       setShowForm(false);
-      setForm({ name: "", description: "", icon: "🏆", category: "", ppReward: 0 });
+      setForm({ name: "", description: "", icon: "🏆", category: "", ppReward: 0, threshold: 0 });
       fetchBadges();
     }
   };
@@ -128,8 +149,14 @@ export function Tab6SeriousGame({ siteId, persons }: Tab6SeriousGameProps) {
                 <option value="">Catégorie</option>
                 {BADGE_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
+              {form.category && form.category !== "Spécial" && CRITERIA_LABELS[form.category] && (
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-gray-500">{CRITERIA_LABELS[form.category]} :</span>
+                  <Input type="number" value={form.threshold} onChange={(e) => setForm({ ...form, threshold: parseInt(e.target.value) || 0 })} className="h-8 text-sm w-24" placeholder="Seuil" />
+                </div>
+              )}
               <div className="flex items-center gap-1">
-                <span className="text-xs text-gray-500">PP:</span>
+                <span className="text-xs text-gray-500">PP récompense :</span>
                 <Input type="number" value={form.ppReward} onChange={(e) => setForm({ ...form, ppReward: parseInt(e.target.value) || 0 })} className="h-8 text-sm w-20" />
               </div>
               <Button size="sm" onClick={handleCreate} className="h-8">Créer</Button>
@@ -147,6 +174,7 @@ export function Tab6SeriousGame({ siteId, persons }: Tab6SeriousGameProps) {
                   <TableHead className="text-xs py-1 w-10"></TableHead>
                   <TableHead className="text-xs py-1">Nom</TableHead>
                   <TableHead className="text-xs py-1">Catégorie</TableHead>
+                  <TableHead className="text-xs py-1 w-20">Seuil</TableHead>
                   <TableHead className="text-xs py-1 w-16">PP</TableHead>
                   <TableHead className="text-xs py-1">Attribué à</TableHead>
                   <TableHead className="text-xs py-1 w-20">Actions</TableHead>
@@ -163,6 +191,14 @@ export function Tab6SeriousGame({ siteId, persons }: Tab6SeriousGameProps) {
                       </div>
                     </TableCell>
                     <TableCell className="py-0.5 text-xs text-gray-500">{badge.category || "—"}</TableCell>
+                    <TableCell className="py-0.5 text-xs text-gray-500">
+                      {(() => {
+                        try {
+                          const c = badge.criteria ? JSON.parse(badge.criteria) : null;
+                          return c?.value ? `≥ ${c.value}` : "Manuel";
+                        } catch { return "Manuel"; }
+                      })()}
+                    </TableCell>
                     <TableCell className="py-0.5 text-xs font-medium">{badge.ppReward > 0 ? `+${badge.ppReward}` : "—"}</TableCell>
                     <TableCell className="py-0.5">
                       <div className="flex flex-wrap gap-1">

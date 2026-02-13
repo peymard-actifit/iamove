@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, Button, Input } from "@/components/ui";
-import { Mail, Briefcase, Building, Edit, Save, X, User, ShieldCheck } from "lucide-react";
+import { Mail, Briefcase, Building, Edit, Save, X, User, ShieldCheck, Award } from "lucide-react";
 import { getLevelIcon, getLevelInfo } from "@/lib/levels";
 import { useI18n } from "@/lib/i18n";
 import { ActivitySummary } from "./activity-summary";
@@ -99,6 +99,17 @@ export function PersonalProfileEditor({
   const { t, language } = useI18n();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [personBadges, setPersonBadges] = useState<{ name: string; icon: string | null; description: string | null }[]>([]);
+
+  useEffect(() => {
+    fetch(`/api/sites/${siteId}/activity?personId=${person.id}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.badges) setPersonBadges(d.badges);
+      })
+      .catch(() => {});
+  }, [siteId, person.id]);
+
   const [editForm, setEditForm] = useState({
     name: person.name,
     email: person.email,
@@ -330,9 +341,33 @@ export function PersonalProfileEditor({
               categoryStyleIndex === 2 ? "text-purple-600 dark:text-purple-400" :
               "text-orange-600 dark:text-orange-400"
             }`}>
-              {t.published.categoryUpdatedAuto}
-            </p>
+            {t.published.categoryUpdatedAuto}
+          </p>
           </div>
+
+          {/* Badges obtenus */}
+          {personBadges.length > 0 && (
+            <div className="border rounded-lg p-4 bg-amber-50/50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800">
+              <div className="flex items-center gap-2 mb-3">
+                <Award className="h-4 w-4 text-amber-500" />
+                <span className="text-sm font-semibold text-amber-700 dark:text-amber-300">
+                  Badges ({personBadges.length})
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {personBadges.map((badge, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-1.5 border border-amber-200 dark:border-amber-700 rounded-full px-3 py-1.5 bg-white dark:bg-gray-800 shadow-sm"
+                    title={badge.description || badge.name}
+                  >
+                    <span className="text-base">{badge.icon || "🏆"}</span>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{badge.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

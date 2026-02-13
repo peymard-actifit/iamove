@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { getPPForAction, type PPAction } from "@/lib/pp-rules";
+import { checkAndAwardBadges } from "@/lib/badges";
 
 /** GET : récupérer les PP et le rang de la personne connectée (site publié, PERSON uniquement) */
 export async function GET(
@@ -91,6 +92,9 @@ export async function POST(
       where: { id: person.id },
       data: { participationPoints: newTotal, lastSeenAt: new Date() },
     });
+
+    // Auto-attribution des badges
+    checkAndAwardBadges(person.id, siteId).catch(() => {});
 
     const rank = await prisma.person.count({
       where: {

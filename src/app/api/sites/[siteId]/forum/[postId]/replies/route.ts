@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { checkAndAwardBadges } from "@/lib/badges";
 
 /** POST : ajouter une réponse à un post du forum */
 export async function POST(
@@ -39,6 +40,7 @@ export async function POST(
       where: { id: personId },
       data: { participationPoints: { increment: 10 }, lastSeenAt: new Date() },
     });
+    checkAndAwardBadges(personId, siteId).catch(() => {});
 
     return NextResponse.json(reply, { status: 201 });
   } catch (error) {

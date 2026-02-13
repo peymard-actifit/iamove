@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { checkAndAwardBadges } from "@/lib/badges";
 
 /** GET : liste des posts du forum */
 export async function GET(
@@ -83,6 +84,7 @@ export async function POST(
       where: { id: personId },
       data: { participationPoints: { increment: 20 }, lastSeenAt: new Date() },
     });
+    checkAndAwardBadges(personId, siteId).catch(() => {});
 
     return NextResponse.json(post, { status: 201 });
   } catch (error) {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { checkAndAwardBadges } from "@/lib/badges";
 
 /** GET : liste des use cases du site */
 export async function GET(
@@ -75,6 +76,7 @@ export async function POST(
       where: { id: personId },
       data: { participationPoints: { increment: 50 }, lastSeenAt: new Date() },
     });
+    checkAndAwardBadges(personId, siteId).catch(() => {});
 
     return NextResponse.json(useCase, { status: 201 });
   } catch (error) {

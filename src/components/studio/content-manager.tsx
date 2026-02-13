@@ -49,6 +49,7 @@ interface UseCaseItem {
   category: string | null;
   tools: string | null;
   impact: string | null;
+  url: string | null;
   person: PersonRef;
   site: SiteRef;
   likes: { personId: string }[];
@@ -346,7 +347,7 @@ function EditDialog({
   const [form, setForm] = useState<Record<string, string>>(() => {
     if (type === "use-cases") {
       const uc = item as UseCaseItem;
-      return { title: uc.title, description: uc.description, category: uc.category || "", tools: uc.tools || "", impact: uc.impact || "" } as Record<string, string>;
+      return { title: uc.title, description: uc.description, category: uc.category || "", tools: uc.tools || "", impact: uc.impact || "", url: uc.url || "" } as Record<string, string>;
     }
     if (type === "forum") {
       const fp = item as ForumItem;
@@ -410,6 +411,12 @@ function EditDialog({
                   className="h-8 text-sm"
                 />
               </div>
+              <Input
+                placeholder="URL à partager (optionnel)"
+                value={form.url || ""}
+                onChange={(e) => setForm({ ...form, url: e.target.value })}
+                className="h-8 text-sm"
+              />
             </>
           ) : (
             <>

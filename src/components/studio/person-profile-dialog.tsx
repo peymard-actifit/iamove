@@ -53,6 +53,20 @@ export function PersonProfileDialog({
   const { t } = useI18n();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [personBadges, setPersonBadges] = useState<{ name: string; icon: string | null; description: string | null }[]>([]);
+
+  useEffect(() => {
+    if (person && open) {
+      fetch(`/api/sites/${siteId}/activity?personId=${person.id}`)
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.badges) setPersonBadges(d.badges);
+          else setPersonBadges([]);
+        })
+        .catch(() => setPersonBadges([]));
+    }
+  }, [siteId, person, open]);
+
   const [editForm, setEditForm] = useState({
     name: "",
     email: "",
@@ -256,6 +270,30 @@ export function PersonProfileDialog({
               <label htmlFor="canViewAll" className="text-sm">
                 {t.profile.expandedViewDescription}
               </label>
+            </div>
+          )}
+
+          {/* Badges */}
+          {personBadges.length > 0 && (
+            <div className="border rounded-lg p-3 bg-amber-50/50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800">
+              <div className="flex items-center gap-2 mb-2">
+                <Award className="h-4 w-4 text-amber-500" />
+                <span className="text-sm font-semibold text-amber-700 dark:text-amber-300">
+                  Badges ({personBadges.length})
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {personBadges.map((badge, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-1.5 border border-amber-200 dark:border-amber-700 rounded-full px-2.5 py-1 bg-white dark:bg-gray-800 shadow-sm"
+                    title={badge.description || badge.name}
+                  >
+                    <span className="text-sm">{badge.icon || "🏆"}</span>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{badge.name}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
