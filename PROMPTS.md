@@ -905,4 +905,26 @@ Fonctionnalité majeure : accès centralisé à tous les contenus de tous les si
 → UI : `components/studio/content-manager.tsx`, `components/studio/header.tsx`
 
 ---
+
+## Prompt #80 – Gestion des utilisateurs Studio (admin)
+
+Ajout d'une interface complète de gestion des utilisateurs Studio, accessible aux administrateurs depuis le menu Utilisateur du header.
+
+### Fonctionnalités :
+- **Liste** de tous les utilisateurs Studio avec nom, email, rôle (Admin/Standard), nombre de sites, dernière connexion
+- **Recherche** par nom ou email
+- **Création** d'un nouvel utilisateur (nom, email, mot de passe, rôle)
+- **Modification** (nom, email) d'un utilisateur existant
+- **Changement de rôle** (Admin ↔ Standard) en un clic
+- **Réinitialisation du mot de passe** via dialogue dédié
+- **Suppression** d'un utilisateur avec confirmation
+- **Protections** : impossible de modifier/supprimer son propre compte via cette interface
+- **Badge "vous"** sur la ligne de l'utilisateur connecté
+
+→ API : `api/studio/users/route.ts` (GET, POST, PATCH, DELETE)
+→ Page : `app/(studio)/users/page.tsx`
+→ UI : `components/studio/studio-users-manager.tsx`
+→ Menu : `components/studio/header.tsx` — lien "Gérer les utilisateurs" dans le menu Utilisateur (admin only)
+
+---
 *Dernière mise à jour: 2026-02-13*

@@ -22,6 +22,7 @@ import {
 } from "@/components/ui";
 import {
   User,
+  Users,
   LogOut,
   Settings,
   Shield,
@@ -197,6 +198,14 @@ export function StudioHeader({ session }: StudioHeaderProps) {
                   {t.user.accountSettings}
                 </Link>
               </DropdownMenuItem>
+              {session.role === "ADMIN" && (
+                <DropdownMenuItem asChild>
+                  <Link href="/users">
+                    <Users className="mr-2 h-4 w-4" />
+                    Gérer les utilisateurs
+                  </Link>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               {session.role === "STANDARD" ? (
                 <DropdownMenuItem onClick={() => setShowAdminDialog(true)}>
