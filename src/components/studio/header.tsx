@@ -31,6 +31,9 @@ import {
   FileQuestion,
   GraduationCap,
   Trophy,
+  Lightbulb,
+  MessageCircle,
+  Code2,
 } from "lucide-react";
 import type { SessionPayload } from "@/lib/auth";
 import { useHeaderContent } from "./header-context";
@@ -132,6 +135,26 @@ export function StudioHeader({ session }: StudioHeaderProps) {
                   <Link href="/levels">
                     <Scale className="mr-2 h-4 w-4" />
                     {t.nav.levelsScale}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-[10px] text-gray-400 uppercase">Contenus cross-site</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <Link href="/content?tab=use-cases">
+                    <Lightbulb className="mr-2 h-4 w-4" />
+                    Use Cases (tous)
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/content?tab=forum">
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    Forum (tous)
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/content?tab=tech-tips">
+                    <Code2 className="mr-2 h-4 w-4" />
+                    Tech Tips (tous)
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>

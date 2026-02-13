@@ -15,9 +15,15 @@ export async function GET(
     const { siteId } = await params;
 
     const tips = await prisma.techTip.findMany({
-      where: { siteId },
+      where: {
+        OR: [
+          { siteId },
+          { sharedWith: { some: { id: siteId } } },
+        ],
+      },
       include: {
         person: { select: { id: true, name: true, jobTitle: true, avatar: true } },
+        site: { select: { id: true, name: true } },
         likes: { select: { personId: true } },
       },
       orderBy: { createdAt: "desc" },

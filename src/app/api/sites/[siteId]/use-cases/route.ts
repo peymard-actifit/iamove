@@ -15,9 +15,15 @@ export async function GET(
     const { siteId } = await params;
 
     const useCases = await prisma.useCase.findMany({
-      where: { siteId, status: "PUBLISHED" },
+      where: {
+        OR: [
+          { siteId, status: "PUBLISHED" },
+          { sharedWith: { some: { id: siteId } }, status: "PUBLISHED" },
+        ],
+      },
       include: {
         person: { select: { id: true, name: true, jobTitle: true, avatar: true } },
+        site: { select: { id: true, name: true } },
         likes: { select: { personId: true } },
       },
       orderBy: { createdAt: "desc" },

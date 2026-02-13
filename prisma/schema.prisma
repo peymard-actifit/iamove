@@ -98,6 +98,11 @@ model Site {
   techTips      TechTip[]
   badges        Badge[]
 
+  // Contenus partagés depuis d'autres sites (accès cross-site, même ID)
+  sharedUseCases  UseCase[]   @relation("SharedUseCases")
+  sharedForumPosts ForumPost[] @relation("SharedForumPosts")
+  sharedTechTips  TechTip[]   @relation("SharedTechTips")
+
   @@map("sites")
 }
 
@@ -697,6 +702,7 @@ model UseCase {
   siteId      String
 
   likes       UseCaseLike[]
+  sharedWith  Site[]        @relation("SharedUseCases")
 
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
@@ -737,6 +743,7 @@ model ForumPost {
   siteId    String
 
   replies   ForumReply[]
+  sharedWith Site[]  @relation("SharedForumPosts")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -775,6 +782,7 @@ model TechTip {
   siteId    String
 
   likes     TechTipLike[]
+  sharedWith Site[]  @relation("SharedTechTips")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

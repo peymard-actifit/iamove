@@ -886,4 +886,23 @@ Ajout de la possibilité pour le propriétaire d'un contenu de le modifier ulté
 → UI : `use-cases-tab.tsx`, `forum-tab.tsx`, `tech-tips-tab.tsx`
 
 ---
+
+## Prompt #79 – Gestion cross-site des contenus (Use Cases, Forum, Tech Tips)
+
+Fonctionnalité majeure : accès centralisé à tous les contenus de tous les sites depuis le Studio, avec possibilité de modifier, supprimer et partager des contenus entre sites.
+
+### Changements :
+- **Schema Prisma** : Ajout de relations many-to-many (`sharedWith`) sur `UseCase`, `ForumPost`, `TechTip` vers `Site` via tables de jonction implicites (`SharedUseCases`, `SharedForumPosts`, `SharedTechTips`). Ajout de `sharedUseCases`, `sharedForumPosts`, `sharedTechTips` sur le modèle `Site`.
+- **API Studio** : Nouvel endpoint `/api/studio/content` (GET, PATCH, DELETE) pour lister, éditer, supprimer et partager/départager du contenu cross-site.
+- **API publiées** : Modification des GET de `use-cases`, `forum`, `tech-tips` pour inclure le contenu partagé (`OR [siteId, sharedWith.some]`).
+- **Page Studio** : Nouvelle page `/content` avec 3 onglets (Use Cases, Forum, Tech Tips). Chaque onglet affiche tous les contenus avec filtre par site, recherche, et actions (éditer, supprimer, partager).
+- **Menu Actions** : 3 nouveaux sous-menus "Contenus cross-site" dans le dropdown Actions du header Studio (Use Cases, Forum, Tech Tips).
+- **Partage** : Dialogue de partage permettant de donner accès à un contenu sur un autre site (même ID, pas de duplication). Le contenu apparaît ensuite dans les onglets du site destinataire.
+
+→ Schema : `prisma/schema.prisma`
+→ API : `api/studio/content/route.ts`, `api/sites/[siteId]/use-cases/route.ts`, `api/sites/[siteId]/forum/route.ts`, `api/sites/[siteId]/tech-tips/route.ts`
+→ Pages : `app/(studio)/content/page.tsx`
+→ UI : `components/studio/content-manager.tsx`, `components/studio/header.tsx`
+
+---
 *Dernière mise à jour: 2026-02-13*
