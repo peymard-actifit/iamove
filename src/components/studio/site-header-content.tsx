@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useHeaderContent } from "./header-context";
 import { Button, SaveIndicator } from "@/components/ui";
@@ -28,6 +28,11 @@ export function SiteHeaderContent({
   const router = useRouter();
   const { t } = useI18n();
   const [publishing, setPublishing] = useState(false);
+
+  // Ref stable pour le callback settings (évite les closures stales dans useEffect)
+  const onSettingsClickRef = useRef(onSettingsClick);
+  onSettingsClickRef.current = onSettingsClick;
+  const stableSettingsClick = useCallback(() => onSettingsClickRef.current(), []);
 
   const handlePublishToggle = async () => {
     setPublishing(true);
@@ -82,7 +87,7 @@ export function SiteHeaderContent({
             Voir le site
           </Button>
         )}
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onSettingsClick} title={t.tooltip.siteSettings}>
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={stableSettingsClick} title={t.tooltip.siteSettings}>
           <Settings className="h-4 w-4" />
         </Button>
       </div>
@@ -92,7 +97,7 @@ export function SiteHeaderContent({
       setCenterContent(null);
       setRightActions(null);
     };
-  }, [siteName, siteSlug, isPublished, saveStatus, publishing, t]);
+  }, [siteName, siteSlug, isPublished, saveStatus, publishing, t, stableSettingsClick]);
 
   return null;
 }

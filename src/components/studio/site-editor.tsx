@@ -169,7 +169,7 @@ export function SiteEditor({ site, levels, currentUserEmail }: SiteEditorProps) 
 
       {/* Main Content */}
       <div className="flex gap-6">
-        <div className={`flex-1 transition-all ${showSettings ? "mr-80" : ""}`}>
+        <div className={`flex-1 transition-all ${showSettings ? "mr-96" : ""}`}>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="flex items-center justify-between w-full">
               <TabsList className="justify-start">
