@@ -41,6 +41,11 @@ enum UserRole {
   ADMIN
 }
 
+enum PersonRole {
+  STANDARD
+  ADMIN
+}
+
 // =============================================================================
 // DOSSIERS DE SITES
 // =============================================================================
@@ -182,6 +187,9 @@ model Person {
   
   // Préférences
   language          String    @default("EN") // Langue préférée (EN par défaut en mode publié)
+  
+  // Rôle dans le site publié (admin = gestion utilisateurs + vue complète)
+  personRole        PersonRole @default(STANDARD)
   
   // Droits spéciaux
   canViewAll        Boolean   @default(false) // Vue élargie

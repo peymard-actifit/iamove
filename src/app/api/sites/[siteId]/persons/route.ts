@@ -3,6 +3,26 @@ import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { generateToken } from "@/lib/utils";
 
+// Vérifier si la session a les droits d'admin sur le site
+async function checkAdminAccess(session: { userId: string; userType: string; role?: string; siteId?: string }, siteId: string) {
+  if (session.userType === "STUDIO_USER") {
+    const site = await prisma.site.findUnique({ where: { id: siteId } });
+    if (!site) return { error: "Site non trouvé", status: 404 };
+    if (session.role !== "ADMIN" && site.ownerId !== session.userId) {
+      return { error: "Non autorisé", status: 403 };
+    }
+    return { ok: true };
+  }
+  if (session.userType === "PERSON") {
+    const person = await prisma.person.findUnique({ where: { id: session.userId } });
+    if (!person || person.siteId !== siteId || person.personRole !== "ADMIN") {
+      return { error: "Non autorisé", status: 403 };
+    }
+    return { ok: true };
+  }
+  return { error: "Non autorisé", status: 401 };
+}
+
 // POST - Créer une personne
 export async function POST(
   request: Request,
@@ -10,7 +30,7 @@ export async function POST(
 ) {
   try {
     const session = await getSession();
-    if (!session || session.userType !== "STUDIO_USER") {
+    if (!session) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
@@ -18,7 +38,13 @@ export async function POST(
     const body = await request.json();
     const { name, email, jobTitle, department, managerId } = body;
 
-    // Vérifier que le site existe et appartient à l'utilisateur
+    // Vérifier les droits (studio user ou person admin)
+    const access = await checkAdminAccess(session, siteId);
+    if ("error" in access) {
+      return NextResponse.json({ error: access.error }, { status: access.status });
+    }
+
+    // Vérifier que le site existe
     const site = await prisma.site.findUnique({
       where: { id: siteId },
       include: { _count: { select: { persons: true } } },
@@ -26,10 +52,6 @@ export async function POST(
 
     if (!site) {
       return NextResponse.json({ error: "Site non trouvé" }, { status: 404 });
-    }
-
-    if (session.role !== "ADMIN" && site.ownerId !== session.userId) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
     }
 
     // Vérifier que l'email n'existe pas déjà dans ce site

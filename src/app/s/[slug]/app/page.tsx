@@ -48,6 +48,7 @@ export default async function PublishedSiteAppPage({ params }: PageProps) {
   // Récupérer la personne connectée
   let currentPerson = null;
   let visiblePersons: typeof site.persons = [];
+  let isPersonAdmin = false;
 
   if (session.userType === "PERSON") {
     currentPerson = site.persons.find((p) => p.id === session.userId);
@@ -56,8 +57,10 @@ export default async function PublishedSiteAppPage({ params }: PageProps) {
       redirect(`/s/${slug}`);
     }
 
-    // Calculer les personnes visibles selon l'organigramme
-    if (currentPerson.canViewAll) {
+    isPersonAdmin = currentPerson.personRole === "ADMIN";
+
+    // Les admins voient toutes les personnes (organigramme complet + gestion)
+    if (isPersonAdmin || currentPerson.canViewAll) {
       visiblePersons = site.persons;
     } else {
       // Récupérer tous les subordonnés récursivement
@@ -71,6 +74,7 @@ export default async function PublishedSiteAppPage({ params }: PageProps) {
   } else if (session.userType === "STUDIO_USER") {
     // L'utilisateur studio voit tout
     visiblePersons = site.persons;
+    isPersonAdmin = true; // studio users have admin-like access
     // Chercher si l'utilisateur studio correspond à une personne du site (par email)
     currentPerson = site.persons.find((p) => p.email === session.email) || null;
   }
@@ -96,8 +100,10 @@ export default async function PublishedSiteAppPage({ params }: PageProps) {
       site={site}
       currentPerson={currentPerson}
       visiblePersons={visiblePersons}
+      allPersons={site.persons}
       levels={levels}
       isStudioUser={session.userType === "STUDIO_USER"}
+      isPersonAdmin={isPersonAdmin}
       initialPP={pp}
       initialRank={rank}
     />

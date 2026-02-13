@@ -17,7 +17,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui";
-import { Trash2, Copy, Eye, ArrowUp, ArrowDown, KeyRound, Loader2 } from "lucide-react";
+import { Trash2, Copy, Eye, ArrowUp, ArrowDown, KeyRound, Loader2, Shield, ShieldCheck } from "lucide-react";
 import { getLevelIcon, getLevelInfo } from "@/lib/levels";
 import { useI18n } from "@/lib/i18n";
 import { PersonProfileDialog } from "../person-profile-dialog";
@@ -32,6 +32,7 @@ interface Person {
   department: string | null;
   currentLevel: number;
   canViewAll: boolean;
+  personRole: "STANDARD" | "ADMIN";
   managerId: string | null;
   participationPoints?: number;
   manager: { id: string; name: string } | null;
@@ -243,7 +244,7 @@ function ManagerSelector({
   );
 }
 
-type SortColumn = "name" | "email" | "jobTitle" | "department" | "currentLevel" | "manager" | "pp";
+type SortColumn = "name" | "email" | "jobTitle" | "department" | "currentLevel" | "manager" | "personRole" | "pp";
 type SortDirection = "asc" | "desc";
 
 export function Tab1Persons({
@@ -306,6 +307,10 @@ export function Tab1Persons({
       case "manager":
         valueA = (a.manager?.name || "").toLowerCase();
         valueB = (b.manager?.name || "").toLowerCase();
+        break;
+      case "personRole":
+        valueA = a.personRole || "STANDARD";
+        valueB = b.personRole || "STANDARD";
         break;
       case "pp":
         valueA = a.participationPoints ?? 0;
@@ -478,6 +483,16 @@ export function Tab1Persons({
                   </div>
                 </TableHead>
                 <TableHead 
+                  className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-0 w-20"
+                  onClick={() => handleSort("personRole")}
+                  title={sortDirection === "asc" ? t.tooltip.sortDescending : t.tooltip.sortAscending}
+                >
+                  <div className="flex items-center gap-1">
+                    Rôle
+                    {sortColumn === "personRole" && (sortDirection === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+                  </div>
+                </TableHead>
+                <TableHead 
                   className="text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none py-0 w-16"
                   onClick={() => handleSort("pp")}
                   title={sortDirection === "asc" ? t.tooltip.sortDescending : t.tooltip.sortAscending}
@@ -531,6 +546,26 @@ export function Tab1Persons({
                       currentPersonId={person.id}
                       onChange={(v) => updatePerson(person.id, "managerId", v)}
                     />
+                  </TableCell>
+                  <TableCell className="py-0.5">
+                    <span
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        updatePerson(person.id, "personRole", person.personRole === "ADMIN" ? "STANDARD" : "ADMIN");
+                      }}
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs cursor-pointer transition-colors ${
+                        person.personRole === "ADMIN"
+                          ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50"
+                          : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
+                      }`}
+                      title={person.personRole === "ADMIN" ? "Cliquer pour passer en Standard" : "Cliquer pour passer en Admin"}
+                    >
+                      {person.personRole === "ADMIN" ? (
+                        <><ShieldCheck className="h-3 w-3" /> Admin</>
+                      ) : (
+                        <><Shield className="h-3 w-3" /> Standard</>
+                      )}
+                    </span>
                   </TableCell>
                   <TableCell className="py-0.5 text-right tabular-nums text-gray-600 dark:text-gray-400">
                     {person.participationPoints ?? 0}

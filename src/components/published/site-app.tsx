@@ -3,11 +3,12 @@
 import { useState, useCallback, createContext, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger, TabsContent, Button } from "@/components/ui";
-import { Network, User, GraduationCap, ClipboardCheck, LogOut } from "lucide-react";
+import { Network, User, GraduationCap, ClipboardCheck, LogOut, Users } from "lucide-react";
 import { Tab2Organigramme } from "@/components/studio/tabs/tab2-organigramme";
 import { Tab4Formation } from "@/components/studio/tabs/tab4-formation";
 import { Tab5Quiz } from "@/components/studio/tabs/tab5-quiz";
 import { PersonalProfileEditor } from "./personal-profile-editor";
+import { AdminPersonsManager } from "./admin-persons-manager";
 import { DynamicFavicon } from "./dynamic-favicon";
 import { LevelSelfAssessment } from "./level-self-assessment";
 import { LanguageSelector } from "@/components/studio/language-selector";
@@ -24,11 +25,14 @@ interface Person {
   department: string | null;
   currentLevel: number;
   canViewAll: boolean;
+  personRole: "STANDARD" | "ADMIN";
   managerId: string | null;
   isOnline: boolean;
   participationPoints?: number;
   manager: { id: string; name: string } | null;
   subordinates: { id: string; name: string }[];
+  inviteToken?: string | null;
+  password?: string | null;
 }
 
 interface PPContextValue {
@@ -85,8 +89,10 @@ interface PublishedSiteAppProps {
   site: Site;
   currentPerson: Person | null;
   visiblePersons: Person[];
+  allPersons?: Person[];
   levels: Level[];
   isStudioUser: boolean;
+  isPersonAdmin?: boolean;
   initialPP?: number;
   initialRank?: number;
 }
@@ -95,8 +101,10 @@ export function PublishedSiteApp({
   site,
   currentPerson,
   visiblePersons,
+  allPersons,
   levels,
   isStudioUser: _isStudioUser,
+  isPersonAdmin = false,
   initialPP = 0,
   initialRank = 0,
 }: PublishedSiteAppProps) {
@@ -207,6 +215,12 @@ export function PublishedSiteApp({
                   <span className="hidden sm:inline">{t.tabs.training}</span>
                 </TabsTrigger>
               )}
+              {isPersonAdmin && (
+                <TabsTrigger value="tab-admin" className="gap-1" data-pp-menu="tab-admin">
+                  <Users className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Utilisateurs</span>
+                </TabsTrigger>
+              )}
             </TabsList>
             <div className="flex items-center gap-2 flex-shrink-0 flex-1 justify-end">
               {currentPerson && (
@@ -280,6 +294,17 @@ export function PublishedSiteApp({
               levelsWithTranslations={levels}
             />
           </TabsContent>
+
+          {isPersonAdmin && (
+            <TabsContent value="tab-admin" className="mt-0 flex-1 min-h-0 data-[state=inactive]:hidden flex flex-col">
+              <AdminPersonsManager
+                siteId={site.id}
+                siteSlug={site.slug}
+                persons={allPersons || visiblePersons}
+                currentPersonId={currentPerson?.id || ""}
+              />
+            </TabsContent>
+          )}
         </main>
       </Tabs>
     </div>

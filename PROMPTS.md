@@ -667,4 +667,31 @@ identification de toutes les limites, rapport complet.
 → **PROMPTS.md** : 68 prompts historisés
 
 ---
+
+### Prompt #69 (2026-02-13) - Rôle admin pour les personnes des sites publiés
+```
+Dans les sites publiés, je veux pouvoir avoir des Personnes qui soient
+administratrices (admin). Colonne rôle dans le studio. Les admins peuvent
+voir et modifier la liste des utilisateurs et voir l'organigramme complet.
+```
+→ **Nouveau enum Prisma** : `PersonRole` (STANDARD, ADMIN)
+→ **Champ ajouté** : `personRole` sur le modèle `Person` (défaut: STANDARD)
+→ **Studio** : Colonne "Rôle" cliquable (toggle Admin/Standard) dans tab1-persons
+→ **API** : Routes persons (PATCH, DELETE, POST, reset-password) autorisent les persons admin
+→ **Session** : `personRole` inclus dans le JWT lors du login
+→ **Site publié** : Nouvel onglet "Utilisateurs" visible uniquement pour les admins
+→ **Nouveau composant** : `AdminPersonsManager` - gestion complète (CRUD, recherche, tri)
+→ **Organigramme** : Les admins voient toutes les personnes du site
+→ **Fichiers créés/modifiés** :
+  - `prisma/schema.prisma` (enum PersonRole + champ personRole)
+  - `src/components/studio/tabs/tab1-persons.tsx` (colonne Rôle)
+  - `src/app/api/sites/[siteId]/persons/route.ts` (accès admin)
+  - `src/app/api/sites/[siteId]/persons/[personId]/route.ts` (accès admin)
+  - `src/app/api/sites/[siteId]/persons/[personId]/reset-password/route.ts` (accès admin)
+  - `src/lib/auth.ts` (personRole dans session)
+  - `src/app/s/[slug]/app/page.tsx` (isPersonAdmin + allPersons)
+  - `src/components/published/site-app.tsx` (onglet Utilisateurs)
+  - `src/components/published/admin-persons-manager.tsx` (nouveau)
+
+---
 *Dernière mise à jour: 2026-02-13*

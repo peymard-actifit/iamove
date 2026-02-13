@@ -22,6 +22,7 @@ export interface SessionPayload {
   email: string;
   name: string;
   role?: "STANDARD" | "ADMIN";
+  personRole?: "STANDARD" | "ADMIN";
   siteId?: string;
   exp?: number;
 }
@@ -206,6 +207,7 @@ export async function loginPerson(siteSlug: string, email: string, password: str
     userType: "PERSON",
     email: person.email,
     name: person.name,
+    personRole: person.personRole,
     siteId: site.id,
   });
 
