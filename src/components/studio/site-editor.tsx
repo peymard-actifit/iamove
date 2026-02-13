@@ -44,6 +44,7 @@ interface Person {
   personRole: "STANDARD" | "ADMIN";
   managerId: string | null;
   isOnline?: boolean;
+  inviteClickedAt?: string | null;
   participationPoints?: number;
   manager: { id: string; name: string } | null;
   subordinates: { id: string; name: string }[];

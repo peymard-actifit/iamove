@@ -175,6 +175,7 @@ model Person {
   password          String?   // Hash bcrypt (null = pas encore initialisé)
   inviteToken       String?   @unique // Token pour initialiser le mot de passe
   inviteExpiresAt   DateTime?
+  inviteClickedAt   DateTime? // Date du premier clic sur le lien d'invitation (sans finalisation)
   lastLoginAt       DateTime?
   isOnline          Boolean   @default(false)
   lastSeenAt        DateTime?

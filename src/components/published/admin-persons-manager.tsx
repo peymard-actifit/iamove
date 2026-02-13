@@ -43,6 +43,7 @@ interface Person {
   personRole: "STANDARD" | "ADMIN";
   managerId: string | null;
   isOnline: boolean;
+  inviteClickedAt?: string | null;
   participationPoints?: number;
   manager: { id: string; name: string } | null;
   subordinates: { id: string; name: string }[];
@@ -124,6 +125,20 @@ function EditableCell({
       {value || <span className="text-gray-400">{placeholder}</span>}
     </span>
   );
+}
+
+// Point de statut coloré selon l'état du compte
+function PersonStatusDot({ person }: { person: Person }) {
+  if (person.isOnline) {
+    return <span className="block h-1.5 w-1.5 rounded-full bg-green-500" title="En ligne" />;
+  }
+  if (person.password) {
+    return <span className="block h-1.5 w-1.5 rounded-full bg-blue-500" title="Compte actif" />;
+  }
+  if (person.inviteClickedAt) {
+    return <span className="block h-1.5 w-1.5 rounded-full bg-red-500" title="Invitation ouverte, compte non finalisé" />;
+  }
+  return <span className="block h-1.5 w-1.5 rounded-full bg-orange-400" title="Invitation non encore ouverte" />;
 }
 
 type SortColumn = "name" | "email" | "jobTitle" | "department" | "currentLevel" | "pp";
@@ -351,6 +366,13 @@ export function AdminPersonsManager({
 
       {/* Tableau */}
       <div className="border rounded-lg overflow-hidden">
+        {/* Légende des statuts */}
+        <div className="flex items-center gap-4 px-3 py-1.5 bg-gray-50 dark:bg-gray-800/50 border-b text-[10px] text-gray-500">
+          <span className="flex items-center gap-1"><span className="block h-1.5 w-1.5 rounded-full bg-green-500" />En ligne</span>
+          <span className="flex items-center gap-1"><span className="block h-1.5 w-1.5 rounded-full bg-blue-500" />Compte actif</span>
+          <span className="flex items-center gap-1"><span className="block h-1.5 w-1.5 rounded-full bg-red-500" />Non finalisé</span>
+          <span className="flex items-center gap-1"><span className="block h-1.5 w-1.5 rounded-full bg-orange-400" />Non créé</span>
+        </div>
         <Table>
           <TableHeader>
             <TableRow className="h-7">
@@ -421,9 +443,7 @@ export function AdminPersonsManager({
                   <TableCell className="py-0.5 font-medium">
                     <div className="flex items-center gap-1.5">
                       <span className="h-1.5 w-1.5 flex-shrink-0">
-                        {person.isOnline && (
-                          <span className="block h-1.5 w-1.5 rounded-full bg-green-500" />
-                        )}
+                        <PersonStatusDot person={person} />
                       </span>
                       <EditableCell
                         value={person.name}

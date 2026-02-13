@@ -84,6 +84,22 @@ export default async function PublishedSiteAppPage({ params }: PageProps) {
     include: { translations: true },
   });
 
+  // Sérialiser inviteClickedAt (Date -> string) pour les composants client
+  const serializePersons = (persons: typeof site.persons) =>
+    persons.map((p) => ({
+      ...p,
+      inviteClickedAt: p.inviteClickedAt?.toISOString() ?? null,
+      password: p.password ? "[SET]" : null, // Ne pas exposer le hash
+    }));
+
+  const safeVisiblePersons = serializePersons(visiblePersons);
+  const safeAllPersons = serializePersons(site.persons);
+  const safeCurrentPerson = currentPerson ? {
+    ...currentPerson,
+    inviteClickedAt: currentPerson.inviteClickedAt?.toISOString() ?? null,
+    password: currentPerson.password ? "[SET]" : null,
+  } : null;
+
   const pp = currentPerson?.participationPoints ?? 0;
   const rank =
     currentPerson != null
@@ -98,9 +114,9 @@ export default async function PublishedSiteAppPage({ params }: PageProps) {
   return (
     <PublishedSiteApp
       site={site}
-      currentPerson={currentPerson}
-      visiblePersons={visiblePersons}
-      allPersons={site.persons}
+      currentPerson={safeCurrentPerson}
+      visiblePersons={safeVisiblePersons}
+      allPersons={safeAllPersons}
       levels={levels}
       isStudioUser={session.userType === "STUDIO_USER"}
       isPersonAdmin={isPersonAdmin}

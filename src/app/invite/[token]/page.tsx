@@ -30,6 +30,14 @@ export default async function InvitePage({ params }: PageProps) {
     notFound();
   }
 
+  // Tracker la visite sur la page d'invitation (premier clic)
+  if (!person.inviteClickedAt) {
+    await prisma.person.update({
+      where: { id: person.id },
+      data: { inviteClickedAt: new Date() },
+    });
+  }
+
   // Vérifier si le mot de passe a déjà été défini
   if (person.password) {
     return (

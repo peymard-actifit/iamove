@@ -727,4 +727,32 @@ Renommer l'onglet "Utilisateurs" en "Personnes" pour les admins en site publié.
   - `src/components/published/site-app.tsx` (renommage onglet)
 
 ---
+
+## Prompt #72 – Système de statuts colorés des personnes (4 couleurs)
+
+**Demande** : Remplacer le simple point vert (en ligne) par un système à 4 statuts colorés :
+- 🟢 **Vert** = En ligne (connecté actuellement)
+- 🔵 **Bleu** = Compte actif (mot de passe défini, s'est déjà connecté)
+- 🔴 **Rouge** = Invitation ouverte mais compte non finalisé (lien cliqué sans finalisation)
+- 🟠 **Orange** = Compte non encore créé (invitation jamais ouverte)
+
+**Changements** :
+→ **Prisma** : ajout du champ `inviteClickedAt DateTime?` au modèle Person
+→ **Tracking invitation** : quand une personne visite `/invite/[token]`, on enregistre `inviteClickedAt`
+→ **Logout corrigé** : `isOnline` passe à `false` lors de la déconnexion (API logout met à jour la DB)
+→ **Composant PersonStatusDot** : créé dans studio et publié, calcule automatiquement la couleur
+→ **Légende** : barre de légende ajoutée au-dessus des tableaux (studio + publié admin)
+→ **Sérialisation** : `inviteClickedAt` converti de Date en string ISO dans les pages serveur
+→ **Fichiers modifiés** :
+  - `prisma/schema.prisma` (inviteClickedAt)
+  - `src/app/invite/[token]/page.tsx` (tracking visite)
+  - `src/app/api/auth/logout/route.ts` (isOnline=false)
+  - `src/components/studio/tabs/tab1-persons.tsx` (PersonStatusDot + légende)
+  - `src/components/studio/site-editor.tsx` (inviteClickedAt interface)
+  - `src/components/published/admin-persons-manager.tsx` (PersonStatusDot + légende)
+  - `src/components/published/site-app.tsx` (inviteClickedAt interface)
+  - `src/app/(studio)/studio/[siteId]/page.tsx` (sérialisation)
+  - `src/app/s/[slug]/app/page.tsx` (sérialisation)
+
+---
 *Dernière mise à jour: 2026-02-13*
