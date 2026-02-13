@@ -866,4 +866,12 @@ Renommer l'onglet "Utilisateurs" en "Personnes" pour les admins en site publié.
 → Fichiers : `use-cases-tab.tsx`, `tab2-organigramme.tsx`, `site-app.tsx`, `tab4-formation.tsx`
 
 ---
+
+## Prompt #77 – Fix : prompt Formation IA invisible (hauteur explicite)
+
+Le prompt n'était pas visible car `flex-1 min-h-0` ne suffisait pas : la chaîne de hauteurs flex n'était pas continue jusqu'au viewport. Fix : hauteur explicite `calc(100vh - 7rem)` sur le conteneur formation publié pour garantir que les panneaux gauche/droite ont une hauteur fixe et que le prompt reste visible en bas.
+
+→ Fichier : `src/components/studio/tabs/tab4-formation.tsx`
+
+---
 *Dernière mise à jour: 2026-02-13*

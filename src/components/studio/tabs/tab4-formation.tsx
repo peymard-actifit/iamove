@@ -500,7 +500,8 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
   return (
     <div
       ref={containerRef}
-      className={`flex flex-1 min-h-0 w-full ${isDragging ? "select-none" : ""}`}
+      className={`flex w-full ${isDragging ? "select-none" : ""}`}
+      style={{ height: "calc(100vh - 7rem)" }}
     >
       {/* Partie gauche : prompt / assistant OpenAI – le prompt reste fixe en bas */}
       <div
