@@ -419,16 +419,18 @@ export function AdminPersonsManager({
                   className={`group h-7 ${isSelf ? "bg-blue-50/50 dark:bg-blue-900/10" : ""}`}
                 >
                   <TableCell className="py-0.5 font-medium">
-                    <div className="flex items-center gap-1">
-                      {person.isOnline && (
-                        <span className="h-1.5 w-1.5 rounded-full bg-green-500 flex-shrink-0" />
-                      )}
+                    <div className="flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 flex-shrink-0">
+                        {person.isOnline && (
+                          <span className="block h-1.5 w-1.5 rounded-full bg-green-500" />
+                        )}
+                      </span>
                       <EditableCell
                         value={person.name}
                         onChange={(v) => updatePerson(person.id, "name", v)}
                       />
                       {isSelf && (
-                        <span className="text-[10px] text-blue-500 font-normal">(vous)</span>
+                        <span className="text-[10px] text-blue-500 font-normal flex-shrink-0">(vous)</span>
                       )}
                     </div>
                   </TableCell>
@@ -463,7 +465,7 @@ export function AdminPersonsManager({
                     {person.participationPoints ?? 0}
                   </TableCell>
                   <TableCell className="py-0.5">
-                    <div className="flex items-center justify-end gap-0.5">
+                    <div className="flex items-center justify-end gap-0.5 w-[68px]">
                       <Button
                         variant="ghost"
                         size="icon"
@@ -493,7 +495,9 @@ export function AdminPersonsManager({
                           <KeyRound className="h-3 w-3" />
                         )}
                       </Button>
-                      {!isSelf && (
+                      {isSelf ? (
+                        <span className="h-5 w-5 flex-shrink-0" />
+                      ) : (
                         <Button
                           variant="ghost"
                           size="icon"

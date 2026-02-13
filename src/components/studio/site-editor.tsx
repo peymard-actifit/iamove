@@ -156,6 +156,7 @@ export function SiteEditor({ site, levels, currentUserEmail }: SiteEditorProps) 
       <SiteHeaderContent
         siteId={site.id}
         siteName={site.name}
+        siteSlug={site.slug}
         isPublished={site.isPublished}
         onSettingsClick={() => setShowSettings(!showSettings)}
         saveStatus={status}

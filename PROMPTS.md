@@ -694,4 +694,23 @@ voir et modifier la liste des utilisateurs et voir l'organigramme complet.
   - `src/components/published/admin-persons-manager.tsx` (nouveau)
 
 ---
+
+### Prompt #70 (2026-02-13) - UX : bouton site publié, badge admin profil, alignements liste admin
+```
+Bouton "Voir le site" dans le header studio quand publié.
+Badge admin/standard dans le profil publié à gauche du bouton Modifier.
+Alignement des noms avec le point vert dans la liste admin publiée.
+Alignement des icônes d'actions même sans icône suppression (pour soi-même).
+```
+→ **Bouton "Voir le site"** : nouveau bouton bleu avec icône ExternalLink, ouvre `/s/{slug}/app` dans un nouvel onglet, visible uniquement quand le site est publié
+→ **Badge Admin profil** : badge ambre "Admin" avec icône ShieldCheck affiché à gauche du bouton Modifier dans la fiche profil en mode publié
+→ **Alignement noms** : espace fixe réservé pour le point vert (1.5px) même quand la personne est hors ligne, tous les noms alignés uniformément
+→ **Alignement icônes** : espace invisible réservé (span 5x5) quand le bouton supprimer est absent (pour l'admin lui-même), les icônes copier et réinitialiser restent alignées
+→ **Fichiers modifiés** :
+  - `src/components/studio/site-header-content.tsx` (bouton Voir le site + prop siteSlug)
+  - `src/components/studio/site-editor.tsx` (passage siteSlug)
+  - `src/components/published/personal-profile-editor.tsx` (badge admin + personRole)
+  - `src/components/published/admin-persons-manager.tsx` (alignements noms et icônes)
+
+---
 *Dernière mise à jour: 2026-02-13*

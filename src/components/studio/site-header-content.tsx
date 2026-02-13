@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useHeaderContent } from "./header-context";
 import { Button, SaveIndicator } from "@/components/ui";
-import { Settings, Globe, GlobeLock } from "lucide-react";
+import { Settings, Globe, GlobeLock, ExternalLink } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 interface SiteHeaderContentProps {
   siteId: string;
   siteName: string;
+  siteSlug: string;
   isPublished: boolean;
   onSettingsClick: () => void;
   saveStatus: "idle" | "saving" | "saved" | "error";
@@ -18,6 +19,7 @@ interface SiteHeaderContentProps {
 export function SiteHeaderContent({
   siteId,
   siteName,
+  siteSlug,
   isPublished,
   onSettingsClick,
   saveStatus,
@@ -68,6 +70,18 @@ export function SiteHeaderContent({
             </>
           )}
         </Button>
+        {isPublished && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.open(`/s/${siteSlug}/app`, "_blank")}
+            className="text-blue-600 border-blue-200 hover:bg-blue-50 dark:border-blue-800 dark:hover:bg-blue-900/20"
+            title="Ouvrir le site publié dans un nouvel onglet"
+          >
+            <ExternalLink className="h-4 w-4 mr-1" />
+            Voir le site
+          </Button>
+        )}
         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onSettingsClick} title={t.tooltip.siteSettings}>
           <Settings className="h-4 w-4" />
         </Button>
@@ -78,7 +92,7 @@ export function SiteHeaderContent({
       setCenterContent(null);
       setRightActions(null);
     };
-  }, [siteName, isPublished, saveStatus, publishing, t]);
+  }, [siteName, siteSlug, isPublished, saveStatus, publishing, t]);
 
   return null;
 }

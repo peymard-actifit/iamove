@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, Button, Input } from "@/components/ui";
-import { Mail, Briefcase, Building, Edit, Save, X, User } from "lucide-react";
+import { Mail, Briefcase, Building, Edit, Save, X, User, ShieldCheck } from "lucide-react";
 import { getLevelIcon, getLevelInfo } from "@/lib/levels";
 import { useI18n } from "@/lib/i18n";
 
@@ -17,6 +17,7 @@ interface Person {
   department: string | null;
   currentLevel: number;
   canViewAll: boolean;
+  personRole?: "STANDARD" | "ADMIN";
   managerId: string | null;
   manager: { id: string; name: string } | null;
   language?: string;
@@ -185,7 +186,13 @@ export function PersonalProfileEditor({
                 )}
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
+              {person.personRole === "ADMIN" && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  Admin
+                </span>
+              )}
               {isEditing ? (
                 <>
                   <Button variant="outline" size="sm" onClick={handleCancel}>
