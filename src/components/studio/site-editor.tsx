@@ -43,6 +43,7 @@ interface Person {
   canViewAll: boolean;
   personRole: "STANDARD" | "ADMIN";
   managerId: string | null;
+  isOnline?: boolean;
   participationPoints?: number;
   manager: { id: string; name: string } | null;
   subordinates: { id: string; name: string }[];

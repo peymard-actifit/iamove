@@ -713,4 +713,18 @@ Alignement des icônes d'actions même sans icône suppression (pour soi-même).
   - `src/components/published/admin-persons-manager.tsx` (alignements noms et icônes)
 
 ---
+
+### Prompt #71 (2026-02-13) - Point vert "en ligne" aussi en studio, onglet renommé "Personnes"
+```
+Le point vert indique isOnline. L'ajouter aussi en mode studio.
+Renommer l'onglet "Utilisateurs" en "Personnes" pour les admins en site publié.
+```
+→ **Point vert studio** : ajout de `isOnline` dans l'interface Person du studio + affichage du point vert avec espace réservé pour l'alignement
+→ **Onglet renommé** : "Utilisateurs" → "Personnes" dans l'onglet admin du site publié
+→ **Fichiers modifiés** :
+  - `src/components/studio/tabs/tab1-persons.tsx` (isOnline + point vert)
+  - `src/components/studio/site-editor.tsx` (isOnline dans interface)
+  - `src/components/published/site-app.tsx` (renommage onglet)
+
+---
 *Dernière mise à jour: 2026-02-13*

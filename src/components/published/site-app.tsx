@@ -218,7 +218,7 @@ export function PublishedSiteApp({
               {isPersonAdmin && (
                 <TabsTrigger value="tab-admin" className="gap-1" data-pp-menu="tab-admin">
                   <Users className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Utilisateurs</span>
+                  <span className="hidden sm:inline">Personnes</span>
                 </TabsTrigger>
               )}
             </TabsList>

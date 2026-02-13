@@ -34,6 +34,7 @@ interface Person {
   canViewAll: boolean;
   personRole: "STANDARD" | "ADMIN";
   managerId: string | null;
+  isOnline?: boolean;
   participationPoints?: number;
   manager: { id: string; name: string } | null;
   inviteToken: string | null;
@@ -509,10 +510,17 @@ export function Tab1Persons({
               {sortedPersons.map((person) => (
                 <TableRow key={person.id} className="group h-6">
                   <TableCell className="py-0.5 font-medium">
-                    <EditableCell
-                      value={person.name}
-                      onChange={(v) => updatePerson(person.id, "name", v)}
-                    />
+                    <div className="flex items-center gap-1">
+                      <span className="h-1.5 w-1.5 flex-shrink-0">
+                        {person.isOnline && (
+                          <span className="block h-1.5 w-1.5 rounded-full bg-green-500" title="En ligne" />
+                        )}
+                      </span>
+                      <EditableCell
+                        value={person.name}
+                        onChange={(v) => updatePerson(person.id, "name", v)}
+                      />
+                    </div>
                   </TableCell>
                   <TableCell className="py-0.5">
                     <EditableCell
