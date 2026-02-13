@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Input } from "@/components/ui";
-import { X, Save, Copy, UserPlus, Check, Loader2, Link2, Share2, Trash2, Settings, FileText, Users } from "lucide-react";
+import { X, Save, Copy, UserPlus, Check, Loader2, Link2, ChevronDown, Settings, FileText, Share2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 interface Site {
@@ -59,7 +59,7 @@ export function SiteSettingsPanel({
 }: SiteSettingsPanelProps) {
   const router = useRouter();
   const { t } = useI18n();
-  const [activeSection, setActiveSection] = useState<SettingsSection>("properties");
+  const [openSection, setOpenSection] = useState<SettingsSection | null>("properties");
   const [formData, setFormData] = useState({
     name: site.name,
     description: site.description || "",
@@ -71,10 +71,10 @@ export function SiteSettingsPanel({
   const [isGeneratingToken, setIsGeneratingToken] = useState(false);
 
   // Partage
-  const [sharedUsers, setSharedUsers] = useState<SharedUser[]>([]);
+  const [sharedUserIds, setSharedUserIds] = useState<Set<string>>(new Set());
   const [allUsers, setAllUsers] = useState<StudioUserOption[]>([]);
-  const [shareSearch, setShareSearch] = useState("");
   const [loadingShare, setLoadingShare] = useState(false);
+  const [sharingLoaded, setSharingLoaded] = useState(false);
 
   const fetchSharing = useCallback(async () => {
     const res = await fetch(`/api/sites/${site.id}`, {
@@ -84,7 +84,7 @@ export function SiteSettingsPanel({
     });
     if (res.ok) {
       const data = await res.json();
-      setSharedUsers(data.sharedWith || []);
+      setSharedUserIds(new Set((data.sharedWith || []).map((u: SharedUser) => u.id)));
     }
   }, [site.id]);
 
@@ -92,38 +92,47 @@ export function SiteSettingsPanel({
     const res = await fetch("/api/studio/users");
     if (res.ok) {
       const users = await res.json();
-      setAllUsers(users.map((u: StudioUserOption & { _count?: { sites: number } }) => ({ id: u.id, name: u.name, email: u.email })));
+      setAllUsers(users.map((u: StudioUserOption & { _count?: { sites: number } }) => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+      })));
     }
   }, []);
 
   useEffect(() => {
-    if (activeSection === "sharing") {
-      fetchSharing();
-      fetchAllUsers();
+    if (openSection === "sharing" && !sharingLoaded) {
+      Promise.all([fetchSharing(), fetchAllUsers()]).then(() => setSharingLoaded(true));
     }
-  }, [activeSection, fetchSharing, fetchAllUsers]);
+  }, [openSection, sharingLoaded, fetchSharing, fetchAllUsers]);
 
-  const handleShare = async (userId: string) => {
+  const toggleShare = async (userId: string) => {
     setLoadingShare(true);
+    const isShared = sharedUserIds.has(userId);
+    const action = isShared ? "unshare" : "share";
     await fetch(`/api/sites/${site.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "share", userId }),
+      body: JSON.stringify({ action, userId }),
     });
-    await fetchSharing();
-    setShareSearch("");
+    setSharedUserIds((prev) => {
+      const next = new Set(prev);
+      if (isShared) next.delete(userId);
+      else next.add(userId);
+      return next;
+    });
     setLoadingShare(false);
   };
 
-  const handleUnshare = async (userId: string) => {
-    setLoadingShare(true);
+  // Sauvegarde auto du toggle inscription publique
+  const handleToggleRegistration = async (checked: boolean) => {
+    setFormData({ ...formData, allowPublicRegistration: checked });
     await fetch(`/api/sites/${site.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "unshare", userId }),
+      body: JSON.stringify({ allowPublicRegistration: checked }),
     });
-    await fetchSharing();
-    setLoadingShare(false);
+    router.refresh();
   };
 
   // Génère un nouveau token à usage unique et le copie
@@ -150,7 +159,7 @@ export function SiteSettingsPanel({
 
   const copyLink = (type: "login" | "register") => {
     const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-    const link = type === "register" 
+    const link = type === "register"
       ? `${baseUrl}/s/${site.slug}/register`
       : `${baseUrl}/s/${site.slug}`;
     navigator.clipboard.writeText(link);
@@ -179,22 +188,19 @@ export function SiteSettingsPanel({
     }
   };
 
-  const sections: { key: SettingsSection; label: string; icon: React.ReactNode }[] = [
-    { key: "properties", label: "Propriétés générales", icon: <Settings className="h-3.5 w-3.5" /> },
-    { key: "registration", label: "Inscriptions", icon: <FileText className="h-3.5 w-3.5" /> },
-    { key: "sharing", label: "Partages", icon: <Share2 className="h-3.5 w-3.5" /> },
-  ];
+  const toggleSection = (key: SettingsSection) => {
+    setOpenSection((prev) => (prev === key ? null : key));
+  };
 
-  // Utilisateurs éligibles au partage (pas déjà partagés, pas le owner)
-  const availableUsers = allUsers.filter(
-    (u) => !sharedUsers.some((s) => s.id === u.id) && shareSearch.length > 0 && (
-      u.name.toLowerCase().includes(shareSearch.toLowerCase()) ||
-      u.email.toLowerCase().includes(shareSearch.toLowerCase())
-    )
-  );
+  const sections: { key: SettingsSection; label: string; icon: React.ReactNode }[] = [
+    { key: "properties", label: "Propriétés générales", icon: <Settings className="h-4 w-4" /> },
+    { key: "registration", label: "Inscriptions", icon: <FileText className="h-4 w-4" /> },
+    { key: "sharing", label: "Partages", icon: <Share2 className="h-4 w-4" /> },
+  ];
 
   return (
     <div className="fixed right-0 top-16 bottom-0 w-96 bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-800 overflow-auto z-50">
+      {/* En-tête */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
         <h3 className="font-semibold">{t.settings.siteSettings}</h3>
         <Button variant="ghost" size="icon" onClick={onClose}>
@@ -202,314 +208,266 @@ export function SiteSettingsPanel({
         </Button>
       </div>
 
-      {/* Navigation sous-menus */}
-      <div className="flex border-b border-gray-200 dark:border-gray-800">
-        {sections.map((s) => (
-          <button
-            key={s.key}
-            onClick={() => setActiveSection(s.key)}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2.5 text-xs font-medium transition-colors ${
-              activeSection === s.key
-                ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
-                : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-            }`}
-          >
-            {s.icon}
-            {s.label}
-          </button>
-        ))}
-      </div>
+      {/* Sections accordéon */}
+      <div className="divide-y divide-gray-200 dark:divide-gray-800">
 
-      <div className="p-4 space-y-6">
-
-        {/* ============================================================= */}
-        {/* PROPRIÉTÉS GÉNÉRALES                                          */}
-        {/* ============================================================= */}
-        {activeSection === "properties" && (
-          <>
-            {/* Informations générales */}
-            <div className="space-y-4">
-              <h4 className="text-sm font-medium text-gray-500">{t.settings.generalInfo}</h4>
-              
-              <div className="space-y-2">
-                <label className="text-sm">{t.sites.siteName}</label>
-                <Input
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder={t.placeholder.enterSiteName}
-                />
+        {sections.map((section) => (
+          <div key={section.key}>
+            {/* Barre de titre cliquable */}
+            <button
+              onClick={() => toggleSection(section.key)}
+              className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+            >
+              <div className="flex items-center gap-2.5 text-sm font-medium text-gray-700 dark:text-gray-200">
+                {section.icon}
+                {section.label}
               </div>
-
-              <div className="space-y-2">
-                <label className="text-sm">{t.sites.siteDescription}</label>
-                <textarea
-                  className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm"
-                  rows={3}
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder={t.placeholder.enterDescription}
-                />
-              </div>
-            </div>
-
-            {/* Couleurs */}
-            <div className="space-y-4">
-              <h4 className="text-sm font-medium text-gray-500">{t.settings.personalization}</h4>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm">{t.settings.primaryColor}</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={formData.primaryColor}
-                      onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                      className="h-10 w-10 rounded cursor-pointer"
-                    />
-                    <Input
-                      value={formData.primaryColor}
-                      onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                      className="flex-1"
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="text-sm">{t.settings.secondaryColor}</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={formData.secondaryColor}
-                      onChange={(e) => setFormData({ ...formData, secondaryColor: e.target.value })}
-                      className="h-10 w-10 rounded cursor-pointer"
-                    />
-                    <Input
-                      value={formData.secondaryColor}
-                      onChange={(e) => setFormData({ ...formData, secondaryColor: e.target.value })}
-                      className="flex-1"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* URL du site */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-500">{t.settings.publishedUrl}</h4>
-              
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs text-gray-500 mb-1">Lien de connexion</p>
-                    <code className="text-xs break-all">
-                      {typeof window !== "undefined" ? window.location.origin : ""}/s/{site.slug}
-                    </code>
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 flex-shrink-0"
-                    onClick={() => copyLink("login")}
-                  >
-                    {copiedLink === "login" ? (
-                      <Check className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Bouton sauvegarder */}
-            <Button onClick={handleSave} className="w-full">
-              <Save className="h-4 w-4 mr-2" />
-              {t.common.save}
-            </Button>
-          </>
-        )}
-
-        {/* ============================================================= */}
-        {/* INSCRIPTIONS                                                   */}
-        {/* ============================================================= */}
-        {activeSection === "registration" && (
-          <>
-            {/* Inscription publique */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-500">Inscription publique</h4>
-              
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.allowPublicRegistration}
-                  onChange={(e) => setFormData({ ...formData, allowPublicRegistration: e.target.checked })}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm">
-                  Autoriser l&apos;auto-inscription
-                </span>
-              </label>
-              
-              <p className="text-xs text-gray-500">
-                Permet à n&apos;importe qui de créer un compte sur ce site via un lien public.
-              </p>
-
-              {formData.allowPublicRegistration && (
-                <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-green-700 dark:text-green-400 mb-1 flex items-center gap-1">
-                        <UserPlus className="h-3 w-3" />
-                        Lien d&apos;inscription permanent
-                      </p>
-                      <code className="text-xs break-all text-green-800 dark:text-green-300">
-                        {typeof window !== "undefined" ? window.location.origin : ""}/s/{site.slug}/register
-                      </code>
-                    </div>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 flex-shrink-0 text-green-600 hover:text-green-700 hover:bg-green-100 dark:hover:bg-green-900/30"
-                      onClick={() => copyLink("register")}
-                    >
-                      {copiedLink === "register" ? (
-                        <Check className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Lien d'inscription à usage unique */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-500">Lien à usage unique</h4>
-              
-              <p className="text-xs text-gray-500">
-                Génère un lien d&apos;inscription qui ne peut être utilisé qu&apos;une seule fois.
-                Un nouveau lien est créé à chaque copie.
-              </p>
-
-              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs text-amber-700 dark:text-amber-400 mb-1 flex items-center gap-1">
-                      <Link2 className="h-3 w-3" />
-                      Lien à usage unique
-                    </p>
-                    <p className="text-xs text-amber-600 dark:text-amber-300">
-                      Cliquez pour générer et copier un nouveau lien
-                    </p>
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 flex-shrink-0 text-amber-600 hover:text-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/30"
-                    onClick={copyOneTimeLink}
-                    disabled={isGeneratingToken}
-                  >
-                    {isGeneratingToken ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : copiedLink === "one-time" ? (
-                      <Check className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Bouton sauvegarder (pour inscription publique) */}
-            <Button onClick={handleSave} className="w-full">
-              <Save className="h-4 w-4 mr-2" />
-              {t.common.save}
-            </Button>
-          </>
-        )}
-
-        {/* ============================================================= */}
-        {/* PARTAGES                                                       */}
-        {/* ============================================================= */}
-        {activeSection === "sharing" && (
-          <>
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-500">Partager ce site</h4>
-              <p className="text-xs text-gray-500">
-                Donnez accès à ce site à d&apos;autres utilisateurs du Studio. Ils pourront le voir et le gérer.
-              </p>
-            </div>
-
-            {/* Utilisateurs ayant accès */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-500 flex items-center gap-1.5">
-                <Users className="h-3.5 w-3.5" />
-                Utilisateurs avec accès ({sharedUsers.length})
-              </h4>
-
-              {sharedUsers.length === 0 ? (
-                <p className="text-xs text-gray-400 italic">Aucun partage pour le moment</p>
-              ) : (
-                <div className="space-y-1.5">
-                  {sharedUsers.map((user) => (
-                    <div key={user.id} className="flex items-center justify-between gap-2 p-2 rounded-md bg-gray-50 dark:bg-gray-800">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium truncate">{user.name}</p>
-                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 px-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                        onClick={() => handleUnshare(user.id)}
-                        disabled={loadingShare}
-                        title="Retirer l'accès"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Ajouter un utilisateur */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-500">Ajouter un utilisateur</h4>
-              <Input
-                placeholder="Rechercher par nom ou email..."
-                value={shareSearch}
-                onChange={(e) => setShareSearch(e.target.value)}
-                className="h-9 text-sm"
+              <ChevronDown
+                className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
+                  openSection === section.key ? "rotate-180" : ""
+                }`}
               />
+            </button>
 
-              {availableUsers.length > 0 && (
-                <div className="max-h-40 overflow-auto border rounded-md bg-white dark:bg-gray-900">
-                  {availableUsers.map((user) => (
-                    <button
-                      key={user.id}
-                      onClick={() => handleShare(user.id)}
-                      disabled={loadingShare}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors border-b last:border-b-0"
-                    >
-                      <Share2 className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <span className="font-medium">{user.name}</span>
-                        <span className="text-xs text-gray-500 ml-2">{user.email}</span>
+            {/* Contenu dépliable */}
+            {openSection === section.key && (
+              <div className="px-4 pb-4 space-y-5">
+
+                {/* ======================================================= */}
+                {/* PROPRIÉTÉS GÉNÉRALES                                     */}
+                {/* ======================================================= */}
+                {section.key === "properties" && (
+                  <>
+                    <div className="space-y-3">
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-gray-500">{t.sites.siteName}</label>
+                        <Input
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          placeholder={t.placeholder.enterSiteName}
+                          className="h-9 text-sm"
+                        />
                       </div>
-                    </button>
-                  ))}
-                </div>
-              )}
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-gray-500">{t.sites.siteDescription}</label>
+                        <textarea
+                          className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm"
+                          rows={2}
+                          value={formData.description}
+                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                          placeholder={t.placeholder.enterDescription}
+                        />
+                      </div>
+                    </div>
 
-              {shareSearch.length > 0 && availableUsers.length === 0 && (
-                <p className="text-xs text-gray-400 italic">Aucun utilisateur trouvé</p>
-              )}
-            </div>
-          </>
-        )}
+                    {/* Couleurs */}
+                    <div className="space-y-3">
+                      <label className="text-xs text-gray-500">{t.settings.personalization}</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <label className="text-xs text-gray-400">{t.settings.primaryColor}</label>
+                          <div className="flex gap-2">
+                            <input
+                              type="color"
+                              value={formData.primaryColor}
+                              onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                              className="h-9 w-9 rounded cursor-pointer"
+                            />
+                            <Input
+                              value={formData.primaryColor}
+                              onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                              className="flex-1 h-9 text-sm"
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-xs text-gray-400">{t.settings.secondaryColor}</label>
+                          <div className="flex gap-2">
+                            <input
+                              type="color"
+                              value={formData.secondaryColor}
+                              onChange={(e) => setFormData({ ...formData, secondaryColor: e.target.value })}
+                              className="h-9 w-9 rounded cursor-pointer"
+                            />
+                            <Input
+                              value={formData.secondaryColor}
+                              onChange={(e) => setFormData({ ...formData, secondaryColor: e.target.value })}
+                              className="flex-1 h-9 text-sm"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* URL du site */}
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs text-gray-500 mb-1">Lien de connexion</p>
+                          <code className="text-xs break-all">
+                            {typeof window !== "undefined" ? window.location.origin : ""}/s/{site.slug}
+                          </code>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 flex-shrink-0"
+                          onClick={() => copyLink("login")}
+                        >
+                          {copiedLink === "login" ? (
+                            <Check className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <Button onClick={handleSave} className="w-full" size="sm">
+                      <Save className="h-4 w-4 mr-2" />
+                      {t.common.save}
+                    </Button>
+                  </>
+                )}
+
+                {/* ======================================================= */}
+                {/* INSCRIPTIONS                                             */}
+                {/* ======================================================= */}
+                {section.key === "registration" && (
+                  <>
+                    {/* Toggle inscription publique — sauvegarde immédiate */}
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.allowPublicRegistration}
+                        onChange={(e) => handleToggleRegistration(e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm">
+                        Autoriser l&apos;auto-inscription
+                      </span>
+                    </label>
+                    <p className="text-xs text-gray-500">
+                      Permet à n&apos;importe qui de créer un compte sur ce site via un lien public.
+                    </p>
+
+                    {formData.allowPublicRegistration && (
+                      <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs text-green-700 dark:text-green-400 mb-1 flex items-center gap-1">
+                              <UserPlus className="h-3 w-3" />
+                              Lien d&apos;inscription permanent
+                            </p>
+                            <code className="text-xs break-all text-green-800 dark:text-green-300">
+                              {typeof window !== "undefined" ? window.location.origin : ""}/s/{site.slug}/register
+                            </code>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 flex-shrink-0 text-green-600 hover:text-green-700 hover:bg-green-100 dark:hover:bg-green-900/30"
+                            onClick={() => copyLink("register")}
+                          >
+                            {copiedLink === "register" ? (
+                              <Check className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <Copy className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Lien à usage unique */}
+                    <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs text-amber-700 dark:text-amber-400 mb-1 flex items-center gap-1">
+                            <Link2 className="h-3 w-3" />
+                            Lien à usage unique
+                          </p>
+                          <p className="text-xs text-amber-600 dark:text-amber-300">
+                            Cliquez pour générer et copier un nouveau lien
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 flex-shrink-0 text-amber-600 hover:text-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/30"
+                          onClick={copyOneTimeLink}
+                          disabled={isGeneratingToken}
+                        >
+                          {isGeneratingToken ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : copiedLink === "one-time" ? (
+                            <Check className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* ======================================================= */}
+                {/* PARTAGES                                                  */}
+                {/* ======================================================= */}
+                {section.key === "sharing" && (
+                  <>
+                    <p className="text-xs text-gray-500">
+                      Cochez les utilisateurs Studio qui doivent avoir accès à ce site.
+                    </p>
+
+                    {allUsers.length === 0 ? (
+                      <p className="text-xs text-gray-400 italic py-2">Chargement...</p>
+                    ) : (
+                      <div className="border rounded-lg divide-y divide-gray-100 dark:divide-gray-800 max-h-80 overflow-auto">
+                        {allUsers.map((user) => {
+                          const isShared = sharedUserIds.has(user.id);
+                          return (
+                            <label
+                              key={user.id}
+                              className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors ${
+                                isShared
+                                  ? "bg-blue-50/50 dark:bg-blue-900/10"
+                                  : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                              }`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isShared}
+                                onChange={() => toggleShare(user.id)}
+                                disabled={loadingShare}
+                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                              />
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-medium truncate">{user.name}</p>
+                                <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                              </div>
+                              {isShared && (
+                                <span className="text-[10px] bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 px-1.5 py-0.5 rounded flex-shrink-0">
+                                  accès
+                                </span>
+                              )}
+                            </label>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {sharedUserIds.size > 0 && (
+                      <p className="text-xs text-blue-600 dark:text-blue-400">
+                        {sharedUserIds.size} utilisateur{sharedUserIds.size > 1 ? "s" : ""} avec accès
+                      </p>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
