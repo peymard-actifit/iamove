@@ -50,7 +50,8 @@ export default async function SiteEditorPage({ params }: PageProps) {
     persons: site.persons.map((person) => ({
       ...person,
       password: person.password ? "[SET]" : null, // Indique si un password existe sans exposer le hash
-      inviteClickedAt: person.inviteClickedAt?.toISOString() ?? null, // Serialiser Date en string
+      inviteClickedAt: person.inviteClickedAt?.toISOString() ?? null,
+      lastSeenAt: person.lastSeenAt?.toISOString() ?? null,
     })),
   };
 

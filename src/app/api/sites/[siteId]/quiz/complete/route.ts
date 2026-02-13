@@ -82,7 +82,7 @@ export async function POST(
     const newTotal = person.participationPoints + toAdd;
     await prisma.person.update({
       where: { id: person.id },
-      data: { participationPoints: newTotal },
+      data: { participationPoints: newTotal, lastSeenAt: new Date() },
     });
 
     const rank = await prisma.person.count({

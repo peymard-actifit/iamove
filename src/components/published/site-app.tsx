@@ -28,6 +28,7 @@ interface Person {
   personRole: "STANDARD" | "ADMIN";
   managerId: string | null;
   isOnline: boolean;
+  lastSeenAt?: string | null;
   inviteClickedAt?: string | null;
   participationPoints?: number;
   manager: { id: string; name: string } | null;

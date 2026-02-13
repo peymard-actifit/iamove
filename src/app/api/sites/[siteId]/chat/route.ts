@@ -125,7 +125,7 @@ export async function POST(
       });
       await prisma.person.update({
         where: { id: personId },
-        data: { participationPoints: { increment: 5 } },
+        data: { participationPoints: { increment: 5 }, lastSeenAt: new Date() },
       });
     }
 

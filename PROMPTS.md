@@ -755,4 +755,38 @@ Renommer l'onglet "Utilisateurs" en "Personnes" pour les admins en site publié.
   - `src/app/s/[slug]/app/page.tsx` (sérialisation)
 
 ---
+
+## Prompt #73 – Statut "en ligne" basé sur l'activité PP (pas isOnline)
+
+**Demande** : Le flag `isOnline` est peu fiable (reste `true` si le navigateur est fermé sans logout). Le vrai indicateur d'activité est l'évolution des PP. Si les PP n'ont pas évolué dans les 15 dernières minutes → bleu (actif), sinon → vert (en ligne).
+
+**Changements** :
+→ **PersonStatusDot** : la logique Vert repose désormais sur `lastSeenAt` < 15 min (au lieu de `isOnline`)
+→ **Tous les endpoints PP** : `lastSeenAt: new Date()` ajouté à chaque mise à jour de PP :
+  - `/api/sites/[siteId]/pp` (POST)
+  - `/api/sites/[siteId]/chat` (POST, +5 PP)
+  - `/api/sites/[siteId]/quiz/complete` (POST)
+  - `/api/auth/login-site` (POST, +10 PP)
+→ **Interfaces Person** : `lastSeenAt` ajouté dans studio, publié, site-editor, site-app
+→ **Sérialisation** : `lastSeenAt` converti de Date en string ISO dans les pages serveur
+
+**Logique finale** :
+1. `password` défini ET `lastSeenAt` < 15 min → 🟢 Vert (en ligne)
+2. `password` défini ET pas d'activité récente → 🔵 Bleu (compte actif)
+3. `password` null ET `inviteClickedAt` défini → 🔴 Rouge (non finalisé)
+4. `password` null ET pas de clic → 🟠 Orange (non créé)
+
+→ **Fichiers modifiés** :
+  - `src/components/studio/tabs/tab1-persons.tsx`
+  - `src/components/studio/site-editor.tsx`
+  - `src/components/published/admin-persons-manager.tsx`
+  - `src/components/published/site-app.tsx`
+  - `src/app/api/sites/[siteId]/pp/route.ts`
+  - `src/app/api/sites/[siteId]/chat/route.ts`
+  - `src/app/api/sites/[siteId]/quiz/complete/route.ts`
+  - `src/app/api/auth/login-site/route.ts`
+  - `src/app/(studio)/studio/[siteId]/page.tsx`
+  - `src/app/s/[slug]/app/page.tsx`
+
+---
 *Dernière mise à jour: 2026-02-13*

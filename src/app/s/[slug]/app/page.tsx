@@ -89,6 +89,7 @@ export default async function PublishedSiteAppPage({ params }: PageProps) {
     persons.map((p) => ({
       ...p,
       inviteClickedAt: p.inviteClickedAt?.toISOString() ?? null,
+      lastSeenAt: p.lastSeenAt?.toISOString() ?? null,
       password: p.password ? "[SET]" : null, // Ne pas exposer le hash
     }));
 
@@ -97,6 +98,7 @@ export default async function PublishedSiteAppPage({ params }: PageProps) {
   const safeCurrentPerson = currentPerson ? {
     ...currentPerson,
     inviteClickedAt: currentPerson.inviteClickedAt?.toISOString() ?? null,
+    lastSeenAt: currentPerson.lastSeenAt?.toISOString() ?? null,
     password: currentPerson.password ? "[SET]" : null,
   } : null;
 

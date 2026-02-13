@@ -43,6 +43,7 @@ interface Person {
   personRole: "STANDARD" | "ADMIN";
   managerId: string | null;
   isOnline: boolean;
+  lastSeenAt?: string | null;
   inviteClickedAt?: string | null;
   participationPoints?: number;
   manager: { id: string; name: string } | null;
@@ -128,11 +129,18 @@ function EditableCell({
 }
 
 // Point de statut coloré selon l'état du compte
+// Vert = activité PP < 15 min, Bleu = compte actif, Rouge = invitation cliquée non finalisée, Orange = non créé
+const ONLINE_THRESHOLD_MS = 15 * 60 * 1000; // 15 minutes
+
 function PersonStatusDot({ person }: { person: Person }) {
-  if (person.isOnline) {
-    return <span className="block h-1.5 w-1.5 rounded-full bg-green-500" title="En ligne" />;
-  }
   if (person.password) {
+    if (person.lastSeenAt) {
+      const lastSeen = new Date(person.lastSeenAt).getTime();
+      const now = Date.now();
+      if (now - lastSeen < ONLINE_THRESHOLD_MS) {
+        return <span className="block h-1.5 w-1.5 rounded-full bg-green-500" title="En ligne (activité < 15 min)" />;
+      }
+    }
     return <span className="block h-1.5 w-1.5 rounded-full bg-blue-500" title="Compte actif" />;
   }
   if (person.inviteClickedAt) {

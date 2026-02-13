@@ -40,6 +40,7 @@ export async function POST(request: Request) {
         where: { id: personId },
         data: {
           isOnline: true,
+          lastSeenAt: new Date(),
           participationPoints: { increment: 10 },
         },
       });
