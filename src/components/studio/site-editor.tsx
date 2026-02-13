@@ -41,6 +41,7 @@ interface Person {
   department: string | null;
   currentLevel: number;
   canViewAll: boolean;
+  personRole: "STANDARD" | "ADMIN";
   managerId: string | null;
   participationPoints?: number;
   manager: { id: string; name: string } | null;
