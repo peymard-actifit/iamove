@@ -30,6 +30,7 @@ model StudioUser {
 
   // Relations
   sites         Site[]
+  sharedSites   Site[]        @relation("SharedSiteUsers") // Sites partagés avec cet utilisateur
   folders       SiteFolder[]
   quizzes       Quiz[]        // Quizz créés par les admins
 
@@ -97,6 +98,9 @@ model Site {
   forumPosts    ForumPost[]
   techTips      TechTip[]
   badges        Badge[]
+
+  // Utilisateurs Studio ayant accès à ce site (partage)
+  sharedWith    StudioUser[]  @relation("SharedSiteUsers")
 
   // Contenus partagés depuis d'autres sites (accès cross-site, même ID)
   sharedUseCases  UseCase[]   @relation("SharedUseCases")

@@ -14,7 +14,12 @@ export async function GET() {
     const sites = await prisma.site.findMany({
       where: session.role === "ADMIN" 
         ? {} 
-        : { ownerId: session.userId },
+        : {
+            OR: [
+              { ownerId: session.userId },
+              { sharedWith: { some: { id: session.userId } } },
+            ],
+          },
       include: {
         owner: { select: { name: true, email: true } },
         _count: { select: { persons: true } },

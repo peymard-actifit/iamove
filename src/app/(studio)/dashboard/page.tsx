@@ -8,11 +8,18 @@ export default async function DashboardPage() {
   
   if (!session) return null;
 
-  // Récupérer les sites de l'utilisateur (ou tous si admin)
+  // Récupérer les sites de l'utilisateur :
+  // - Admin : tous les sites
+  // - Standard : ses propres sites + ceux partagés avec lui
   const sites = await prisma.site.findMany({
     where: session.role === "ADMIN" 
       ? {} 
-      : { ownerId: session.userId },
+      : {
+          OR: [
+            { ownerId: session.userId },
+            { sharedWith: { some: { id: session.userId } } },
+          ],
+        },
     include: {
       owner: {
         select: { name: true, email: true },
@@ -36,7 +43,8 @@ export default async function DashboardPage() {
       <SitesList 
         sites={sites} 
         folders={folders} 
-        isAdmin={session.role === "ADMIN"} 
+        isAdmin={session.role === "ADMIN"}
+        currentUserEmail={session.email}
       />
     </>
   );

@@ -22,6 +22,7 @@ import {
   GlobeLock,
   Users,
   ExternalLink,
+  Share2,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { SiteLanguageSelector } from "./site-language-selector";
@@ -51,9 +52,10 @@ interface SitesListProps {
   sites: Site[];
   folders: Folder[];
   isAdmin: boolean;
+  currentUserEmail?: string;
 }
 
-export function SitesList({ sites, folders, isAdmin }: SitesListProps) {
+export function SitesList({ sites, folders, isAdmin, currentUserEmail }: SitesListProps) {
   const router = useRouter();
   const { t } = useI18n();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -217,6 +219,12 @@ export function SitesList({ sites, folders, isAdmin }: SitesListProps) {
                       <span>•</span>
                       <span className="text-gray-400">{site.owner.name}</span>
                     </>
+                  )}
+                  {!isAdmin && site.owner.email !== currentUserEmail && (
+                    <span className="inline-flex items-center gap-0.5 text-blue-500" title={`Partagé par ${site.owner.name}`}>
+                      <Share2 className="h-3 w-3" />
+                      partagé
+                    </span>
                   )}
                 </div>
               </Card>

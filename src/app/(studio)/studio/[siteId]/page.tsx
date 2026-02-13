@@ -34,9 +34,13 @@ export default async function SiteEditorPage({ params }: PageProps) {
     notFound();
   }
 
-  // Vérifier les droits
+  // Vérifier les droits : propriétaire, admin, ou site partagé avec l'utilisateur
   if (session.role !== "ADMIN" && site.ownerId !== session.userId) {
-    redirect("/dashboard");
+    const isShared = await prisma.site.findFirst({
+      where: { id: siteId, sharedWith: { some: { id: session.userId } } },
+      select: { id: true },
+    });
+    if (!isShared) redirect("/dashboard");
   }
 
   // Récupérer les niveaux disponibles

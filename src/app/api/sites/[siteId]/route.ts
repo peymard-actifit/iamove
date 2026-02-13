@@ -64,8 +64,15 @@ export async function PATCH(
       return NextResponse.json({ error: "Site non trouvé" }, { status: 404 });
     }
 
+    // Vérifier droits : admin, propriétaire, ou utilisateur avec accès partagé
     if (session.role !== "ADMIN" && site.ownerId !== session.userId) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+      const isShared = await prisma.site.findFirst({
+        where: { id: siteId, sharedWith: { some: { id: session.userId } } },
+        select: { id: true },
+      });
+      if (!isShared) {
+        return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+      }
     }
 
     // Préparer les données du site
@@ -86,6 +93,39 @@ export async function PATCH(
           allowPublicRegistration: body.allowPublicRegistration,
         },
       });
+    }
+
+    // Gestion du partage avec d'autres utilisateurs Studio
+    if (body.action === "share" && body.userId) {
+      await prisma.site.update({
+        where: { id: siteId },
+        data: { sharedWith: { connect: { id: body.userId } } },
+      });
+      const updated = await prisma.site.findUnique({
+        where: { id: siteId },
+        include: { sharedWith: { select: { id: true, name: true, email: true } } },
+      });
+      return NextResponse.json(updated);
+    }
+
+    if (body.action === "unshare" && body.userId) {
+      await prisma.site.update({
+        where: { id: siteId },
+        data: { sharedWith: { disconnect: { id: body.userId } } },
+      });
+      const updated = await prisma.site.findUnique({
+        where: { id: siteId },
+        include: { sharedWith: { select: { id: true, name: true, email: true } } },
+      });
+      return NextResponse.json(updated);
+    }
+
+    if (body.action === "get-sharing") {
+      const siteWithSharing = await prisma.site.findUnique({
+        where: { id: siteId },
+        include: { sharedWith: { select: { id: true, name: true, email: true } } },
+      });
+      return NextResponse.json(siteWithSharing);
     }
 
     const updatedSite = await prisma.site.update({

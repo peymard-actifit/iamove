@@ -25,6 +25,8 @@ import {
   Globe,
   Calendar,
   Mail,
+  Link2,
+  Check,
 } from "lucide-react";
 
 interface StudioUser {
@@ -49,6 +51,16 @@ export function StudioUsersManager({ currentUserId }: StudioUsersManagerProps) {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editUser, setEditUser] = useState<StudioUser | null>(null);
   const [resetPasswordUser, setResetPasswordUser] = useState<StudioUser | null>(null);
+  const [copiedUserId, setCopiedUserId] = useState<string | null>(null);
+
+  const copyLoginUrl = (user: StudioUser) => {
+    const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+    const link = `${baseUrl}/login`;
+    const text = `Votre accès Studio iamove :\nURL : ${link}\nEmail : ${user.email}\n\nConnectez-vous avec le mot de passe qui vous a été communiqué.`;
+    navigator.clipboard.writeText(text);
+    setCopiedUserId(user.id);
+    setTimeout(() => setCopiedUserId(null), 2000);
+  };
 
   const fetchUsers = useCallback(async () => {
     const res = await fetch("/api/studio/users");
@@ -211,6 +223,19 @@ export function StudioUsersManager({ currentUserId }: StudioUsersManagerProps) {
                             title="Réinitialiser le mot de passe"
                           >
                             <KeyRound className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyLoginUrl(user)}
+                            className="h-7 px-1.5"
+                            title="Copier l'URL de connexion"
+                          >
+                            {copiedUserId === user.id ? (
+                              <Check className="h-3.5 w-3.5 text-green-500" />
+                            ) : (
+                              <Link2 className="h-3.5 w-3.5 text-blue-500" />
+                            )}
                           </Button>
                           <Button
                             variant="ghost"
