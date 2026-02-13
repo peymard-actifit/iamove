@@ -48,7 +48,7 @@ export async function POST(
     }
     const { siteId } = await params;
     const body = await request.json();
-    const { title, description, category, tools, impact } = body;
+    const { title, description, category, tools, impact, url } = body;
 
     if (!title || !description) {
       return NextResponse.json({ error: "Titre et description requis" }, { status: 400 });
@@ -63,7 +63,7 @@ export async function POST(
     }
 
     const useCase = await prisma.useCase.create({
-      data: { title, description, category, tools, impact, personId, siteId },
+      data: { title, description, category, tools, impact, url, personId, siteId },
       include: {
         person: { select: { id: true, name: true, jobTitle: true, avatar: true } },
         likes: { select: { personId: true } },
@@ -150,6 +150,7 @@ export async function PATCH(
           ...(body.category !== undefined && { category: body.category }),
           ...(body.tools !== undefined && { tools: body.tools }),
           ...(body.impact !== undefined && { impact: body.impact }),
+          ...(body.url !== undefined && { url: body.url }),
         },
         include: {
           person: { select: { id: true, name: true, jobTitle: true, avatar: true } },

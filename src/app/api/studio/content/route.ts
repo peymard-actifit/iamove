@@ -112,6 +112,7 @@ export async function PATCH(request: Request) {
           ...(body.category !== undefined && { category: body.category }),
           ...(body.tools !== undefined && { tools: body.tools }),
           ...(body.impact !== undefined && { impact: body.impact }),
+          ...(body.url !== undefined && { url: body.url }),
         },
       });
       return NextResponse.json(uc);

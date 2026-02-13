@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Button, Input } from "@/components/ui";
-import { Plus, Heart, Pencil, Trash2, Lightbulb, Wrench, TrendingUp, X } from "lucide-react";
+import { Plus, Heart, Pencil, Trash2, Lightbulb, Wrench, TrendingUp, X, ExternalLink } from "lucide-react";
 
 interface Person {
   id: string;
@@ -18,6 +18,7 @@ interface UseCase {
   category: string | null;
   tools: string | null;
   impact: string | null;
+  url: string | null;
   status: string;
   person: Person;
   likes: { personId: string }[];
@@ -36,7 +37,7 @@ export function UseCasesTab({ siteId, currentPersonId }: UseCasesTabProps) {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState({ title: "", description: "", category: "", tools: "", impact: "" });
+  const [form, setForm] = useState({ title: "", description: "", category: "", tools: "", impact: "", url: "" });
   const [filter, setFilter] = useState("");
 
   const fetchUseCases = useCallback(async () => {
@@ -59,7 +60,7 @@ export function UseCasesTab({ siteId, currentPersonId }: UseCasesTabProps) {
     if (res.ok) {
       setShowForm(false);
       setEditId(null);
-      setForm({ title: "", description: "", category: "", tools: "", impact: "" });
+      setForm({ title: "", description: "", category: "", tools: "", impact: "", url: "" });
       fetchUseCases();
     }
   };
@@ -80,7 +81,7 @@ export function UseCasesTab({ siteId, currentPersonId }: UseCasesTabProps) {
   };
 
   const startEdit = (uc: UseCase) => {
-    setForm({ title: uc.title, description: uc.description, category: uc.category || "", tools: uc.tools || "", impact: uc.impact || "" });
+    setForm({ title: uc.title, description: uc.description, category: uc.category || "", tools: uc.tools || "", impact: uc.impact || "", url: uc.url || "" });
     setEditId(uc.id);
     setShowForm(true);
   };
@@ -108,7 +109,7 @@ export function UseCasesTab({ siteId, currentPersonId }: UseCasesTabProps) {
             <option value="">Toutes catégories</option>
             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
-          <Button size="sm" onClick={() => { setShowForm(true); setEditId(null); setForm({ title: "", description: "", category: "", tools: "", impact: "" }); }} className="h-8 gap-1">
+          <Button size="sm" onClick={() => { setShowForm(true); setEditId(null); setForm({ title: "", description: "", category: "", tools: "", impact: "", url: "" }); }} className="h-8 gap-1">
             <Plus className="h-3.5 w-3.5" /> Partager
           </Button>
         </div>
@@ -141,6 +142,7 @@ export function UseCasesTab({ siteId, currentPersonId }: UseCasesTabProps) {
             <Input placeholder="Outils utilisés" value={form.tools} onChange={(e) => setForm({ ...form, tools: e.target.value })} className="h-8 text-sm" />
             <Input placeholder="Impact observé" value={form.impact} onChange={(e) => setForm({ ...form, impact: e.target.value })} className="h-8 text-sm" />
           </div>
+          <Input placeholder="URL à partager (optionnel)" value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} className="h-8 text-sm" />
           <Button size="sm" onClick={handleSubmit} className="h-8">{editId ? "Enregistrer" : "Publier"}</Button>
         </div>
       )}
@@ -189,10 +191,15 @@ export function UseCasesTab({ siteId, currentPersonId }: UseCasesTabProps) {
                   </div>
                 </div>
                 <p className="text-sm text-gray-700 dark:text-gray-300 mt-2 whitespace-pre-wrap">{uc.description}</p>
-                {(uc.tools || uc.impact) && (
-                  <div className="flex gap-4 mt-2 text-xs text-gray-500">
+                {(uc.tools || uc.impact || uc.url) && (
+                  <div className="flex gap-4 mt-2 text-xs text-gray-500 flex-wrap">
                     {uc.tools && <span className="flex items-center gap-1"><Wrench className="h-3 w-3" />{uc.tools}</span>}
                     {uc.impact && <span className="flex items-center gap-1"><TrendingUp className="h-3 w-3" />{uc.impact}</span>}
+                    {uc.url && (
+                      <a href={uc.url.startsWith("http") ? uc.url : `https://${uc.url}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-blue-500 hover:underline">
+                        <ExternalLink className="h-3 w-3" />Lien
+                      </a>
+                    )}
                   </div>
                 )}
               </div>

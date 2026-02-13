@@ -694,6 +694,7 @@ model UseCase {
   category    String?       // "Automatisation", "Analyse", "Génération", "Productivité", etc.
   tools       String?       // Outils utilisés (ChatGPT, Copilot, etc.)
   impact      String?       // Impact observé
+  url         String?       // URL partagée par le créateur
   status      UseCaseStatus @default(PUBLISHED)
 
   person      Person        @relation(fields: [personId], references: [id], onDelete: Cascade)
