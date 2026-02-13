@@ -268,7 +268,7 @@ export function PublishedSiteApp({
             <Tab2Organigramme
               siteId={site.id}
               siteName={site.name}
-              persons={visiblePersons}
+              persons={isPersonAdmin ? (allPersons || visiblePersons) : visiblePersons}
               currentUserEmail={currentPerson?.email}
               isPublished={true}
               onSaveStart={() => {}}

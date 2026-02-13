@@ -502,9 +502,9 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
       ref={containerRef}
       className={`flex flex-1 min-h-0 w-full ${isDragging ? "select-none" : ""}`}
     >
-      {/* Partie gauche : prompt / assistant OpenAI */}
+      {/* Partie gauche : prompt / assistant OpenAI – le prompt reste fixe en bas */}
       <div
-        className="flex flex-col border rounded-l-lg overflow-hidden bg-white dark:bg-gray-900 shadow-sm flex-shrink-0 min-w-0"
+        className="flex flex-col border rounded-l-lg bg-white dark:bg-gray-900 shadow-sm flex-shrink-0 min-w-0 min-h-0"
         style={{ width: leftPercent === 0 ? "0" : `calc(${leftPercent}% - 3px)` }}
       >
         {leftPercent > 0 && (

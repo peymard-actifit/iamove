@@ -835,4 +835,25 @@ Renommer l'onglet "Utilisateurs" en "Personnes" pour les admins en site publié.
 - `src/components/studio/site-editor.tsx` (onglet Serious G)
 
 ---
+
+## Prompt #75 – Corrections UX multiples (studio + publié)
+
+**Changements** :
+1. **Studio** : bouton "Ajouter une personne" masqué sauf quand on est dans l'onglet Équipe (tab1)
+2. **Profil publié** : quiz affiche "XXX questions passées" au lieu de "XXX passés"
+3. **Organigramme admin** : les personnes admin voient désormais toutes les personnes du site (via `allPersons`) et pas seulement leur sous-arbre
+4. **Formation publié** : ajout de `min-h-0` sur le conteneur gauche pour que le prompt IA reste fixe en bas avec le scroll uniquement sur les messages
+5. **Tech Tips** : affichage condensé (titre seul en une ligne) avec ouverture d'une pop-up Dialog au clic pour voir le contenu complet
+6. **Use Cases / Forum** : suppression du jobTitle dans la ligne auteur (juste nom + date)
+
+→ **Fichiers modifiés** :
+  - `src/components/studio/site-editor.tsx`
+  - `src/components/published/activity-summary.tsx`
+  - `src/components/published/site-app.tsx`
+  - `src/components/studio/tabs/tab4-formation.tsx`
+  - `src/components/published/tech-tips-tab.tsx`
+  - `src/components/published/use-cases-tab.tsx`
+  - `src/components/published/forum-tab.tsx`
+
+---
 *Dernière mise à jour: 2026-02-13*

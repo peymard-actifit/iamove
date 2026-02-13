@@ -41,7 +41,7 @@ export function ActivitySummary({ siteId, personId }: ActivitySummaryProps) {
 
   const stats = [
     { icon: GraduationCap, label: "Formations", value: `${data.training.modulesCompleted} terminée${data.training.modulesCompleted !== 1 ? "s" : ""}`, sub: data.training.modulesStarted > 0 ? `${data.training.modulesStarted} en cours` : undefined, color: "text-blue-500" },
-    { icon: ClipboardCheck, label: "Quiz", value: `${data.quizzes.total} passé${data.quizzes.total !== 1 ? "s" : ""}`, sub: data.quizzes.total > 0 ? `${data.quizzes.accuracy}% correct` : undefined, color: "text-green-500" },
+    { icon: ClipboardCheck, label: "Quiz", value: `${data.quizzes.total} question${data.quizzes.total !== 1 ? "s" : ""} passée${data.quizzes.total !== 1 ? "s" : ""}`, sub: data.quizzes.total > 0 ? `${data.quizzes.accuracy}% correct` : undefined, color: "text-green-500" },
     { icon: MessageCircle, label: "Chat IA", value: `${data.chat.messagesCount} message${data.chat.messagesCount !== 1 ? "s" : ""}`, color: "text-purple-500" },
     { icon: Lightbulb, label: "Use Cases", value: `${data.useCases.count} partagé${data.useCases.count !== 1 ? "s" : ""}`, color: "text-yellow-500" },
     { icon: MessageCircle, label: "Forum", value: `${data.forum.posts} post${data.forum.posts !== 1 ? "s" : ""}`, sub: data.forum.replies > 0 ? `${data.forum.replies} réponse${data.forum.replies !== 1 ? "s" : ""}` : undefined, color: "text-indigo-500" },

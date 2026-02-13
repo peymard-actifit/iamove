@@ -170,7 +170,7 @@ export function UseCasesTab({ siteId, currentPersonId }: UseCasesTabProps) {
                       )}
                     </div>
                     <p className="text-xs text-gray-500 mt-0.5">
-                      par {uc.person.name}{uc.person.jobTitle ? ` · ${uc.person.jobTitle}` : ""} · {new Date(uc.createdAt).toLocaleDateString("fr-FR")}
+                      par {uc.person.name} · {new Date(uc.createdAt).toLocaleDateString("fr-FR")}
                     </p>
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">

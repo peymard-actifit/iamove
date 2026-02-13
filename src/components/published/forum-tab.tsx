@@ -165,7 +165,7 @@ export function ForumTab({ siteId, currentPersonId }: ForumTabProps) {
                         )}
                       </div>
                       <p className="text-xs text-gray-500 mt-0.5">
-                        {post.person.name}{post.person.jobTitle ? ` · ${post.person.jobTitle}` : ""} · {new Date(post.createdAt).toLocaleDateString("fr-FR")}
+                        {post.person.name} · {new Date(post.createdAt).toLocaleDateString("fr-FR")}
                       </p>
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">

@@ -202,10 +202,12 @@ export function SiteEditor({ site, levels, currentUserEmail }: SiteEditorProps) 
                   <span className="hidden sm:inline">Serious G</span>
                 </TabsTrigger>
               </TabsList>
-              <Button size="sm" onClick={() => setShowAddPersonDialog(true)}>
-                <Plus className="h-4 w-4 mr-1" />
-                {t.header.addPerson} ({site.persons.length})
-              </Button>
+              {activeTab === "tab1" && (
+                <Button size="sm" onClick={() => setShowAddPersonDialog(true)}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  {t.header.addPerson} ({site.persons.length})
+                </Button>
+              )}
             </div>
 
             <TabsContent value="tab1" className="mt-2">

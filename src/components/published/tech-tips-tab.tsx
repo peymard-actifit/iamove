@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Button, Input } from "@/components/ui";
+import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui";
 import { Plus, Heart, Trash2, Code2, X } from "lucide-react";
 
 interface Person {
@@ -34,6 +34,7 @@ export function TechTipsTab({ siteId, currentPersonId }: TechTipsTabProps) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: "", content: "", category: "" });
   const [filter, setFilter] = useState("");
+  const [selectedTip, setSelectedTip] = useState<TechTip | null>(null);
 
   const fetchTips = useCallback(async () => {
     const res = await fetch(`/api/sites/${siteId}/tech-tips`);
@@ -136,44 +137,65 @@ export function TechTipsTab({ siteId, currentPersonId }: TechTipsTabProps) {
           <p className="text-xs mt-1">Partagez vos découvertes techniques !</p>
         </div>
       ) : (
-        <div className="grid gap-3">
+        <div className="grid gap-1.5">
           {filtered.map((tip) => {
             const isLiked = tip.likes.some((l) => l.personId === currentPersonId);
             const isMine = tip.person.id === currentPersonId;
             return (
-              <div key={tip.id} className="border rounded-lg p-4 bg-white dark:bg-gray-800 hover:shadow-sm transition">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-semibold text-sm">{tip.title}</h3>
-                      {tip.category && (
-                        <span className="text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 px-1.5 py-0.5 rounded">
-                          {tip.category}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      {tip.person.name} · {new Date(tip.createdAt).toLocaleDateString("fr-FR")}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <Button variant="ghost" size="sm" onClick={() => handleLike(tip.id)} className={`h-7 px-2 gap-1 ${isLiked ? "text-red-500" : "text-gray-400"}`}>
-                      <Heart className={`h-3.5 w-3.5 ${isLiked ? "fill-current" : ""}`} />
-                      <span className="text-xs">{tip.likes.length}</span>
-                    </Button>
-                    {isMine && (
-                      <Button variant="ghost" size="sm" onClick={() => handleDelete(tip.id)} className="h-7 px-1.5 text-red-500"><Trash2 className="h-3 w-3" /></Button>
-                    )}
-                  </div>
+              <div
+                key={tip.id}
+                className="border rounded-lg px-4 py-2.5 bg-white dark:bg-gray-800 hover:shadow-sm hover:border-emerald-300 dark:hover:border-emerald-600 transition cursor-pointer flex items-center justify-between gap-2"
+                onClick={() => setSelectedTip(tip)}
+              >
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <h3 className="font-semibold text-sm truncate">{tip.title}</h3>
+                  {tip.category && (
+                    <span className="text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 px-1.5 py-0.5 rounded flex-shrink-0">
+                      {tip.category}
+                    </span>
+                  )}
+                  <span className="text-[10px] text-gray-400 flex-shrink-0">{tip.person.name} · {new Date(tip.createdAt).toLocaleDateString("fr-FR")}</span>
                 </div>
-                <div className="text-sm text-gray-700 dark:text-gray-300 mt-2 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-3 rounded">
-                  {tip.content}
+                <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <Button variant="ghost" size="sm" onClick={() => handleLike(tip.id)} className={`h-7 px-2 gap-1 ${isLiked ? "text-red-500" : "text-gray-400"}`}>
+                    <Heart className={`h-3.5 w-3.5 ${isLiked ? "fill-current" : ""}`} />
+                    <span className="text-xs">{tip.likes.length}</span>
+                  </Button>
+                  {isMine && (
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(tip.id)} className="h-7 px-1.5 text-red-500"><Trash2 className="h-3 w-3" /></Button>
+                  )}
                 </div>
               </div>
             );
           })}
         </div>
       )}
+
+      {/* Pop-up détail */}
+      <Dialog open={!!selectedTip} onOpenChange={() => setSelectedTip(null)}>
+        <DialogContent className="max-w-2xl">
+          {selectedTip && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  {selectedTip.title}
+                  {selectedTip.category && (
+                    <span className="text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 px-1.5 py-0.5 rounded font-normal">
+                      {selectedTip.category}
+                    </span>
+                  )}
+                </DialogTitle>
+              </DialogHeader>
+              <p className="text-xs text-gray-500">
+                {selectedTip.person.name} · {new Date(selectedTip.createdAt).toLocaleDateString("fr-FR")}
+              </p>
+              <div className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded max-h-[60vh] overflow-auto">
+                {selectedTip.content}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
