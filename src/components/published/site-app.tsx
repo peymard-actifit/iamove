@@ -271,6 +271,7 @@ export function PublishedSiteApp({
               persons={isPersonAdmin ? (allPersons || visiblePersons) : visiblePersons}
               currentUserEmail={currentPerson?.email}
               isPublished={true}
+              showFullTree={isPersonAdmin}
               onSaveStart={() => {}}
               onSaveDone={() => {}}
               onSaveError={() => {}}

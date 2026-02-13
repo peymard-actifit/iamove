@@ -25,6 +25,7 @@ interface Tab2OrganigrammeProps {
   onSaveError: () => void;
   currentUserEmail?: string;
   isPublished?: boolean; // Mode publié = afficher uniquement à partir de l'utilisateur connecté
+  showFullTree?: boolean; // Admin publiés = arbre complet même en mode publié
 }
 
 interface OrgNode {
@@ -193,14 +194,16 @@ export function Tab2Organigramme({
   onSaveError,
   currentUserEmail,
   isPublished = false,
+  showFullTree = false,
 }: Tab2OrganigrammeProps) {
   // En mode publié avec un utilisateur connecté, afficher uniquement à partir de cet utilisateur
+  // Sauf si showFullTree est activé (admin) : arbre complet
   const orgTree = useMemo(() => {
-    if (isPublished && currentUserEmail) {
+    if (isPublished && currentUserEmail && !showFullTree) {
       return buildOrgTreeFromPerson(persons, currentUserEmail);
     }
     return buildOrgTree(persons);
-  }, [persons, isPublished, currentUserEmail]);
+  }, [persons, isPublished, currentUserEmail, showFullTree]);
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const printRef = useRef<HTMLDivElement>(null);

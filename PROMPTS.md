@@ -856,4 +856,14 @@ Renommer l'onglet "Utilisateurs" en "Personnes" pour les admins en site publié.
   - `src/components/published/forum-tab.tsx`
 
 ---
+
+## Prompt #76 – Fix : "par" auteur, organigramme admin, prompt IA fixe
+
+1. **Use Cases** : suppression du "par" devant le nom de l'auteur
+2. **Organigramme admin** : ajout prop `showFullTree` au composant `Tab2Organigramme` ; quand `isPersonAdmin`, l'arbre complet est affiché (via `buildOrgTree`) au lieu du sous-arbre (`buildOrgTreeFromPerson`)
+3. **Prompt IA Formation** : ajout `overflow-hidden` sur le conteneur gauche + `flex-shrink-0` sur la zone de prompt pour qu'elle reste toujours visible en bas
+
+→ Fichiers : `use-cases-tab.tsx`, `tab2-organigramme.tsx`, `site-app.tsx`, `tab4-formation.tsx`
+
+---
 *Dernière mise à jour: 2026-02-13*

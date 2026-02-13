@@ -504,7 +504,7 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
     >
       {/* Partie gauche : prompt / assistant OpenAI – le prompt reste fixe en bas */}
       <div
-        className="flex flex-col border rounded-l-lg bg-white dark:bg-gray-900 shadow-sm flex-shrink-0 min-w-0 min-h-0"
+        className="flex flex-col border rounded-l-lg bg-white dark:bg-gray-900 shadow-sm flex-shrink-0 min-w-0 min-h-0 overflow-hidden"
         style={{ width: leftPercent === 0 ? "0" : `calc(${leftPercent}% - 3px)` }}
       >
         {leftPercent > 0 && (
@@ -565,7 +565,7 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
                 </div>
               )}
             </div>
-            <div className="p-4 border-t bg-gray-50/50 dark:bg-gray-800/30">
+            <div className="p-4 border-t bg-gray-50/50 dark:bg-gray-800/30 flex-shrink-0">
               <div className="flex gap-2">
                 <Input
                   value={input}
