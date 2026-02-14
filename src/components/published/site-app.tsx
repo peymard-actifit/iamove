@@ -187,9 +187,9 @@ export function PublishedSiteApp({
           className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800"
           style={{ backgroundColor: site.primaryColor }}
         >
-          <div className="container mx-auto relative flex h-10 min-h-[2.5rem] items-center px-2 sm:px-4">
-            {/* Nom du site — ancré à gauche */}
-            <div className="flex items-center gap-2 flex-shrink-0 min-w-0 z-10">
+          {/* Ligne 1 : nom du site + infos utilisateur */}
+          <div className="container mx-auto flex h-10 min-h-[2.5rem] items-center justify-between px-2 sm:px-4">
+            <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
               <div className="h-7 w-7 rounded bg-white/20 flex items-center justify-center flex-shrink-0">
                 <span className="text-white font-bold text-sm">{site.name.charAt(0)}</span>
               </div>
@@ -197,65 +197,7 @@ export function PublishedSiteApp({
                 {site.name}
               </span>
             </div>
-            {/* Onglets centrés absolument dans la barre */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <TabsList className="pointer-events-auto flex-shrink-0 justify-center h-8 bg-white/10 border-0 gap-0.5 p-0.5 [&>button]:text-white/90 [&>button]:data-[state=active]:bg-white/20 [&>button]:rounded [&>button]:px-2 [&>button]:py-1 [&>button]:text-xs">
-              {settings.tab3Enabled && (
-                <TabsTrigger value="tab3" className="gap-1" data-pp-menu="tab-profile">
-                  <User className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">{t.tabs.profile}</span>
-                </TabsTrigger>
-              )}
-              {settings.tab2Enabled && (
-                <TabsTrigger value="tab2" className="gap-1" data-pp-menu="tab-organization">
-                  <Network className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">{t.tabs.organization}</span>
-                </TabsTrigger>
-              )}
-              {settings.tab5Enabled && (
-                <TabsTrigger value="tab5" className="gap-1" data-pp-menu="tab-assessment">
-                  <ClipboardCheck className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">{t.tabs.assessment}</span>
-                </TabsTrigger>
-              )}
-              {settings.tab4Enabled && (
-                <TabsTrigger value="tab4" className="gap-1" data-pp-menu="tab-training">
-                  <GraduationCap className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">{t.tabs.training}</span>
-                </TabsTrigger>
-              )}
-              <TabsTrigger value="tab-usecases" className="gap-1" data-pp-menu="tab-usecases">
-                <Lightbulb className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Use Cases</span>
-              </TabsTrigger>
-              <TabsTrigger value="tab-forum" className="gap-1" data-pp-menu="tab-forum">
-                <MessageCircle className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Forum</span>
-              </TabsTrigger>
-              <TabsTrigger value="tab-tech" className="gap-1" data-pp-menu="tab-tech">
-                <Code2 className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Tech</span>
-              </TabsTrigger>
-              <TabsTrigger value="tab-backlog" className="gap-1" data-pp-menu="tab-backlog">
-                <ClipboardList className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Backlog</span>
-              </TabsTrigger>
-              {isPersonAdmin && (
-                <TabsTrigger value="tab-refinement" className="gap-1" data-pp-menu="tab-refinement">
-                  <BarChart3 className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Refinement</span>
-                </TabsTrigger>
-              )}
-              {isPersonAdmin && (
-                <TabsTrigger value="tab-admin" className="gap-1" data-pp-menu="tab-admin">
-                  <Users className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Personnes</span>
-                </TabsTrigger>
-              )}
-            </TabsList>
-            </div>
-            {/* Infos utilisateur — ancré à droite */}
-            <div className="flex items-center gap-2 flex-shrink-0 ml-auto z-10">
+            <div className="flex items-center gap-2 flex-shrink-0">
               {currentPerson && (
                 <>
                   <span className="text-white/80 text-xs hidden sm:inline truncate max-w-[100px]">
@@ -275,6 +217,63 @@ export function PublishedSiteApp({
                 <span className="hidden sm:inline">{t.published.logout}</span>
               </Button>
             </div>
+          </div>
+          {/* Ligne 2 : onglets centrés */}
+          <div className="flex justify-center pb-1">
+            <TabsList className="h-7 bg-white/10 border-0 gap-0.5 p-0.5 [&>button]:text-white/90 [&>button]:data-[state=active]:bg-white/20 [&>button]:rounded [&>button]:px-2 [&>button]:py-0.5 [&>button]:text-xs">
+              {settings.tab3Enabled && (
+                <TabsTrigger value="tab3" className="gap-1" data-pp-menu="tab-profile">
+                  <User className="h-3 w-3" />
+                  <span className="hidden sm:inline">{t.tabs.profile}</span>
+                </TabsTrigger>
+              )}
+              {settings.tab2Enabled && (
+                <TabsTrigger value="tab2" className="gap-1" data-pp-menu="tab-organization">
+                  <Network className="h-3 w-3" />
+                  <span className="hidden sm:inline">{t.tabs.organization}</span>
+                </TabsTrigger>
+              )}
+              {settings.tab5Enabled && (
+                <TabsTrigger value="tab5" className="gap-1" data-pp-menu="tab-assessment">
+                  <ClipboardCheck className="h-3 w-3" />
+                  <span className="hidden sm:inline">{t.tabs.assessment}</span>
+                </TabsTrigger>
+              )}
+              {settings.tab4Enabled && (
+                <TabsTrigger value="tab4" className="gap-1" data-pp-menu="tab-training">
+                  <GraduationCap className="h-3 w-3" />
+                  <span className="hidden sm:inline">{t.tabs.training}</span>
+                </TabsTrigger>
+              )}
+              <TabsTrigger value="tab-usecases" className="gap-1" data-pp-menu="tab-usecases">
+                <Lightbulb className="h-3 w-3" />
+                <span className="hidden sm:inline">Use Cases</span>
+              </TabsTrigger>
+              <TabsTrigger value="tab-forum" className="gap-1" data-pp-menu="tab-forum">
+                <MessageCircle className="h-3 w-3" />
+                <span className="hidden sm:inline">Forum</span>
+              </TabsTrigger>
+              <TabsTrigger value="tab-tech" className="gap-1" data-pp-menu="tab-tech">
+                <Code2 className="h-3 w-3" />
+                <span className="hidden sm:inline">Tech</span>
+              </TabsTrigger>
+              <TabsTrigger value="tab-backlog" className="gap-1" data-pp-menu="tab-backlog">
+                <ClipboardList className="h-3 w-3" />
+                <span className="hidden sm:inline">Backlog</span>
+              </TabsTrigger>
+              {isPersonAdmin && (
+                <TabsTrigger value="tab-refinement" className="gap-1" data-pp-menu="tab-refinement">
+                  <BarChart3 className="h-3 w-3" />
+                  <span className="hidden sm:inline">Refinement</span>
+                </TabsTrigger>
+              )}
+              {isPersonAdmin && (
+                <TabsTrigger value="tab-admin" className="gap-1" data-pp-menu="tab-admin">
+                  <Users className="h-3 w-3" />
+                  <span className="hidden sm:inline">Personnes</span>
+                </TabsTrigger>
+              )}
+            </TabsList>
           </div>
         </header>
 
