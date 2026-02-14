@@ -187,8 +187,9 @@ export function PublishedSiteApp({
           className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800"
           style={{ backgroundColor: site.primaryColor }}
         >
-          <div className="container mx-auto flex h-10 min-h-[2.5rem] items-center justify-between gap-2 px-2 sm:px-4">
-            <div className="flex items-center gap-2 flex-shrink-0 min-w-0 flex-1 justify-start">
+          <div className="container mx-auto relative flex h-10 min-h-[2.5rem] items-center px-2 sm:px-4">
+            {/* Nom du site — ancré à gauche */}
+            <div className="flex items-center gap-2 flex-shrink-0 min-w-0 z-10">
               <div className="h-7 w-7 rounded bg-white/20 flex items-center justify-center flex-shrink-0">
                 <span className="text-white font-bold text-sm">{site.name.charAt(0)}</span>
               </div>
@@ -196,8 +197,9 @@ export function PublishedSiteApp({
                 {site.name}
               </span>
             </div>
-            {/* Onglets centrés dans la barre */}
-            <TabsList className="flex-shrink-0 justify-center h-8 mx-1 bg-white/10 border-0 gap-0.5 p-0.5 [&>button]:text-white/90 [&>button]:data-[state=active]:bg-white/20 [&>button]:rounded [&>button]:px-2 [&>button]:py-1 [&>button]:text-xs">
+            {/* Onglets centrés absolument dans la barre */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <TabsList className="pointer-events-auto flex-shrink-0 justify-center h-8 bg-white/10 border-0 gap-0.5 p-0.5 [&>button]:text-white/90 [&>button]:data-[state=active]:bg-white/20 [&>button]:rounded [&>button]:px-2 [&>button]:py-1 [&>button]:text-xs">
               {settings.tab3Enabled && (
                 <TabsTrigger value="tab3" className="gap-1" data-pp-menu="tab-profile">
                   <User className="h-3.5 w-3.5" />
@@ -251,7 +253,9 @@ export function PublishedSiteApp({
                 </TabsTrigger>
               )}
             </TabsList>
-            <div className="flex items-center gap-2 flex-shrink-0 flex-1 justify-end">
+            </div>
+            {/* Infos utilisateur — ancré à droite */}
+            <div className="flex items-center gap-2 flex-shrink-0 ml-auto z-10">
               {currentPerson && (
                 <>
                   <span className="text-white/80 text-xs hidden sm:inline truncate max-w-[100px]">
