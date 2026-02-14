@@ -882,6 +882,105 @@ export function buildTranslationsObject(flatTranslations: Record<string, string>
       selectLevel: getValue("selfAssessment.selectLevel", "Sélectionnez un niveau"),
       level0Warning: getValue("selfAssessment.level0Warning", "En choisissant le niveau 0, cette auto-évaluation vous sera proposée à chaque connexion jusqu'à ce que vous sélectionniez un autre niveau."),
     },
+    publishedTabs: {
+      useCases: getValue("publishedTabs.useCases", "Use Cases"),
+      forum: getValue("publishedTabs.forum", "Forum"),
+      tech: getValue("publishedTabs.tech", "Tech"),
+      backlog: getValue("publishedTabs.backlog", "Backlog"),
+      refinement: getValue("publishedTabs.refinement", "Refinement"),
+      ecosystem: getValue("publishedTabs.ecosystem", "Écosystème"),
+      persons: getValue("publishedTabs.persons", "Personnes"),
+    },
+    useCases: {
+      title: getValue("useCases.title", "Use Cases IA"),
+      noUseCases: getValue("useCases.noUseCases", "Aucun use case partagé"),
+      beFirst: getValue("useCases.beFirst", "Soyez le premier à partager votre expérience !"),
+      share: getValue("useCases.share", "Partager"),
+      newUseCase: getValue("useCases.newUseCase", "Nouveau Use Case"),
+      editUseCase: getValue("useCases.editUseCase", "Modifier"),
+      allCategories: getValue("useCases.allCategories", "Toutes catégories"),
+      publish: getValue("useCases.publish", "Publier"),
+      deleteConfirm: getValue("useCases.deleteConfirm", "Supprimer ce use case ?"),
+      backlogFile: getValue("useCases.backlogFile", "Dossier Backlog"),
+    },
+    forum: {
+      title: getValue("forum.title", "Forum"),
+      noPosts: getValue("forum.noPosts", "Aucune discussion"),
+      beFirst: getValue("forum.beFirst", "Soyez le premier à lancer une discussion !"),
+      newPost: getValue("forum.newPost", "Nouvelle discussion"),
+      editPost: getValue("forum.editPost", "Modifier la discussion"),
+      reply: getValue("forum.reply", "Répondre"),
+      replies: getValue("forum.replies", "réponse(s)"),
+      deleteConfirm: getValue("forum.deleteConfirm", "Supprimer cette discussion ?"),
+    },
+    techTips: {
+      title: getValue("techTips.title", "Conseils Techniques"),
+      noTips: getValue("techTips.noTips", "Aucun conseil technique"),
+      beFirst: getValue("techTips.beFirst", "Soyez le premier à partager un conseil !"),
+      newTip: getValue("techTips.newTip", "Nouveau conseil technique"),
+      editTip: getValue("techTips.editTip", "Modifier le conseil technique"),
+      deleteConfirm: getValue("techTips.deleteConfirm", "Supprimer ce conseil technique ?"),
+    },
+    backlog: {
+      title: getValue("backlog.title", "Backlog"),
+      proposeUseCase: getValue("backlog.proposeUseCase", "Proposer un cas d'usage"),
+      noItems: getValue("backlog.noItems", "Aucun cas d'usage dans le backlog"),
+      all: getValue("backlog.all", "Tous"),
+      toValidate: getValue("backlog.toValidate", "À valider"),
+      pending: getValue("backlog.pending", "En attente"),
+      validated: getValue("backlog.validated", "Validé"),
+      refused: getValue("backlog.refused", "Refusé"),
+      inDev: getValue("backlog.inDev", "En dev"),
+      mep: getValue("backlog.mep", "MEP"),
+      detail: getValue("backlog.detail", "Voir le détail"),
+      promote: getValue("backlog.promote", "Promouvoir en Use Case"),
+      promoteConfirm: getValue("backlog.promoteConfirm", "Promouvoir en Use Case ?"),
+      deleteConfirm: getValue("backlog.deleteConfirm", "Supprimer cet item du backlog ?"),
+      service: getValue("backlog.service", "Service"),
+      category: getValue("backlog.category", "Catégorie"),
+      tools: getValue("backlog.tools", "Outils / technologies"),
+      impact: getValue("backlog.impact", "Impact attendu"),
+      owner: getValue("backlog.owner", "Owner"),
+      sponsor: getValue("backlog.sponsor", "Sponsor"),
+      estimatedEffort: getValue("backlog.estimatedEffort", "Charge prévisionnelle"),
+      actualEffort: getValue("backlog.actualEffort", "Charge réelle"),
+      targetDate: getValue("backlog.targetDate", "Date cible"),
+      priority: getValue("backlog.priority", "Priorité"),
+      priorityHigh: getValue("backlog.priorityHigh", "Haute"),
+      priorityMedium: getValue("backlog.priorityMedium", "Moyenne"),
+      priorityLow: getValue("backlog.priorityLow", "Basse"),
+      notPrioritized: getValue("backlog.notPrioritized", "Non priorisé"),
+      urlLabel: getValue("backlog.urlLabel", "URL de référence"),
+    },
+    refinementTab: {
+      title: getValue("refinementTab.title", "Refinement"),
+      subtitle: getValue("refinementTab.subtitle", "Revue, priorisation et validation des cas d'usage du backlog"),
+      noItems: getValue("refinementTab.noItems", "Aucun item à afficher"),
+      scrumNotes: getValue("refinementTab.scrumNotes", "Notes du Scrum Master"),
+      validate: getValue("refinementTab.validate", "Valider"),
+      refuse: getValue("refinementTab.refuse", "Refuser"),
+      putOnHold: getValue("refinementTab.putOnHold", "En attente"),
+    },
+    ecosystemTab: {
+      title: getValue("ecosystemTab.title", "Écosystème"),
+      noContent: getValue("ecosystemTab.noContent", "Aucune description de l'écosystème disponible"),
+      createContent: getValue("ecosystemTab.createContent", "Créer le contenu"),
+      editEcosystem: getValue("ecosystemTab.editEcosystem", "Éditer l'Écosystème"),
+      addSection: getValue("ecosystemTab.addSection", "Ajouter une section"),
+      sectionTitle: getValue("ecosystemTab.sectionTitle", "Titre de la section"),
+    },
+    activity: {
+      title: getValue("activity.title", "Activité"),
+      memberSince: getValue("activity.memberSince", "Membre depuis le"),
+      trainings: getValue("activity.trainings", "Formations"),
+      completed: getValue("activity.completed", "terminée(s)"),
+      questionsAnswered: getValue("activity.questionsAnswered", "questions passées"),
+      correct: getValue("activity.correct", "correct"),
+      messages: getValue("activity.messages", "messages"),
+      shared: getValue("activity.shared", "partagé(s)"),
+      posts: getValue("activity.posts", "post(s)"),
+      recentTrainings: getValue("activity.recentTrainings", "Formations récentes"),
+    },
   };
 }
 
@@ -1180,6 +1279,113 @@ export interface Translations {
     selectLevel: string;
     level0Warning: string;
   };
+  // Onglets publiés
+  publishedTabs: {
+    useCases: string;
+    forum: string;
+    tech: string;
+    backlog: string;
+    refinement: string;
+    ecosystem: string;
+    persons: string;
+  };
+  // Use Cases
+  useCases: {
+    title: string;
+    noUseCases: string;
+    beFirst: string;
+    share: string;
+    newUseCase: string;
+    editUseCase: string;
+    allCategories: string;
+    publish: string;
+    deleteConfirm: string;
+    backlogFile: string;
+  };
+  // Forum
+  forum: {
+    title: string;
+    noPosts: string;
+    beFirst: string;
+    newPost: string;
+    editPost: string;
+    reply: string;
+    replies: string;
+    deleteConfirm: string;
+  };
+  // Tech Tips
+  techTips: {
+    title: string;
+    noTips: string;
+    beFirst: string;
+    newTip: string;
+    editTip: string;
+    deleteConfirm: string;
+  };
+  // Backlog
+  backlog: {
+    title: string;
+    proposeUseCase: string;
+    noItems: string;
+    all: string;
+    toValidate: string;
+    pending: string;
+    validated: string;
+    refused: string;
+    inDev: string;
+    mep: string;
+    detail: string;
+    promote: string;
+    promoteConfirm: string;
+    deleteConfirm: string;
+    service: string;
+    category: string;
+    tools: string;
+    impact: string;
+    owner: string;
+    sponsor: string;
+    estimatedEffort: string;
+    actualEffort: string;
+    targetDate: string;
+    priority: string;
+    priorityHigh: string;
+    priorityMedium: string;
+    priorityLow: string;
+    notPrioritized: string;
+    urlLabel: string;
+  };
+  // Refinement
+  refinementTab: {
+    title: string;
+    subtitle: string;
+    noItems: string;
+    scrumNotes: string;
+    validate: string;
+    refuse: string;
+    putOnHold: string;
+  };
+  // Ecosystem
+  ecosystemTab: {
+    title: string;
+    noContent: string;
+    createContent: string;
+    editEcosystem: string;
+    addSection: string;
+    sectionTitle: string;
+  };
+  // Activité
+  activity: {
+    title: string;
+    memberSince: string;
+    trainings: string;
+    completed: string;
+    questionsAnswered: string;
+    correct: string;
+    messages: string;
+    shared: string;
+    posts: string;
+    recentTrainings: string;
+  };
 }
 
 // Traductions françaises (par défaut)
@@ -1460,6 +1666,105 @@ export const FR: Translations = {
     selectLevel: "Sélectionnez un niveau",
     level0Warning: "En choisissant le niveau 0, cette auto-évaluation vous sera proposée à chaque connexion jusqu'à ce que vous sélectionniez un autre niveau.",
   },
+  publishedTabs: {
+    useCases: "Use Cases",
+    forum: "Forum",
+    tech: "Tech",
+    backlog: "Backlog",
+    refinement: "Refinement",
+    ecosystem: "Écosystème",
+    persons: "Personnes",
+  },
+  useCases: {
+    title: "Use Cases IA",
+    noUseCases: "Aucun use case partagé",
+    beFirst: "Soyez le premier à partager votre expérience !",
+    share: "Partager",
+    newUseCase: "Nouveau Use Case",
+    editUseCase: "Modifier",
+    allCategories: "Toutes catégories",
+    publish: "Publier",
+    deleteConfirm: "Supprimer ce use case ?",
+    backlogFile: "Dossier Backlog",
+  },
+  forum: {
+    title: "Forum",
+    noPosts: "Aucune discussion",
+    beFirst: "Soyez le premier à lancer une discussion !",
+    newPost: "Nouvelle discussion",
+    editPost: "Modifier la discussion",
+    reply: "Répondre",
+    replies: "réponse(s)",
+    deleteConfirm: "Supprimer cette discussion ?",
+  },
+  techTips: {
+    title: "Conseils Techniques",
+    noTips: "Aucun conseil technique",
+    beFirst: "Soyez le premier à partager un conseil !",
+    newTip: "Nouveau conseil technique",
+    editTip: "Modifier le conseil technique",
+    deleteConfirm: "Supprimer ce conseil technique ?",
+  },
+  backlog: {
+    title: "Backlog",
+    proposeUseCase: "Proposer un cas d'usage",
+    noItems: "Aucun cas d'usage dans le backlog",
+    all: "Tous",
+    toValidate: "À valider",
+    pending: "En attente",
+    validated: "Validé",
+    refused: "Refusé",
+    inDev: "En dev",
+    mep: "MEP",
+    detail: "Voir le détail",
+    promote: "Promouvoir en Use Case",
+    promoteConfirm: "Promouvoir en Use Case ?",
+    deleteConfirm: "Supprimer cet item du backlog ?",
+    service: "Service",
+    category: "Catégorie",
+    tools: "Outils / technologies",
+    impact: "Impact attendu",
+    owner: "Owner",
+    sponsor: "Sponsor",
+    estimatedEffort: "Charge prévisionnelle",
+    actualEffort: "Charge réelle",
+    targetDate: "Date cible",
+    priority: "Priorité",
+    priorityHigh: "Haute",
+    priorityMedium: "Moyenne",
+    priorityLow: "Basse",
+    notPrioritized: "Non priorisé",
+    urlLabel: "URL de référence",
+  },
+  refinementTab: {
+    title: "Refinement",
+    subtitle: "Revue, priorisation et validation des cas d'usage du backlog",
+    noItems: "Aucun item à afficher",
+    scrumNotes: "Notes du Scrum Master",
+    validate: "Valider",
+    refuse: "Refuser",
+    putOnHold: "En attente",
+  },
+  ecosystemTab: {
+    title: "Écosystème",
+    noContent: "Aucune description de l'écosystème disponible",
+    createContent: "Créer le contenu",
+    editEcosystem: "Éditer l'Écosystème",
+    addSection: "Ajouter une section",
+    sectionTitle: "Titre de la section",
+  },
+  activity: {
+    title: "Activité",
+    memberSince: "Membre depuis le",
+    trainings: "Formations",
+    completed: "terminée(s)",
+    questionsAnswered: "questions passées",
+    correct: "correct",
+    messages: "messages",
+    shared: "partagé(s)",
+    posts: "post(s)",
+    recentTrainings: "Formations récentes",
+  },
 };
 
 // Traductions anglaises
@@ -1739,6 +2044,105 @@ export const EN: Translations = {
     confirmLevel: "Confirm level",
     selectLevel: "Select a level",
     level0Warning: "By choosing level 0, this self-assessment will be presented to you at each login until you select another level.",
+  },
+  publishedTabs: {
+    useCases: "Use Cases",
+    forum: "Forum",
+    tech: "Tech",
+    backlog: "Backlog",
+    refinement: "Refinement",
+    ecosystem: "Ecosystem",
+    persons: "Persons",
+  },
+  useCases: {
+    title: "AI Use Cases",
+    noUseCases: "No use case shared yet",
+    beFirst: "Be the first to share your experience!",
+    share: "Share",
+    newUseCase: "New Use Case",
+    editUseCase: "Edit",
+    allCategories: "All categories",
+    publish: "Publish",
+    deleteConfirm: "Delete this use case?",
+    backlogFile: "Backlog file",
+  },
+  forum: {
+    title: "Forum",
+    noPosts: "No discussions",
+    beFirst: "Be the first to start a discussion!",
+    newPost: "New discussion",
+    editPost: "Edit discussion",
+    reply: "Reply",
+    replies: "reply(ies)",
+    deleteConfirm: "Delete this discussion?",
+  },
+  techTips: {
+    title: "Technical Tips",
+    noTips: "No technical tips",
+    beFirst: "Be the first to share a tip!",
+    newTip: "New technical tip",
+    editTip: "Edit technical tip",
+    deleteConfirm: "Delete this technical tip?",
+  },
+  backlog: {
+    title: "Backlog",
+    proposeUseCase: "Propose a use case",
+    noItems: "No use case in the backlog",
+    all: "All",
+    toValidate: "To validate",
+    pending: "Pending",
+    validated: "Validated",
+    refused: "Refused",
+    inDev: "In dev",
+    mep: "Deployed",
+    detail: "View details",
+    promote: "Promote to Use Case",
+    promoteConfirm: "Promote to Use Case?",
+    deleteConfirm: "Delete this backlog item?",
+    service: "Department",
+    category: "Category",
+    tools: "Tools / technologies",
+    impact: "Expected impact",
+    owner: "Owner",
+    sponsor: "Sponsor",
+    estimatedEffort: "Estimated effort",
+    actualEffort: "Actual effort",
+    targetDate: "Target date",
+    priority: "Priority",
+    priorityHigh: "High",
+    priorityMedium: "Medium",
+    priorityLow: "Low",
+    notPrioritized: "Not prioritized",
+    urlLabel: "Reference URL",
+  },
+  refinementTab: {
+    title: "Refinement",
+    subtitle: "Review, prioritization and validation of backlog use cases",
+    noItems: "No items to display",
+    scrumNotes: "Scrum Master notes",
+    validate: "Validate",
+    refuse: "Refuse",
+    putOnHold: "Put on hold",
+  },
+  ecosystemTab: {
+    title: "Ecosystem",
+    noContent: "No ecosystem description available",
+    createContent: "Create content",
+    editEcosystem: "Edit Ecosystem",
+    addSection: "Add a section",
+    sectionTitle: "Section title",
+  },
+  activity: {
+    title: "Activity",
+    memberSince: "Member since",
+    trainings: "Trainings",
+    completed: "completed",
+    questionsAnswered: "questions answered",
+    correct: "correct",
+    messages: "messages",
+    shared: "shared",
+    posts: "post(s)",
+    recentTrainings: "Recent trainings",
   },
 };
 

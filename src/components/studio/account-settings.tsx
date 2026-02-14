@@ -12,6 +12,7 @@ import {
   CardFooter,
 } from "@/components/ui";
 import { Eye, EyeOff, Save, Shield, ShieldOff } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 interface User {
   id: string;
@@ -27,6 +28,7 @@ interface AccountSettingsProps {
 
 export function AccountSettings({ user }: AccountSettingsProps) {
   const router = useRouter();
+  const { t } = useI18n();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);

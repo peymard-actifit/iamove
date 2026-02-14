@@ -126,7 +126,7 @@ export function Tab3Profile({
   if (persons.length === 0) {
     return (
       <div className="text-center py-12 text-gray-500">
-        <p>Aucune personne à afficher</p>
+        <p>{t.common?.noData || "Aucune personne à afficher"}</p>
       </div>
     );
   }
@@ -265,7 +265,7 @@ export function Tab3Profile({
                         value={editForm.managerId}
                         onChange={(e) => setEditForm({ ...editForm, managerId: e.target.value })}
                       >
-                        <option value="">Aucun (sommet)</option>
+                        <option value="">{t.common?.noData || "Aucun"} (sommet)</option>
                         {persons
                           .filter((p) => p.id !== selectedPerson.id)
                           .map((p) => (
@@ -275,7 +275,7 @@ export function Tab3Profile({
                           ))}
                       </select>
                     ) : (
-                      <p className="font-medium">{selectedPerson.manager?.name || "Aucun"}</p>
+                      <p className="font-medium">{selectedPerson.manager?.name || (t.common?.noData || "Aucun")}</p>
                     )}
                   </div>
                 </div>

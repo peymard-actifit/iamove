@@ -28,6 +28,7 @@ import {
   Link2,
   Check,
 } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 interface StudioUser {
   id: string;
@@ -45,6 +46,7 @@ interface StudioUsersManagerProps {
 }
 
 export function StudioUsersManager({ currentUserId }: StudioUsersManagerProps) {
+  const { t } = useI18n();
   const [users, setUsers] = useState<StudioUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -72,7 +74,7 @@ export function StudioUsersManager({ currentUserId }: StudioUsersManagerProps) {
 
   const handleDelete = async (user: StudioUser) => {
     if (user.id === currentUserId) return;
-    if (!confirm(`Supprimer l'utilisateur "${user.name}" ? Ses sites seront également supprimés.`)) return;
+    if (!confirm(`${t.common?.delete || "Supprimer"} l'utilisateur "${user.name}" ? Ses sites seront également supprimés.`)) return;
     await fetch(`/api/studio/users?id=${user.id}`, { method: "DELETE" });
     fetchUsers();
   };
@@ -95,7 +97,7 @@ export function StudioUsersManager({ currentUserId }: StudioUsersManagerProps) {
     u.email.toLowerCase().includes(search.toLowerCase())
   );
 
-  if (loading) return <div className="text-center py-8 text-gray-400">Chargement...</div>;
+  if (loading) return <div className="text-center py-8 text-gray-400">{t.common?.loading || "Chargement..."}</div>;
 
   return (
     <div className="max-w-4xl mx-auto space-y-4">
@@ -119,7 +121,7 @@ export function StudioUsersManager({ currentUserId }: StudioUsersManagerProps) {
             />
           </div>
           <Button size="sm" onClick={() => setShowAddDialog(true)} className="h-8 gap-1">
-            <Plus className="h-3.5 w-3.5" /> Ajouter
+            <Plus className="h-3.5 w-3.5" /> {t.common?.add || "Ajouter"}
           </Button>
         </div>
       </div>
@@ -211,7 +213,7 @@ export function StudioUsersManager({ currentUserId }: StudioUsersManagerProps) {
                             size="sm"
                             onClick={() => setEditUser(user)}
                             className="h-7 px-1.5"
-                            title="Modifier"
+                            title={t.common?.edit || "Modifier"}
                           >
                             <Pencil className="h-3.5 w-3.5" />
                           </Button>
@@ -242,7 +244,7 @@ export function StudioUsersManager({ currentUserId }: StudioUsersManagerProps) {
                             size="sm"
                             onClick={() => handleDelete(user)}
                             className="h-7 px-1.5 text-red-500"
-                            title="Supprimer"
+                            title={t.common?.delete || "Supprimer"}
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
@@ -258,7 +260,7 @@ export function StudioUsersManager({ currentUserId }: StudioUsersManagerProps) {
       </div>
 
       {filtered.length === 0 && !loading && (
-        <div className="text-center py-8 text-gray-400">Aucun utilisateur trouvé</div>
+        <div className="text-center py-8 text-gray-400">{t.common?.noData || "Aucun utilisateur trouvé"}</div>
       )}
 
       {/* Add Dialog */}
@@ -293,6 +295,7 @@ export function StudioUsersManager({ currentUserId }: StudioUsersManagerProps) {
 // ------- Add User Dialog -------
 
 function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
+  const { t } = useI18n();
   const [form, setForm] = useState({ name: "", email: "", password: "", role: "STANDARD" });
   const [showPassword, setShowPassword] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -385,7 +388,7 @@ function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated:
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button variant="outline" onClick={onClose}>{t.common?.cancel || "Annuler"}</Button>
           <Button onClick={handleSubmit} isLoading={saving}>Créer</Button>
         </DialogFooter>
       </DialogContent>
@@ -396,6 +399,7 @@ function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated:
 // ------- Edit User Dialog -------
 
 function EditUserDialog({ user, onClose, onSaved }: { user: StudioUser; onClose: () => void; onSaved: () => void }) {
+  const { t } = useI18n();
   const [form, setForm] = useState({ name: user.name, email: user.email });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -443,8 +447,8 @@ function EditUserDialog({ user, onClose, onSaved }: { user: StudioUser; onClose:
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Annuler</Button>
-          <Button onClick={handleSubmit} isLoading={saving}>Enregistrer</Button>
+          <Button variant="outline" onClick={onClose}>{t.common?.cancel || "Annuler"}</Button>
+          <Button onClick={handleSubmit} isLoading={saving}>{t.common?.save || "Enregistrer"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -454,6 +458,7 @@ function EditUserDialog({ user, onClose, onSaved }: { user: StudioUser; onClose:
 // ------- Reset Password Dialog -------
 
 function ResetPasswordDialog({ user, onClose, onReset }: { user: StudioUser; onClose: () => void; onReset: () => void }) {
+  const { t } = useI18n();
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -512,7 +517,7 @@ function ResetPasswordDialog({ user, onClose, onReset }: { user: StudioUser; onC
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button variant="outline" onClick={onClose}>{t.common?.cancel || "Annuler"}</Button>
           <Button onClick={handleSubmit} isLoading={saving}>Réinitialiser</Button>
         </DialogFooter>
       </DialogContent>

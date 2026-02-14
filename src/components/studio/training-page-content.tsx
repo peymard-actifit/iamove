@@ -263,7 +263,7 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
   };
 
   const handleDeleteModule = async (moduleId: string) => {
-    if (!confirm("Supprimer ce module de formation ?")) return;
+    if (!confirm(`${t.common?.delete || "Supprimer"} ce module de formation ?`)) return;
     
     try {
       await fetch(`/api/training/modules/${moduleId}`, {
@@ -319,7 +319,7 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
   };
 
   const handleDeletePath = async (pathId: string) => {
-    if (!confirm("Supprimer ce parcours ?")) return;
+    if (!confirm(`${t.common?.delete || "Supprimer"} ce parcours ?`)) return;
     try {
       const res = await fetch(`/api/training/paths/${pathId}`, { method: "DELETE", credentials: "include" });
       if (res.ok) {

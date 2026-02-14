@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { GraduationCap, ClipboardCheck, MessageCircle, Lightbulb, Code2, Zap } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 interface ActivityData {
   training: {
@@ -26,6 +27,7 @@ interface ActivitySummaryProps {
 }
 
 export function ActivitySummary({ siteId, personId }: ActivitySummaryProps) {
+  const { t } = useI18n();
   const [data, setData] = useState<ActivityData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -36,7 +38,7 @@ export function ActivitySummary({ siteId, personId }: ActivitySummaryProps) {
       .catch(() => setLoading(false));
   }, [siteId, personId]);
 
-  if (loading) return <div className="text-center py-4 text-gray-400 text-sm">Chargement de l&apos;activité...</div>;
+  if (loading) return <div className="text-center py-4 text-gray-400 text-sm">{t.common?.loading || "Chargement..."}</div>;
   if (!data) return null;
 
   const stats = [

@@ -439,7 +439,7 @@ export function Tab1Persons({
     <div className="space-y-4">
       {persons.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
-          <p>Aucune personne dans ce site</p>
+          <p>{t.common?.noData || "Aucune personne dans ce site"}</p>
           <p className="text-sm mt-1">Utilisez le bouton &quot;Ajouter une personne&quot; ci-dessus</p>
         </div>
       ) : (

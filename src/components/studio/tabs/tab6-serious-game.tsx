@@ -5,6 +5,7 @@ import { Button, Input } from "@/components/ui";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Trash2, Award, Gift } from "lucide-react";
 import { PP_GAINS } from "@/lib/pp-rules";
+import { useI18n } from "@/lib/i18n";
 
 interface Badge {
   id: string;
@@ -47,6 +48,7 @@ const CRITERIA_TYPES: Record<string, string> = {
 };
 
 export function Tab6SeriousGame({ siteId, persons }: Tab6SeriousGameProps) {
+  const { t } = useI18n();
   const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -82,7 +84,7 @@ export function Tab6SeriousGame({ siteId, persons }: Tab6SeriousGameProps) {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Supprimer ce badge ?")) return;
+    if (!confirm(`${t.common?.delete || "Supprimer"} ce badge ?`)) return;
     await fetch(`/api/sites/${siteId}/badges?id=${id}`, { method: "DELETE" });
     fetchBadges();
   };
@@ -101,7 +103,7 @@ export function Tab6SeriousGame({ siteId, persons }: Tab6SeriousGameProps) {
     }
   };
 
-  if (loading) return <div className="text-center py-8 text-gray-400">Chargement...</div>;
+  if (loading) return <div className="text-center py-8 text-gray-400">{t.common?.loading || "Chargement..."}</div>;
 
   return (
     <div className="space-y-6">
@@ -160,7 +162,7 @@ export function Tab6SeriousGame({ siteId, persons }: Tab6SeriousGameProps) {
                 <Input type="number" value={form.ppReward} onChange={(e) => setForm({ ...form, ppReward: parseInt(e.target.value) || 0 })} className="h-8 text-sm w-20" />
               </div>
               <Button size="sm" onClick={handleCreate} className="h-8">Créer</Button>
-              <Button size="sm" variant="ghost" onClick={() => setShowForm(false)} className="h-8">Annuler</Button>
+              <Button size="sm" variant="ghost" onClick={() => setShowForm(false)} className="h-8">{t.common?.cancel || "Annuler"}</Button>
             </div>
           </div>
         )}

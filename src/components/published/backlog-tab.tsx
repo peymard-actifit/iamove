@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button, Input, Card } from "@/components/ui";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui";
 import { Plus, ChevronDown, ChevronUp, Rocket, Eye, Calendar, User, Briefcase, Tag, ArrowUpDown } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -60,6 +61,7 @@ const CATEGORIES = ["Automatisation", "Analyse", "Génération", "Productivité"
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function BacklogTab({ siteId, personId, isAdmin, persons }: BacklogTabProps) {
+  const { t } = useI18n();
   const [items, setItems] = useState<BacklogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -85,7 +87,7 @@ export function BacklogTab({ siteId, personId, isAdmin, persons }: BacklogTabPro
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Supprimer cet item du backlog ?")) return;
+    if (!confirm(t.backlog?.deleteConfirm || "Supprimer cet item du backlog ?")) return;
     await fetch(`/api/sites/${siteId}/backlog?id=${id}`, { method: "DELETE" });
     fetchItems();
   };
@@ -97,7 +99,7 @@ export function BacklogTab({ siteId, personId, isAdmin, persons }: BacklogTabPro
     return acc;
   }, {});
 
-  if (loading) return <div className="text-center py-8 text-gray-400">Chargement du backlog...</div>;
+  if (loading) return <div className="text-center py-8 text-gray-400">{t.common?.loading || "Chargement..."}</div>;
 
   return (
     <div className="max-w-5xl mx-auto space-y-4 p-2">
@@ -134,7 +136,7 @@ export function BacklogTab({ siteId, personId, isAdmin, persons }: BacklogTabPro
       {/* Liste */}
       {filtered.length === 0 ? (
         <Card className="p-8 text-center text-gray-400">
-          {filter === "all" ? "Aucun cas d'usage dans le backlog" : `Aucun cas d'usage "${STATUS_CONFIG[filter]?.label}"`}
+          {filter === "all" ? (t.backlog?.noItems || "Aucun cas d'usage dans le backlog") : `${t.backlog?.noItems || "Aucun cas d'usage"} "${STATUS_CONFIG[filter]?.label}"`}
         </Card>
       ) : (
         <div className="space-y-2">
@@ -259,6 +261,7 @@ function ProposalForm({
   onClose: () => void;
   onCreated: () => void;
 }) {
+  const { t } = useI18n();
   const [form, setForm] = useState({
     title: "", description: "", service: "", category: "", tools: "", impact: "", url: "", ownerId: "", sponsorId: "", targetDate: "",
   });
@@ -348,9 +351,9 @@ function ProposalForm({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button variant="outline" onClick={onClose}>{t.common?.cancel || "Annuler"}</Button>
           <Button onClick={handleSubmit} disabled={saving || !form.title || !form.description}>
-            {saving ? "Envoi..." : "Proposer"}
+            {saving ? (t.common?.saving || "Envoi...") : (t.backlog?.proposeUseCase || "Proposer")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -361,6 +364,7 @@ function ProposalForm({
 // ─── Détail en lecture seule ──────────────────────────────────────────────────
 
 function DetailDialog({ item, onClose }: { item: BacklogItem; onClose: () => void }) {
+  const { t } = useI18n();
   const cfg = STATUS_CONFIG[item.status] || STATUS_CONFIG.A_VALIDER;
   const fields = [
     { label: "Statut", value: cfg.label },
@@ -400,7 +404,7 @@ function DetailDialog({ item, onClose }: { item: BacklogItem; onClose: () => voi
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Fermer</Button>
+          <Button variant="outline" onClick={onClose}>{t.common?.close || "Fermer"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

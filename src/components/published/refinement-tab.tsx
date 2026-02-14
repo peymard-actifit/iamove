@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button, Input, Card } from "@/components/ui";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui";
 import { CheckCircle, XCircle, Clock, Pencil, ChevronDown, Save, ArrowUp, ArrowDown } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -61,6 +62,7 @@ const CATEGORIES = ["Automatisation", "Analyse", "Génération", "Productivité"
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function RefinementTab({ siteId, persons }: RefinementTabProps) {
+  const { t } = useI18n();
   const [items, setItems] = useState<BacklogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [editItem, setEditItem] = useState<BacklogItem | null>(null);
@@ -94,7 +96,7 @@ export function RefinementTab({ siteId, persons }: RefinementTabProps) {
 
   const filtered = items.filter((i) => statusFilter === "all" || i.status === statusFilter);
 
-  if (loading) return <div className="text-center py-8 text-gray-400">Chargement...</div>;
+  if (loading) return <div className="text-center py-8 text-gray-400">{t.common?.loading || "Chargement..."}</div>;
 
   return (
     <div className="max-w-5xl mx-auto space-y-4 p-2">
@@ -122,7 +124,7 @@ export function RefinementTab({ siteId, persons }: RefinementTabProps) {
 
       {/* Liste */}
       {filtered.length === 0 ? (
-        <Card className="p-8 text-center text-gray-400">Aucun item à afficher</Card>
+        <Card className="p-8 text-center text-gray-400">{t.refinementTab?.noItems || "Aucun item à afficher"}</Card>
       ) : (
         <div className="border rounded-lg overflow-hidden">
           <table className="w-full text-sm">
@@ -242,6 +244,7 @@ function EditRefinementDialog({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const { t } = useI18n();
   const [form, setForm] = useState({
     title: item.title,
     description: item.description,
@@ -358,9 +361,9 @@ function EditRefinementDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button variant="outline" onClick={onClose}>{t.common?.cancel || "Annuler"}</Button>
           <Button onClick={handleSave} disabled={saving}>
-            <Save className="h-4 w-4 mr-1" /> {saving ? "Sauvegarde..." : "Enregistrer"}
+            <Save className="h-4 w-4 mr-1" /> {saving ? (t.common?.saving || "Sauvegarde...") : (t.common?.save || "Enregistrer")}
           </Button>
         </DialogFooter>
       </DialogContent>

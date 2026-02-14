@@ -422,7 +422,7 @@ export function SiteSettingsPanel({
                     </p>
 
                     {allUsers.length === 0 ? (
-                      <p className="text-xs text-gray-400 italic py-2">Chargement...</p>
+                      <p className="text-xs text-gray-400 italic py-2">{t.common?.loading || "Chargement..."}</p>
                     ) : (
                       <div className="border rounded-lg divide-y divide-gray-100 dark:divide-gray-800 max-h-80 overflow-auto">
                         {allUsers.filter((u) => u.id !== site.ownerId).map((user) => {

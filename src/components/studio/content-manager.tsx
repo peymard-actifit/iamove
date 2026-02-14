@@ -27,6 +27,7 @@ import {
   ArrowRight,
   Search,
 } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 // ------- Types -------
 
@@ -129,6 +130,7 @@ const TYPE_LABELS: Record<string, { singular: string; plural: string; icon: type
 };
 
 function ContentList({ type }: { type: string }) {
+  const { t } = useI18n();
   const [items, setItems] = useState<ContentItem[]>([]);
   const [sites, setSites] = useState<SiteRef[]>([]);
   const [loading, setLoading] = useState(true);
@@ -155,7 +157,7 @@ function ContentList({ type }: { type: string }) {
   }, [fetchData]);
 
   const handleDelete = async (id: string) => {
-    if (!confirm(`Supprimer ce contenu ?`)) return;
+    if (!confirm(`${t.common?.delete || "Supprimer"} ce contenu ?`)) return;
     await fetch(`/api/studio/content?type=${type}&id=${id}`, { method: "DELETE" });
     fetchData();
   };
@@ -169,7 +171,7 @@ function ContentList({ type }: { type: string }) {
     return matchSearch && matchSite;
   });
 
-  if (loading) return <div className="text-center py-8 text-gray-400">Chargement...</div>;
+  if (loading) return <div className="text-center py-8 text-gray-400">{t.common?.loading || "Chargement..."}</div>;
 
   return (
     <div className="space-y-4">
@@ -211,7 +213,7 @@ function ContentList({ type }: { type: string }) {
       {filtered.length === 0 ? (
         <div className="text-center py-12 text-gray-400">
           <meta.icon className="h-10 w-10 mx-auto mb-2 opacity-30" />
-          <p>Aucun contenu trouvé</p>
+          <p>{t.common?.noData || "Aucun contenu trouvé"}</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -276,6 +278,7 @@ function ContentRow({
   onDelete: () => void;
   onShare: () => void;
 }) {
+  const { t } = useI18n();
   const sharedWith = (item as UseCaseItem | ForumItem | TechTipItem).sharedWith || [];
   const interactionCount =
     type === "forum"
@@ -319,10 +322,10 @@ function ContentRow({
           <Button variant="ghost" size="sm" onClick={onShare} className="h-7 px-1.5" title="Partager avec un autre site">
             <Share2 className="h-3.5 w-3.5" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={onEdit} className="h-7 px-1.5" title="Modifier">
+          <Button variant="ghost" size="sm" onClick={onEdit} className="h-7 px-1.5" title={t.common?.edit || "Modifier"}>
             <Pencil className="h-3.5 w-3.5" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={onDelete} className="h-7 px-1.5 text-red-500" title="Supprimer">
+          <Button variant="ghost" size="sm" onClick={onDelete} className="h-7 px-1.5 text-red-500" title={t.common?.delete || "Supprimer"}>
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
         </div>
@@ -344,6 +347,7 @@ function EditDialog({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const { t } = useI18n();
   const [form, setForm] = useState<Record<string, string>>(() => {
     if (type === "use-cases") {
       const uc = item as UseCaseItem;
@@ -438,10 +442,10 @@ function EditDialog({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            Annuler
+            {t.common?.cancel || "Annuler"}
           </Button>
           <Button onClick={handleSave} isLoading={saving}>
-            Enregistrer
+            {t.common?.save || "Enregistrer"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -464,6 +468,7 @@ function ShareDialog({
   onClose: () => void;
   onChanged: () => void;
 }) {
+  const { t } = useI18n();
   const sharedWith = (item as UseCaseItem | ForumItem | TechTipItem).sharedWith || [];
   const sharedIds = new Set(sharedWith.map((s) => s.id));
   const [loading, setLoading] = useState<string | null>(null);
@@ -502,7 +507,7 @@ function ShareDialog({
             Origine : <span className="font-medium">{item.site.name}</span>
           </p>
           {otherSites.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-4">Aucun autre site disponible</p>
+            <p className="text-sm text-gray-400 text-center py-4">{t.common?.noData || "Aucun autre site disponible"}</p>
           ) : (
             <div className="space-y-1.5">
               {otherSites.map((site) => {
@@ -545,7 +550,7 @@ function ShareDialog({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            Fermer
+            {t.common?.close || "Fermer"}
           </Button>
         </DialogFooter>
       </DialogContent>

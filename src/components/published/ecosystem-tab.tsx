@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button, Card } from "@/components/ui";
 import { Globe, Pencil, Save, X, Plus, Trash2, GripVertical, ChevronDown, ChevronUp } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -23,6 +24,7 @@ const DEFAULT_ICONS = ["🏗️", "🔧", "🌐", "📊", "🔒", "💾", "☁�
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function EcosystemTab({ siteId, isAdmin }: EcosystemTabProps) {
+  const { t } = useI18n();
   const [sections, setSections] = useState<EcosystemSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -109,7 +111,7 @@ export function EcosystemTab({ siteId, isAdmin }: EcosystemTabProps) {
     });
   };
 
-  if (loading) return <div className="text-center py-8 text-gray-400">Chargement...</div>;
+  if (loading) return <div className="text-center py-8 text-gray-400">{t.common?.loading || "Chargement..."}</div>;
 
   // ─── Mode édition (admin) ───────────────────────────────────────────────────
 
@@ -122,10 +124,10 @@ export function EcosystemTab({ siteId, isAdmin }: EcosystemTabProps) {
           </h2>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => setEditing(false)} className="gap-1">
-              <X className="h-3.5 w-3.5" /> Annuler
+              <X className="h-3.5 w-3.5" /> {t.common?.cancel || "Annuler"}
             </Button>
             <Button size="sm" onClick={handleSave} disabled={saving} className="gap-1">
-              <Save className="h-3.5 w-3.5" /> {saving ? "Sauvegarde..." : "Enregistrer"}
+              <Save className="h-3.5 w-3.5" /> {saving ? (t.common?.saving || "Sauvegarde...") : (t.common?.save || "Enregistrer")}
             </Button>
           </div>
         </div>
@@ -174,7 +176,7 @@ export function EcosystemTab({ siteId, isAdmin }: EcosystemTabProps) {
         </div>
 
         <Button variant="outline" size="sm" onClick={addSection} className="gap-1 w-full">
-          <Plus className="h-3.5 w-3.5" /> Ajouter une section
+          <Plus className="h-3.5 w-3.5" /> {t.ecosystemTab?.addSection || "Ajouter une section"}
         </Button>
       </div>
     );
@@ -200,7 +202,7 @@ export function EcosystemTab({ siteId, isAdmin }: EcosystemTabProps) {
       {isEmpty ? (
         <Card className="p-12 text-center">
           <Globe className="h-12 w-12 mx-auto mb-3 text-gray-200" />
-          <p className="text-gray-400">Aucune description de l&apos;écosystème disponible</p>
+          <p className="text-gray-400">{t.ecosystemTab?.noContent || "Aucune description de l'écosystème disponible"}</p>
           {isAdmin && (
             <Button size="sm" variant="outline" onClick={startEditing} className="mt-4 gap-1">
               <Plus className="h-3.5 w-3.5" /> Créer le contenu

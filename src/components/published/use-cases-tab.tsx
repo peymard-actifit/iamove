@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button, Input } from "@/components/ui";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui";
 import { Plus, Heart, Pencil, Trash2, Lightbulb, Wrench, TrendingUp, X, ExternalLink, ClipboardList, Eye } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 interface Person {
   id: string;
@@ -56,6 +57,7 @@ interface UseCasesTabProps {
 const CATEGORIES = ["Automatisation", "Analyse", "Génération", "Productivité", "Communication", "Autre"];
 
 export function UseCasesTab({ siteId, currentPersonId }: UseCasesTabProps) {
+  const { t } = useI18n();
   const [useCases, setUseCases] = useState<UseCase[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -99,7 +101,7 @@ export function UseCasesTab({ siteId, currentPersonId }: UseCasesTabProps) {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Supprimer ce use case ?")) return;
+    if (!confirm(t.useCases?.deleteConfirm || "Supprimer ce use case ?")) return;
     await fetch(`/api/sites/${siteId}/use-cases?id=${id}`, { method: "DELETE" });
     fetchUseCases();
   };
@@ -114,7 +116,7 @@ export function UseCasesTab({ siteId, currentPersonId }: UseCasesTabProps) {
     filter === "" || uc.category === filter
   );
 
-  if (loading) return <div className="text-center py-8 text-gray-400">Chargement...</div>;
+  if (loading) return <div className="text-center py-8 text-gray-400">{t.common?.loading || "Chargement..."}</div>;
 
   return (
     <div className="space-y-4">
@@ -143,7 +145,7 @@ export function UseCasesTab({ siteId, currentPersonId }: UseCasesTabProps) {
       {showForm && (
         <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-medium text-sm">{editId ? "Modifier" : "Nouveau"} Use Case</h3>
+            <h3 className="font-medium text-sm">{editId ? (t.useCases?.editUseCase || "Modifier Use Case") : (t.useCases?.newUseCase || "Nouveau Use Case")}</h3>
             <Button variant="ghost" size="sm" onClick={() => { setShowForm(false); setEditId(null); }}><X className="h-4 w-4" /></Button>
           </div>
           <Input placeholder="Titre du use case *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="h-8 text-sm" />
@@ -167,7 +169,7 @@ export function UseCasesTab({ siteId, currentPersonId }: UseCasesTabProps) {
             <Input placeholder="Impact observé" value={form.impact} onChange={(e) => setForm({ ...form, impact: e.target.value })} className="h-8 text-sm" />
           </div>
           <Input placeholder="URL à partager (optionnel)" value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} className="h-8 text-sm" />
-          <Button size="sm" onClick={handleSubmit} className="h-8">{editId ? "Enregistrer" : "Publier"}</Button>
+          <Button size="sm" onClick={handleSubmit} className="h-8">{editId ? (t.common?.save || "Enregistrer") : (t.useCases?.publish || "Publier")}</Button>
         </div>
       )}
 
@@ -175,7 +177,7 @@ export function UseCasesTab({ siteId, currentPersonId }: UseCasesTabProps) {
       {filtered.length === 0 ? (
         <div className="text-center py-12 text-gray-400">
           <Lightbulb className="h-10 w-10 mx-auto mb-2 opacity-30" />
-          <p>Aucun use case partagé</p>
+          <p>{t.useCases?.noUseCases || "Aucun use case partagé"}</p>
           <p className="text-xs mt-1">Soyez le premier à partager votre expérience !</p>
         </div>
       ) : (
@@ -253,6 +255,7 @@ const STATUS_LABELS: Record<string, string> = {
 const PRIO_LABELS: Record<number, string> = { 0: "Non priorisé", 1: "Haute", 2: "Moyenne", 3: "Basse" };
 
 function BacklogDetailDialog({ item, onClose }: { item: BacklogItemRef; onClose: () => void }) {
+  const { t } = useI18n();
   const fields = [
     { label: "Statut final", value: STATUS_LABELS[item.status] || item.status },
     { label: "Priorité", value: PRIO_LABELS[item.priority] || "—" },
@@ -292,7 +295,7 @@ function BacklogDetailDialog({ item, onClose }: { item: BacklogItemRef; onClose:
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Fermer</Button>
+          <Button variant="outline" onClick={onClose}>{t.common?.close || "Fermer"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui";
 import { Plus, Heart, Trash2, Code2, X, Pencil } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 interface Person {
   id: string;
@@ -29,6 +30,7 @@ interface TechTipsTabProps {
 const CATEGORIES = ["API", "Outil", "Méthode", "Service Web", "Prompt", "Script", "Autre"];
 
 export function TechTipsTab({ siteId, currentPersonId }: TechTipsTabProps) {
+  const { t } = useI18n();
   const [tips, setTips] = useState<TechTip[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -79,14 +81,14 @@ export function TechTipsTab({ siteId, currentPersonId }: TechTipsTabProps) {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Supprimer ce conseil technique ?")) return;
+    if (!confirm(t.techTips?.deleteConfirm || "Supprimer ce conseil technique ?")) return;
     await fetch(`/api/sites/${siteId}/tech-tips?id=${id}`, { method: "DELETE" });
     fetchTips();
   };
 
   const filtered = tips.filter((t) => filter === "" || t.category === filter);
 
-  if (loading) return <div className="text-center py-8 text-gray-400">Chargement...</div>;
+  if (loading) return <div className="text-center py-8 text-gray-400">{t.common?.loading || "Chargement..."}</div>;
 
   return (
     <div className="space-y-4">
@@ -115,7 +117,7 @@ export function TechTipsTab({ siteId, currentPersonId }: TechTipsTabProps) {
       {showForm && (
         <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-medium text-sm">{editId ? "Modifier le conseil technique" : "Nouveau conseil technique"}</h3>
+            <h3 className="font-medium text-sm">{editId ? (t.techTips?.editTip || "Modifier le conseil technique") : (t.techTips?.newTip || "Nouveau conseil technique")}</h3>
             <Button variant="ghost" size="sm" onClick={() => { setShowForm(false); setEditId(null); }}><X className="h-4 w-4" /></Button>
           </div>
           <Input placeholder="Titre *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="h-8 text-sm" />
@@ -135,7 +137,7 @@ export function TechTipsTab({ siteId, currentPersonId }: TechTipsTabProps) {
               <option value="">Catégorie</option>
               {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
-            <Button size="sm" onClick={handleSubmit} className="h-8">{editId ? "Enregistrer" : "Publier"}</Button>
+            <Button size="sm" onClick={handleSubmit} className="h-8">{editId ? (t.common?.save || "Enregistrer") : (t.useCases?.publish || "Publier")}</Button>
           </div>
         </div>
       )}
@@ -144,7 +146,7 @@ export function TechTipsTab({ siteId, currentPersonId }: TechTipsTabProps) {
       {filtered.length === 0 ? (
         <div className="text-center py-12 text-gray-400">
           <Code2 className="h-10 w-10 mx-auto mb-2 opacity-30" />
-          <p>Aucun conseil technique</p>
+          <p>{t.techTips?.noTips || "Aucun conseil technique"}</p>
           <p className="text-xs mt-1">Partagez vos découvertes techniques !</p>
         </div>
       ) : (
@@ -208,7 +210,7 @@ export function TechTipsTab({ siteId, currentPersonId }: TechTipsTabProps) {
                 </p>
                 {selectedTip.person.id === currentPersonId && selectedTip.likes.length === 0 && (
                   <Button variant="outline" size="sm" onClick={() => startEdit(selectedTip)} className="h-7 gap-1 text-xs">
-                    <Pencil className="h-3 w-3" /> Modifier
+                    <Pencil className="h-3 w-3" /> {t.common?.edit || "Modifier"}
                   </Button>
                 )}
               </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button, Input } from "@/components/ui";
 import { Plus, MessageCircle, Send, Trash2, X, ChevronDown, ChevronUp, Pencil } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 interface Person {
   id: string;
@@ -36,6 +37,7 @@ interface ForumTabProps {
 const CATEGORIES = ["Question", "Discussion", "Partage", "Aide"];
 
 export function ForumTab({ siteId, currentPersonId }: ForumTabProps) {
+  const { t } = useI18n();
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -91,7 +93,7 @@ export function ForumTab({ siteId, currentPersonId }: ForumTabProps) {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Supprimer cette discussion ?")) return;
+    if (!confirm(t.forum?.deleteConfirm || "Supprimer cette discussion ?")) return;
     await fetch(`/api/sites/${siteId}/forum?id=${id}`, { method: "DELETE" });
     fetchPosts();
   };
@@ -105,7 +107,7 @@ export function ForumTab({ siteId, currentPersonId }: ForumTabProps) {
     });
   };
 
-  if (loading) return <div className="text-center py-8 text-gray-400">Chargement...</div>;
+  if (loading) return <div className="text-center py-8 text-gray-400">{t.common?.loading || "Chargement..."}</div>;
 
   return (
     <div className="space-y-4">
@@ -124,7 +126,7 @@ export function ForumTab({ siteId, currentPersonId }: ForumTabProps) {
       {showForm && (
         <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-medium text-sm">{editId ? "Modifier la discussion" : "Nouvelle discussion"}</h3>
+            <h3 className="font-medium text-sm">{editId ? (t.forum?.editPost || "Modifier la discussion") : (t.forum?.newPost || "Nouvelle discussion")}</h3>
             <Button variant="ghost" size="sm" onClick={() => { setShowForm(false); setEditId(null); }}><X className="h-4 w-4" /></Button>
           </div>
           <Input placeholder="Titre de la discussion *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="h-8 text-sm" />
@@ -144,7 +146,7 @@ export function ForumTab({ siteId, currentPersonId }: ForumTabProps) {
               <option value="">Catégorie</option>
               {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
-            <Button size="sm" onClick={handleSubmit} className="h-8">{editId ? "Enregistrer" : "Publier"}</Button>
+            <Button size="sm" onClick={handleSubmit} className="h-8">{editId ? (t.common?.save || "Enregistrer") : (t.useCases?.publish || "Publier")}</Button>
           </div>
         </div>
       )}
@@ -153,7 +155,7 @@ export function ForumTab({ siteId, currentPersonId }: ForumTabProps) {
       {posts.length === 0 ? (
         <div className="text-center py-12 text-gray-400">
           <MessageCircle className="h-10 w-10 mx-auto mb-2 opacity-30" />
-          <p>Aucune discussion</p>
+          <p>{t.forum?.noPosts || "Aucune discussion"}</p>
           <p className="text-xs mt-1">Lancez la première conversation !</p>
         </div>
       ) : (

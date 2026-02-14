@@ -4,6 +4,7 @@ import { useMemo, useState, useRef, useCallback } from "react";
 import { Card, Button, Input } from "@/components/ui";
 import { ChevronDown, Plus, Minus, Maximize, Minimize, Focus, Printer } from "lucide-react";
 import { getLevelIcon, getLevelInfo } from "@/lib/levels";
+import { useI18n } from "@/lib/i18n";
 
 interface Person {
   id: string;
@@ -198,6 +199,7 @@ export function Tab2Organigramme({
 }: Tab2OrganigrammeProps) {
   // En mode publié avec un utilisateur connecté, afficher uniquement à partir de cet utilisateur
   // Sauf si showFullTree est activé (admin) : arbre complet
+  const { t } = useI18n();
   const orgTree = useMemo(() => {
     if (isPublished && currentUserEmail && !showFullTree) {
       return buildOrgTreeFromPerson(persons, currentUserEmail);
@@ -274,7 +276,7 @@ export function Tab2Organigramme({
   if (persons.length === 0) {
     return (
       <div className="text-center py-12 text-gray-500">
-        <p>Aucune personne dans l&apos;organigramme</p>
+        <p>{t.common?.noData || "Aucune personne dans l'organigramme"}</p>
         <p className="text-sm mt-1">Ajoutez des personnes dans l&apos;onglet Équipe</p>
       </div>
     );

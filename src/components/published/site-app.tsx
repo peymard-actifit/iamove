@@ -227,34 +227,34 @@ export function PublishedSiteApp({
                 )}
                 <TabsTrigger value="tab-usecases" className="gap-0.5" data-pp-menu="tab-usecases">
                   <Lightbulb className="h-3 w-3" />
-                  <span className="hidden lg:inline">Use Cases</span>
+                  <span className="hidden lg:inline">{t.publishedTabs?.useCases || "Use Cases"}</span>
                 </TabsTrigger>
                 <TabsTrigger value="tab-forum" className="gap-0.5" data-pp-menu="tab-forum">
                   <MessageCircle className="h-3 w-3" />
-                  <span className="hidden lg:inline">Forum</span>
+                  <span className="hidden lg:inline">{t.publishedTabs?.forum || "Forum"}</span>
                 </TabsTrigger>
                 <TabsTrigger value="tab-tech" className="gap-0.5" data-pp-menu="tab-tech">
                   <Code2 className="h-3 w-3" />
-                  <span className="hidden lg:inline">Tech</span>
+                  <span className="hidden lg:inline">{t.publishedTabs?.tech || "Tech"}</span>
                 </TabsTrigger>
                 <TabsTrigger value="tab-ecosystem" className="gap-0.5" data-pp-menu="tab-ecosystem">
                   <Globe className="h-3 w-3" />
-                  <span className="hidden lg:inline">Écosystème</span>
+                  <span className="hidden lg:inline">{t.publishedTabs?.ecosystem || "Écosystème"}</span>
                 </TabsTrigger>
                 <TabsTrigger value="tab-backlog" className="gap-0.5" data-pp-menu="tab-backlog">
                   <ClipboardList className="h-3 w-3" />
-                  <span className="hidden lg:inline">Backlog</span>
+                  <span className="hidden lg:inline">{t.publishedTabs?.backlog || "Backlog"}</span>
                 </TabsTrigger>
                 {isPersonAdmin && (
                   <TabsTrigger value="tab-refinement" className="gap-0.5" data-pp-menu="tab-refinement">
                     <BarChart3 className="h-3 w-3" />
-                    <span className="hidden lg:inline">Refinement</span>
+                    <span className="hidden lg:inline">{t.publishedTabs?.refinement || "Refinement"}</span>
                   </TabsTrigger>
                 )}
                 {isPersonAdmin && (
                   <TabsTrigger value="tab-admin" className="gap-0.5" data-pp-menu="tab-admin">
                     <Users className="h-3 w-3" />
-                    <span className="hidden lg:inline">Personnes</span>
+                    <span className="hidden lg:inline">{t.publishedTabs?.persons || "Personnes"}</span>
                   </TabsTrigger>
                 )}
               </TabsList>
