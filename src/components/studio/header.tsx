@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import pkg from "../../../package.json";
 import {
@@ -28,6 +28,7 @@ import {
   Shield,
   ShieldOff,
   ChevronDown,
+  ArrowLeft,
   Scale,
   FileQuestion,
   GraduationCap,
@@ -49,6 +50,8 @@ export function StudioHeader({ session }: StudioHeaderProps) {
   const { centerContent, rightActions } = useHeaderContent();
   const { t } = useI18n();
   const router = useRouter();
+  const pathname = usePathname();
+  const isOnDashboard = pathname === "/dashboard";
   const [isLoading, setIsLoading] = useState(false);
   const [showAdminDialog, setShowAdminDialog] = useState(false);
   // showLevelsDialog supprimé — redirigé vers /levels
@@ -89,8 +92,10 @@ export function StudioHeader({ session }: StudioHeaderProps) {
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">
       <div className="container mx-auto flex h-14 items-center px-4 gap-4">
         {/* Logo (gauche) */}
-        <Link href="/dashboard" className="flex items-center gap-2 shrink-0">
-          <div className="h-7 w-7 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600" />
+        <Link href="/dashboard" className="flex items-center gap-2 shrink-0" title={isOnDashboard ? undefined : "Retour à la gestion des sites"}>
+          <div className="h-7 w-7 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
+            {!isOnDashboard && <ArrowLeft className="h-4 w-4 text-blue-200" />}
+          </div>
           <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             iamove
           </span>
