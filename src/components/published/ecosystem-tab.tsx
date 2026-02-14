@@ -127,7 +127,7 @@ export function EcosystemTab({ siteId, isAdmin }: EcosystemTabProps) {
               <X className="h-3.5 w-3.5" /> {t.common?.cancel || "Annuler"}
             </Button>
             <Button size="sm" onClick={handleSave} disabled={saving} className="gap-1">
-              <Save className="h-3.5 w-3.5" /> {saving ? (t.common?.saving || "Sauvegarde...") : (t.common?.save || "Enregistrer")}
+              <Save className="h-3.5 w-3.5" /> {saving ? "Sauvegarde..." : (t.common?.save || "Enregistrer")}
             </Button>
           </div>
         </div>

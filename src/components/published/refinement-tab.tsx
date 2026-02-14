@@ -363,7 +363,7 @@ function EditRefinementDialog({
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>{t.common?.cancel || "Annuler"}</Button>
           <Button onClick={handleSave} disabled={saving}>
-            <Save className="h-4 w-4 mr-1" /> {saving ? (t.common?.saving || "Sauvegarde...") : (t.common?.save || "Enregistrer")}
+            <Save className="h-4 w-4 mr-1" /> {saving ? "Sauvegarde..." : (t.common?.save || "Enregistrer")}
           </Button>
         </DialogFooter>
       </DialogContent>

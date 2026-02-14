@@ -353,7 +353,7 @@ function ProposalForm({
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>{t.common?.cancel || "Annuler"}</Button>
           <Button onClick={handleSubmit} disabled={saving || !form.title || !form.description}>
-            {saving ? (t.common?.saving || "Envoi...") : (t.backlog?.proposeUseCase || "Proposer")}
+            {saving ? "Envoi..." : (t.backlog?.proposeUseCase || "Proposer")}
           </Button>
         </DialogFooter>
       </DialogContent>
