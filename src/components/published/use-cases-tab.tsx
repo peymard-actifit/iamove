@@ -2,13 +2,35 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Button, Input } from "@/components/ui";
-import { Plus, Heart, Pencil, Trash2, Lightbulb, Wrench, TrendingUp, X, ExternalLink } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui";
+import { Plus, Heart, Pencil, Trash2, Lightbulb, Wrench, TrendingUp, X, ExternalLink, ClipboardList, Eye } from "lucide-react";
 
 interface Person {
   id: string;
   name: string;
   jobTitle: string | null;
   avatar: string | null;
+}
+
+interface BacklogItemRef {
+  id: string;
+  title: string;
+  description: string;
+  service: string | null;
+  category: string | null;
+  tools: string | null;
+  impact: string | null;
+  url: string | null;
+  priority: number;
+  status: string;
+  estimatedEffort: string | null;
+  actualEffort: string | null;
+  targetDate: string | null;
+  notes: string | null;
+  creator: { name: string };
+  owner: { name: string } | null;
+  sponsor: { name: string } | null;
+  createdAt: string;
 }
 
 interface UseCase {
@@ -22,6 +44,7 @@ interface UseCase {
   status: string;
   person: Person;
   likes: { personId: string }[];
+  backlogItem: BacklogItemRef | null;
   createdAt: string;
 }
 
@@ -39,6 +62,7 @@ export function UseCasesTab({ siteId, currentPersonId }: UseCasesTabProps) {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: "", description: "", category: "", tools: "", impact: "", url: "" });
   const [filter, setFilter] = useState("");
+  const [backlogDetail, setBacklogDetail] = useState<BacklogItemRef | null>(null);
 
   const fetchUseCases = useCallback(async () => {
     const res = await fetch(`/api/sites/${siteId}/use-cases`);
@@ -180,6 +204,11 @@ export function UseCasesTab({ siteId, currentPersonId }: UseCasesTabProps) {
                       <Heart className={`h-3.5 w-3.5 ${isLiked ? "fill-current" : ""}`} />
                       <span className="text-xs">{uc.likes.length}</span>
                     </Button>
+                    {uc.backlogItem && (
+                      <Button variant="ghost" size="sm" onClick={() => setBacklogDetail(uc.backlogItem)} className="h-7 px-1.5 text-purple-500" title="Dossier backlog">
+                        <ClipboardList className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
                     {isMine && (
                       <>
                         {uc.likes.length === 0 && (
@@ -207,6 +236,65 @@ export function UseCasesTab({ siteId, currentPersonId }: UseCasesTabProps) {
           })}
         </div>
       )}
+
+      {/* Dialog détail backlog en lecture seule */}
+      {backlogDetail && (
+        <BacklogDetailDialog item={backlogDetail} onClose={() => setBacklogDetail(null)} />
+      )}
     </div>
+  );
+}
+
+// ─── Backlog Detail Dialog ────────────────────────────────────────────────────
+
+const STATUS_LABELS: Record<string, string> = {
+  A_VALIDER: "À valider", EN_ATTENTE: "En attente", VALIDE: "Validé", REFUSE: "Refusé", EN_DEV: "En dev", MEP: "MEP",
+};
+const PRIO_LABELS: Record<number, string> = { 0: "Non priorisé", 1: "Haute", 2: "Moyenne", 3: "Basse" };
+
+function BacklogDetailDialog({ item, onClose }: { item: BacklogItemRef; onClose: () => void }) {
+  const fields = [
+    { label: "Statut final", value: STATUS_LABELS[item.status] || item.status },
+    { label: "Priorité", value: PRIO_LABELS[item.priority] || "—" },
+    { label: "Service", value: item.service },
+    { label: "Catégorie", value: item.category },
+    { label: "Outils", value: item.tools },
+    { label: "Impact", value: item.impact },
+    { label: "URL", value: item.url },
+    { label: "Proposé par", value: item.creator?.name },
+    { label: "Owner", value: item.owner?.name },
+    { label: "Sponsor", value: item.sponsor?.name },
+    { label: "Charge prévisionnelle", value: item.estimatedEffort },
+    { label: "Charge réelle", value: item.actualEffort },
+    { label: "Date cible", value: item.targetDate ? new Date(item.targetDate).toLocaleDateString("fr-FR") : null },
+    { label: "Notes refinement", value: item.notes },
+    { label: "Proposé le", value: new Date(item.createdAt).toLocaleDateString("fr-FR") },
+  ];
+
+  return (
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <ClipboardList className="h-4 w-4 text-purple-500" /> Dossier Backlog
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-2 py-2">
+          <h3 className="font-semibold">{item.title}</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap">{item.description}</p>
+          <div className="border-t pt-3 mt-3 space-y-2">
+            {fields.filter((f) => f.value).map((f) => (
+              <div key={f.label} className="flex items-start gap-2">
+                <span className="text-xs font-medium text-gray-500 w-36 flex-shrink-0">{f.label}</span>
+                <span className="text-sm">{f.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Fermer</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

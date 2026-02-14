@@ -98,6 +98,7 @@ model Site {
   forumPosts    ForumPost[]
   techTips      TechTip[]
   badges        Badge[]
+  backlogItems  BacklogItem[]
 
   // Utilisateurs Studio ayant accès à ce site (partage)
   sharedWith    StudioUser[]  @relation("SharedSiteUsers")
@@ -235,6 +236,11 @@ model Person {
   // Use cases IA
   useCases          UseCase[]
   useCaseLikes      UseCaseLike[]
+
+  // Backlog
+  backlogItems         BacklogItem[]  @relation("BacklogCreator")
+  ownedBacklogItems    BacklogItem[]  @relation("BacklogOwner")
+  sponsoredBacklogItems BacklogItem[] @relation("BacklogSponsor")
 
   // Forum
   forumPosts        ForumPost[]
@@ -709,6 +715,10 @@ model UseCase {
   likes       UseCaseLike[]
   sharedWith  Site[]        @relation("SharedUseCases")
 
+  // Lien optionnel vers le backlog d'origine
+  backlogItem   BacklogItem? @relation(fields: [backlogItemId], references: [id])
+  backlogItemId String?      @unique
+
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -730,6 +740,60 @@ model UseCaseLike {
 
   @@unique([useCaseId, personId])
   @@map("use_case_likes")
+}
+
+// =============================================================================
+// BACKLOG (gestion structurée des cas d'usage)
+// =============================================================================
+
+enum BacklogStatus {
+  A_VALIDER       // Proposé, en attente de validation
+  EN_ATTENTE      // En attente d'informations ou de décision
+  VALIDE          // Validé pour exécution
+  REFUSE          // Refusé
+  EN_DEV          // En cours de développement
+  MEP             // Mis en production
+}
+
+model BacklogItem {
+  id               String        @id @default(cuid())
+  title            String
+  description      String        @db.Text
+  service          String?       // Service / département concerné
+  category         String?       // Catégorie métier
+  tools            String?       // Outils / technologies envisagés
+  impact           String?       // Impact attendu
+  url              String?       // URL de référence
+  priority         Int           @default(0) // 0 = non priorisé, 1 = haute, 2 = moyenne, 3 = basse
+  status           BacklogStatus @default(A_VALIDER)
+  estimatedEffort  String?       // Charge prévisionnelle (ex: "5 jours", "2 sprints")
+  actualEffort     String?       // Charge réelle
+  targetDate       DateTime?     // Date cible
+  notes            String?       @db.Text // Notes du scrum master / refinement
+
+  // Créateur (la personne qui propose)
+  creator          Person        @relation("BacklogCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  creatorId        String
+
+  // Owner (responsable de la réalisation)
+  owner            Person?       @relation("BacklogOwner", fields: [ownerId], references: [id])
+  ownerId          String?
+
+  // Sponsor (commanditaire)
+  sponsor          Person?       @relation("BacklogSponsor", fields: [sponsorId], references: [id])
+  sponsorId        String?
+
+  // Site
+  site             Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  siteId           String
+
+  // Lien vers le UseCase créé lors de la promotion MEP
+  promotedUseCase  UseCase?
+
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@map("backlog_items")
 }
 
 // =============================================================================

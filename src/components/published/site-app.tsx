@@ -3,7 +3,7 @@
 import { useState, useCallback, createContext, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger, TabsContent, Button } from "@/components/ui";
-import { Network, User, GraduationCap, ClipboardCheck, LogOut, Users, Lightbulb, MessageCircle, Code2 } from "lucide-react";
+import { Network, User, GraduationCap, ClipboardCheck, LogOut, Users, Lightbulb, MessageCircle, Code2, ClipboardList, BarChart3 } from "lucide-react";
 import { Tab2Organigramme } from "@/components/studio/tabs/tab2-organigramme";
 import { Tab4Formation } from "@/components/studio/tabs/tab4-formation";
 import { Tab5Quiz } from "@/components/studio/tabs/tab5-quiz";
@@ -12,6 +12,8 @@ import { AdminPersonsManager } from "./admin-persons-manager";
 import { UseCasesTab } from "./use-cases-tab";
 import { ForumTab } from "./forum-tab";
 import { TechTipsTab } from "./tech-tips-tab";
+import { BacklogTab } from "./backlog-tab";
+import { RefinementTab } from "./refinement-tab";
 import { DynamicFavicon } from "./dynamic-favicon";
 import { LevelSelfAssessment } from "./level-self-assessment";
 import { LanguageSelector } from "@/components/studio/language-selector";
@@ -232,6 +234,16 @@ export function PublishedSiteApp({
                 <Code2 className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Tech</span>
               </TabsTrigger>
+              <TabsTrigger value="tab-backlog" className="gap-1" data-pp-menu="tab-backlog">
+                <ClipboardList className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Backlog</span>
+              </TabsTrigger>
+              {isPersonAdmin && (
+                <TabsTrigger value="tab-refinement" className="gap-1" data-pp-menu="tab-refinement">
+                  <BarChart3 className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Refinement</span>
+                </TabsTrigger>
+              )}
               {isPersonAdmin && (
                 <TabsTrigger value="tab-admin" className="gap-1" data-pp-menu="tab-admin">
                   <Users className="h-3.5 w-3.5" />
@@ -330,6 +342,26 @@ export function PublishedSiteApp({
               <TechTipsTab siteId={site.id} currentPersonId={currentPerson.id} />
             )}
           </TabsContent>
+
+          <TabsContent value="tab-backlog" className="mt-0 flex-1 min-h-0 data-[state=inactive]:hidden flex flex-col">
+            {currentPerson && (
+              <BacklogTab
+                siteId={site.id}
+                personId={currentPerson.id}
+                isAdmin={isPersonAdmin}
+                persons={(allPersons || visiblePersons).map((p) => ({ id: p.id, name: p.name, department: p.department }))}
+              />
+            )}
+          </TabsContent>
+
+          {isPersonAdmin && (
+            <TabsContent value="tab-refinement" className="mt-0 flex-1 min-h-0 data-[state=inactive]:hidden flex flex-col">
+              <RefinementTab
+                siteId={site.id}
+                persons={(allPersons || visiblePersons).map((p) => ({ id: p.id, name: p.name, department: p.department }))}
+              />
+            </TabsContent>
+          )}
 
           {isPersonAdmin && (
             <TabsContent value="tab-admin" className="mt-0 flex-1 min-h-0 data-[state=inactive]:hidden flex flex-col">

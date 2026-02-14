@@ -927,4 +927,50 @@ Ajout d'une interface complète de gestion des utilisateurs Studio, accessible a
 → Menu : `components/studio/header.tsx` — lien "Gérer les utilisateurs" dans le menu Utilisateur (admin only)
 
 ---
-*Dernière mise à jour: 2026-02-13*
+
+## Prompt #89 — Backlog de cas d'usage + Refinement (v3.0.0 - major)
+
+### Objectifs
+- Créer un environnement de gestion structurée des cas d'usage IA via un **backlog**
+- Permettre à **toute personne** de proposer des cas d'usage (statut "à valider" par défaut)
+- Offrir aux **admins** un espace **Refinement** pour prioriser, compléter et valider
+- Gérer le cycle de vie complet : proposition → validation → développement → MEP → promotion en Use Case
+
+### Changements
+
+**Schema Prisma** :
+- Nouveau modèle `BacklogItem` avec champs : title, description, service, category, tools, impact, url, priority (0-3), status (A_VALIDER, EN_ATTENTE, VALIDE, REFUSE, EN_DEV, MEP), estimatedEffort, actualEffort, targetDate, notes
+- Relations : creator (proposant), owner (responsable), sponsor (commanditaire), site
+- Lien `UseCase.backlogItemId` (1:1 optionnel) pour tracer l'origine backlog
+- Enum `BacklogStatus` pour les statuts du cycle de vie
+
+**API** :
+- `api/sites/[siteId]/backlog/route.ts` : GET (liste), POST (proposer, +30 PP), PATCH (modifier/promouvoir MEP→UseCase), DELETE
+- Promotion MEP : crée un UseCase pour l'owner et un second pour le sponsor (si différent)
+- API use-cases modifiée pour inclure `backlogItem` dans la réponse GET
+
+**Onglet Backlog** (published, toutes les personnes) :
+- Vue filtrée par statut avec compteurs visuels
+- Cartes avec priorité, statut, catégorie, owner, sponsor, date cible, charge
+- Formulaire de proposition complet (titre, description, service, catégorie, outils, impact, URL, owner suggéré, sponsor suggéré, date cible)
+- Détail en lecture seule (popup)
+- Actions admin : promouvoir MEP en Use Case, supprimer
+
+**Onglet Refinement** (published, admins uniquement) :
+- Vue tableau avec colonnes : priorité, titre, statut, owner, charge, date, actions
+- Changement rapide de statut (dropdown inline)
+- Ajustement de priorité (flèches haut/bas)
+- Boutons d'action rapide : valider, refuser, mettre en attente
+- Dialogue d'édition complet avec tous les champs dont les notes du scrum master
+
+**Use Cases ↔ Backlog** :
+- Bouton "Dossier backlog" (icône clipboard) sur les use cases issus du backlog
+- Popup en lecture seule affichant toutes les métadonnées du passage en backlog (statut final, priorité, charges, dates, notes refinement)
+
+→ Schema : `prisma/schema.prisma` — BacklogItem, BacklogStatus, UseCase.backlogItemId
+→ API : `api/sites/[siteId]/backlog/route.ts`
+→ UI : `components/published/backlog-tab.tsx`, `components/published/refinement-tab.tsx`
+→ Modifié : `components/published/use-cases-tab.tsx`, `components/published/site-app.tsx`, `api/sites/[siteId]/use-cases/route.ts`
+
+---
+*Dernière mise à jour: 2026-02-14*

@@ -26,6 +26,13 @@ export async function GET(
         person: { select: { id: true, name: true, jobTitle: true, avatar: true } },
         site: { select: { id: true, name: true } },
         likes: { select: { personId: true } },
+        backlogItem: {
+          include: {
+            creator: { select: { name: true } },
+            owner: { select: { name: true } },
+            sponsor: { select: { name: true } },
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
