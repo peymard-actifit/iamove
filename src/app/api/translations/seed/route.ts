@@ -336,45 +336,31 @@ const LANGUAGES = ["FR", "EN", "DE", "ES", "IT", "PT", "NL", "PL", "RU", "JA", "
 // POST - Insérer toutes les traductions
 export async function POST() {
   try {
-    let count = 0;
+    // Préparer toutes les traductions à insérer
+    const data: { key: string; language: string; value: string; type: "GLOBAL" }[] = [];
 
     for (const [key, translations] of Object.entries(TRANSLATIONS)) {
       for (const lang of LANGUAGES) {
         const value = translations[lang];
         if (!value) continue;
-
-        // Chercher si la traduction existe déjà
-        const existing = await prisma.translation.findFirst({
-          where: {
-            key,
-            language: lang,
-            type: "GLOBAL",
-            siteId: null,
-          },
-        });
-
-        if (existing) {
-          await prisma.translation.update({
-            where: { id: existing.id },
-            data: { value },
-          });
-        } else {
-          await prisma.translation.create({
-            data: {
-              key,
-              language: lang,
-              value,
-              type: "GLOBAL",
-            },
-          });
-        }
-        count++;
+        data.push({ key, language: lang, value, type: "GLOBAL" });
       }
     }
 
+    // Transaction : supprimer toutes les GLOBAL (sans siteId) puis réinsérer en batch
+    await prisma.$transaction([
+      prisma.translation.deleteMany({
+        where: { type: "GLOBAL", siteId: null },
+      }),
+      prisma.translation.createMany({
+        data,
+        skipDuplicates: true,
+      }),
+    ]);
+
     return NextResponse.json({ 
       success: true, 
-      count,
+      count: data.length,
       keys: Object.keys(TRANSLATIONS).length,
       languages: LANGUAGES.length,
     });
