@@ -513,7 +513,7 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
                 onClick={() => setGenerationResults(null)}
                 className="ml-auto text-xs hover:underline"
               >
-                Fermer
+                {t.common?.close || "Fermer"}
               </button>
             </div>
           </div>
@@ -530,7 +530,7 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
                 onClick={() => setGenerationError(null)}
                 className="ml-auto text-xs hover:underline"
               >
-                Fermer
+                {t.common?.close || "Fermer"}
               </button>
             </div>
           </div>
@@ -563,10 +563,10 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
                         />
                         <div className="flex gap-2">
                           <Button size="sm" onClick={() => handleUpdatePath(path.id, { name: pathForm.name, description: pathForm.description })}>
-                            Enregistrer
+                            {t.common?.save || "Enregistrer"}
                           </Button>
                           <Button size="sm" variant="outline" onClick={() => { setEditingPath(null); setShowPathDialog(false); }}>
-                            Annuler
+                            {t.common?.cancel || "Annuler"}
                           </Button>
                         </div>
                       </div>
@@ -579,15 +579,15 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
                         <div className="flex items-center gap-2 mt-2">
                           <Button variant="ghost" size="sm" onClick={() => { setEditingPath(path); setPathForm({ name: path.name, description: path.description || "" }); }}>
                             <Edit className="h-3 w-3 mr-1" />
-                            Modifier
+                            {t.common?.edit || "Modifier"}
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => setShowAddPathItemDialog(path)}>
                             <Plus className="h-3 w-3 mr-1" />
-                            Ajouter un élément
+                            {t.common?.add || "Ajouter"} un élément
                           </Button>
                           <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDeletePath(path.id)}>
                             <Trash2 className="h-3 w-3 mr-1" />
-                            Supprimer
+                            {t.common?.delete || "Supprimer"}
                           </Button>
                         </div>
                       </>
@@ -679,7 +679,7 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
               setShowModuleDialog(true);
             }}>
               <Plus className="h-4 w-4 mr-1" />
-              Ajouter un module
+              {t.common?.add || "Ajouter"} un module
             </Button>
           </div>
 

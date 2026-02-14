@@ -255,7 +255,7 @@ export function LevelsEditorDialog({ open, onOpenChange }: LevelsEditorDialogPro
                               disabled={saving}
                             >
                               <X className="h-4 w-4 mr-1" />
-                              Annuler
+                              {t.common?.cancel || "Annuler"}
                             </Button>
                             <Button
                               size="sm"
@@ -267,7 +267,7 @@ export function LevelsEditorDialog({ open, onOpenChange }: LevelsEditorDialogPro
                               ) : (
                                 <Save className="h-4 w-4 mr-1" />
                               )}
-                              Enregistrer
+                              {t.common?.save || "Enregistrer"}
                             </Button>
                           </div>
                         </div>

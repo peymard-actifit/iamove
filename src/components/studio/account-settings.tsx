@@ -204,7 +204,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
           <CardFooter>
             <Button type="submit" isLoading={isLoading}>
               <Save className="h-4 w-4 mr-2" />
-              Enregistrer
+              {t.common?.save || "Enregistrer"}
             </Button>
           </CardFooter>
         </form>

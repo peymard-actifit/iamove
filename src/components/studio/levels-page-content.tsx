@@ -249,7 +249,7 @@ export function LevelsPageContent({ initialLevels }: LevelsPageContentProps) {
                         disabled={saving}
                       >
                         <X className="h-4 w-4 mr-1" />
-                        Annuler
+                        {t.common?.cancel || "Annuler"}
                       </Button>
                       <Button
                         size="sm"
@@ -261,7 +261,7 @@ export function LevelsPageContent({ initialLevels }: LevelsPageContentProps) {
                         ) : (
                           <Save className="h-4 w-4 mr-1" />
                         )}
-                        Enregistrer
+                        {t.common?.save || "Enregistrer"}
                       </Button>
                     </div>
                   </div>
