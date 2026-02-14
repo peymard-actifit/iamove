@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui";
-import { Plus, Heart, Trash2, Code2, X, Pencil } from "lucide-react";
+import { Plus, Heart, Trash2, Code2, X, Pencil, AlertCircle } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 interface Person {
@@ -38,29 +38,52 @@ export function TechTipsTab({ siteId, currentPersonId }: TechTipsTabProps) {
   const [form, setForm] = useState({ title: "", content: "", category: "" });
   const [filter, setFilter] = useState("");
   const [selectedTip, setSelectedTip] = useState<TechTip | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchTips = useCallback(async () => {
-    const res = await fetch(`/api/sites/${siteId}/tech-tips`);
-    if (res.ok) setTips(await res.json());
+    try {
+      const res = await fetch(`/api/sites/${siteId}/tech-tips`);
+      if (res.ok) setTips(await res.json());
+    } catch {
+      // silently fail
+    }
     setLoading(false);
   }, [siteId]);
 
   useEffect(() => { fetchTips(); }, [fetchTips]);
 
   const handleSubmit = async () => {
-    if (!form.title || !form.content) return;
-    const method = editId ? "PATCH" : "POST";
-    const body = editId ? { ...form, id: editId } : form;
-    const res = await fetch(`/api/sites/${siteId}/tech-tips`, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (res.ok) {
-      setShowForm(false);
-      setEditId(null);
-      setForm({ title: "", content: "", category: "" });
-      fetchTips();
+    if (!form.title.trim() || !form.content.trim()) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      const method = editId ? "PATCH" : "POST";
+      const payload = {
+        title: form.title.trim(),
+        content: form.content.trim(),
+        category: form.category || null,
+        ...(editId && { id: editId }),
+      };
+      const res = await fetch(`/api/sites/${siteId}/tech-tips`, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        setShowForm(false);
+        setEditId(null);
+        setForm({ title: "", content: "", category: "" });
+        fetchTips();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || `Erreur ${res.status}`);
+      }
+    } catch {
+      setError("Erreur réseau, réessayez.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -69,21 +92,31 @@ export function TechTipsTab({ siteId, currentPersonId }: TechTipsTabProps) {
     setEditId(tip.id);
     setSelectedTip(null);
     setShowForm(true);
+    setError(null);
   };
 
   const handleLike = async (techTipId: string) => {
-    await fetch(`/api/sites/${siteId}/tech-tips`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "like", techTipId }),
-    });
-    fetchTips();
+    try {
+      await fetch(`/api/sites/${siteId}/tech-tips`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ action: "like", techTipId }),
+      });
+      fetchTips();
+    } catch {
+      // ignore
+    }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm(t.techTips?.deleteConfirm || "Supprimer ce conseil technique ?")) return;
-    await fetch(`/api/sites/${siteId}/tech-tips?id=${id}`, { method: "DELETE" });
-    fetchTips();
+    try {
+      await fetch(`/api/sites/${siteId}/tech-tips?id=${id}`, { method: "DELETE", credentials: "include" });
+      fetchTips();
+    } catch {
+      // ignore
+    }
   };
 
   const filtered = tips.filter((t) => filter === "" || t.category === filter);
@@ -113,12 +146,21 @@ export function TechTipsTab({ siteId, currentPersonId }: TechTipsTabProps) {
         </div>
       </div>
 
+      {/* Message d'erreur */}
+      {error && (
+        <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">
+          <AlertCircle className="h-4 w-4 flex-shrink-0" />
+          <span>{error}</span>
+          <Button variant="ghost" size="sm" onClick={() => setError(null)} className="h-6 px-1 ml-auto"><X className="h-3 w-3" /></Button>
+        </div>
+      )}
+
       {/* Formulaire */}
       {showForm && (
         <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="font-medium text-sm">{editId ? (t.techTips?.editTip || "Modifier le conseil technique") : (t.techTips?.newTip || "Nouveau conseil technique")}</h3>
-            <Button variant="ghost" size="sm" onClick={() => { setShowForm(false); setEditId(null); }}><X className="h-4 w-4" /></Button>
+            <Button variant="ghost" size="sm" onClick={() => { setShowForm(false); setEditId(null); setError(null); }}><X className="h-4 w-4" /></Button>
           </div>
           <Input placeholder="Titre *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="h-8 text-sm" />
           <textarea
@@ -137,7 +179,9 @@ export function TechTipsTab({ siteId, currentPersonId }: TechTipsTabProps) {
               <option value="">Catégorie</option>
               {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
-            <Button size="sm" onClick={handleSubmit} className="h-8">{editId ? (t.common?.save || "Enregistrer") : (t.useCases?.publish || "Publier")}</Button>
+            <Button size="sm" onClick={handleSubmit} disabled={submitting || !form.title.trim() || !form.content.trim()} className="h-8">
+              {submitting ? (t.common?.loading || "...") : editId ? (t.common?.save || "Enregistrer") : (t.techTips?.publish || t.useCases?.publish || "Publier")}
+            </Button>
           </div>
         </div>
       )}

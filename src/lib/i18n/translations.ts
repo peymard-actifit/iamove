@@ -911,6 +911,7 @@ export function buildTranslationsObject(flatTranslations: Record<string, string>
       editPost: getValue("forum.editPost", "Modifier la discussion"),
       reply: getValue("forum.reply", "Répondre"),
       replies: getValue("forum.replies", "réponse(s)"),
+      publish: getValue("forum.publish", "Publier"),
       deleteConfirm: getValue("forum.deleteConfirm", "Supprimer cette discussion ?"),
     },
     techTips: {
@@ -919,6 +920,7 @@ export function buildTranslationsObject(flatTranslations: Record<string, string>
       beFirst: getValue("techTips.beFirst", "Soyez le premier à partager un conseil !"),
       newTip: getValue("techTips.newTip", "Nouveau conseil technique"),
       editTip: getValue("techTips.editTip", "Modifier le conseil technique"),
+      publish: getValue("techTips.publish", "Publier"),
       deleteConfirm: getValue("techTips.deleteConfirm", "Supprimer ce conseil technique ?"),
     },
     backlog: {
@@ -1311,6 +1313,7 @@ export interface Translations {
     editPost: string;
     reply: string;
     replies: string;
+    publish: string;
     deleteConfirm: string;
   };
   // Tech Tips
@@ -1319,6 +1322,7 @@ export interface Translations {
     noTips: string;
     beFirst: string;
     newTip: string;
+    publish: string;
     editTip: string;
     deleteConfirm: string;
   };
@@ -1695,6 +1699,7 @@ export const FR: Translations = {
     editPost: "Modifier la discussion",
     reply: "Répondre",
     replies: "réponse(s)",
+    publish: "Publier",
     deleteConfirm: "Supprimer cette discussion ?",
   },
   techTips: {
@@ -1703,6 +1708,7 @@ export const FR: Translations = {
     beFirst: "Soyez le premier à partager un conseil !",
     newTip: "Nouveau conseil technique",
     editTip: "Modifier le conseil technique",
+    publish: "Publier",
     deleteConfirm: "Supprimer ce conseil technique ?",
   },
   backlog: {
@@ -2074,6 +2080,7 @@ export const EN: Translations = {
     editPost: "Edit discussion",
     reply: "Reply",
     replies: "reply(ies)",
+    publish: "Publish",
     deleteConfirm: "Delete this discussion?",
   },
   techTips: {
@@ -2082,6 +2089,7 @@ export const EN: Translations = {
     beFirst: "Be the first to share a tip!",
     newTip: "New technical tip",
     editTip: "Edit technical tip",
+    publish: "Publish",
     deleteConfirm: "Delete this technical tip?",
   },
   backlog: {

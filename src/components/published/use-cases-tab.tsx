@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button, Input } from "@/components/ui";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui";
-import { Plus, Heart, Pencil, Trash2, Lightbulb, Wrench, TrendingUp, X, ExternalLink, ClipboardList, Eye } from "lucide-react";
+import { Plus, Heart, Pencil, Trash2, Lightbulb, Wrench, TrendingUp, X, ExternalLink, ClipboardList, Eye, AlertCircle } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 interface Person {
@@ -65,45 +65,80 @@ export function UseCasesTab({ siteId, currentPersonId }: UseCasesTabProps) {
   const [form, setForm] = useState({ title: "", description: "", category: "", tools: "", impact: "", url: "" });
   const [filter, setFilter] = useState("");
   const [backlogDetail, setBacklogDetail] = useState<BacklogItemRef | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchUseCases = useCallback(async () => {
-    const res = await fetch(`/api/sites/${siteId}/use-cases`);
-    if (res.ok) setUseCases(await res.json());
+    try {
+      const res = await fetch(`/api/sites/${siteId}/use-cases`);
+      if (res.ok) setUseCases(await res.json());
+    } catch {
+      // silently fail
+    }
     setLoading(false);
   }, [siteId]);
 
   useEffect(() => { fetchUseCases(); }, [fetchUseCases]);
 
   const handleSubmit = async () => {
-    if (!form.title || !form.description) return;
-    const method = editId ? "PATCH" : "POST";
-    const body = editId ? { ...form, id: editId } : form;
-    const res = await fetch(`/api/sites/${siteId}/use-cases`, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (res.ok) {
-      setShowForm(false);
-      setEditId(null);
-      setForm({ title: "", description: "", category: "", tools: "", impact: "", url: "" });
-      fetchUseCases();
+    if (!form.title.trim() || !form.description.trim()) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      const method = editId ? "PATCH" : "POST";
+      const payload = {
+        title: form.title.trim(),
+        description: form.description.trim(),
+        category: form.category || null,
+        tools: form.tools || null,
+        impact: form.impact || null,
+        url: form.url || null,
+        ...(editId && { id: editId }),
+      };
+      const res = await fetch(`/api/sites/${siteId}/use-cases`, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        setShowForm(false);
+        setEditId(null);
+        setForm({ title: "", description: "", category: "", tools: "", impact: "", url: "" });
+        fetchUseCases();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || `Erreur ${res.status}`);
+      }
+    } catch {
+      setError("Erreur réseau, réessayez.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleLike = async (useCaseId: string) => {
-    await fetch(`/api/sites/${siteId}/use-cases`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "like", useCaseId }),
-    });
-    fetchUseCases();
+    try {
+      await fetch(`/api/sites/${siteId}/use-cases`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ action: "like", useCaseId }),
+      });
+      fetchUseCases();
+    } catch {
+      // ignore
+    }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm(t.useCases?.deleteConfirm || "Supprimer ce use case ?")) return;
-    await fetch(`/api/sites/${siteId}/use-cases?id=${id}`, { method: "DELETE" });
-    fetchUseCases();
+    try {
+      await fetch(`/api/sites/${siteId}/use-cases?id=${id}`, { method: "DELETE", credentials: "include" });
+      fetchUseCases();
+    } catch {
+      // ignore
+    }
   };
 
   const startEdit = (uc: UseCase) => {
@@ -141,12 +176,21 @@ export function UseCasesTab({ siteId, currentPersonId }: UseCasesTabProps) {
         </div>
       </div>
 
+      {/* Message d'erreur */}
+      {error && (
+        <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">
+          <AlertCircle className="h-4 w-4 flex-shrink-0" />
+          <span>{error}</span>
+          <Button variant="ghost" size="sm" onClick={() => setError(null)} className="h-6 px-1 ml-auto"><X className="h-3 w-3" /></Button>
+        </div>
+      )}
+
       {/* Formulaire */}
       {showForm && (
         <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="font-medium text-sm">{editId ? (t.useCases?.editUseCase || "Modifier Use Case") : (t.useCases?.newUseCase || "Nouveau Use Case")}</h3>
-            <Button variant="ghost" size="sm" onClick={() => { setShowForm(false); setEditId(null); }}><X className="h-4 w-4" /></Button>
+            <Button variant="ghost" size="sm" onClick={() => { setShowForm(false); setEditId(null); setError(null); }}><X className="h-4 w-4" /></Button>
           </div>
           <Input placeholder="Titre du use case *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="h-8 text-sm" />
           <textarea
@@ -169,7 +213,9 @@ export function UseCasesTab({ siteId, currentPersonId }: UseCasesTabProps) {
             <Input placeholder="Impact observé" value={form.impact} onChange={(e) => setForm({ ...form, impact: e.target.value })} className="h-8 text-sm" />
           </div>
           <Input placeholder="URL à partager (optionnel)" value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} className="h-8 text-sm" />
-          <Button size="sm" onClick={handleSubmit} className="h-8">{editId ? (t.common?.save || "Enregistrer") : (t.useCases?.publish || "Publier")}</Button>
+          <Button size="sm" onClick={handleSubmit} disabled={submitting || !form.title.trim() || !form.description.trim()} className="h-8">
+            {submitting ? (t.common?.loading || "...") : editId ? (t.common?.save || "Enregistrer") : (t.useCases?.publish || "Publier")}
+          </Button>
         </div>
       )}
 

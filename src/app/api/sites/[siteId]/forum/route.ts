@@ -68,7 +68,7 @@ export async function POST(
     }
 
     const post = await prisma.forumPost.create({
-      data: { title, content, category, personId, siteId },
+      data: { title, content, category: category || null, personId, siteId },
       include: {
         person: { select: { id: true, name: true, jobTitle: true, avatar: true } },
         replies: {
@@ -148,7 +148,7 @@ export async function PATCH(
   }
 }
 
-/** DELETE : supprimer un post */
+/** DELETE : supprimer un post (owner only) */
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ siteId: string }> }
@@ -158,11 +158,24 @@ export async function DELETE(
     if (!session) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
-    await params;
+    const { siteId } = await params;
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
     if (!id) return NextResponse.json({ error: "ID requis" }, { status: 400 });
 
+    // Vérifier que le post appartient à l'utilisateur
+    let personId = session.userId;
+    if (session.userType === "STUDIO_USER") {
+      const person = await prisma.person.findFirst({ where: { siteId, email: session.email } });
+      if (person) personId = person.id;
+    }
+
+    const post = await prisma.forumPost.findUnique({ where: { id }, select: { personId: true } });
+    if (!post) return NextResponse.json({ error: "Post non trouvé" }, { status: 404 });
+    if (post.personId !== personId) return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+
+    // Supprimer les réponses d'abord puis le post
+    await prisma.forumReply.deleteMany({ where: { postId: id } });
     await prisma.forumPost.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {

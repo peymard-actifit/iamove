@@ -78,18 +78,27 @@ export function BacklogTab({ siteId, personId, isAdmin, persons }: BacklogTabPro
 
   const handlePromote = async (item: BacklogItem) => {
     if (!confirm(`Promouvoir "${item.title}" en Use Case ? Il sera supprimé du backlog et ajouté aux Use Cases de l'owner${item.sponsor ? " et du sponsor" : ""}.`)) return;
-    const res = await fetch(`/api/sites/${siteId}/backlog`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: item.id, action: "promote" }),
-    });
-    if (res.ok) fetchItems();
+    try {
+      const res = await fetch(`/api/sites/${siteId}/backlog`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ id: item.id, action: "promote" }),
+      });
+      if (res.ok) fetchItems();
+    } catch {
+      // ignore
+    }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm(t.backlog?.deleteConfirm || "Supprimer cet item du backlog ?")) return;
-    await fetch(`/api/sites/${siteId}/backlog?id=${id}`, { method: "DELETE" });
-    fetchItems();
+    try {
+      await fetch(`/api/sites/${siteId}/backlog?id=${id}`, { method: "DELETE", credentials: "include" });
+      fetchItems();
+    } catch {
+      // ignore
+    }
   };
 
   const filtered = items.filter((i) => filter === "all" || i.status === filter);
@@ -267,16 +276,42 @@ function ProposalForm({
   });
   const [saving, setSaving] = useState(false);
 
+  const [error, setError] = useState<string | null>(null);
+
   const handleSubmit = async () => {
-    if (!form.title || !form.description) return;
+    if (!form.title.trim() || !form.description.trim()) return;
     setSaving(true);
-    const res = await fetch(`/api/sites/${siteId}/backlog`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    if (res.ok) onCreated();
-    setSaving(false);
+    setError(null);
+    try {
+      const payload = {
+        title: form.title.trim(),
+        description: form.description.trim(),
+        service: form.service || null,
+        category: form.category || null,
+        tools: form.tools || null,
+        impact: form.impact || null,
+        url: form.url || null,
+        ownerId: form.ownerId || null,
+        sponsorId: form.sponsorId || null,
+        targetDate: form.targetDate || null,
+      };
+      const res = await fetch(`/api/sites/${siteId}/backlog`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        onCreated();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || `Erreur ${res.status}`);
+      }
+    } catch {
+      setError("Erreur réseau, réessayez.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -350,10 +385,15 @@ function ProposalForm({
             <Input type="date" value={form.targetDate} onChange={(e) => setForm({ ...form, targetDate: e.target.value })} className="h-8 text-sm" />
           </div>
         </div>
+        {error && (
+          <div className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">
+            {error}
+          </div>
+        )}
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>{t.common?.cancel || "Annuler"}</Button>
-          <Button onClick={handleSubmit} disabled={saving || !form.title || !form.description}>
-            {saving ? "Envoi..." : (t.backlog?.proposeUseCase || "Proposer")}
+          <Button onClick={handleSubmit} disabled={saving || !form.title.trim() || !form.description.trim()}>
+            {saving ? (t.common?.loading || "Envoi...") : (t.backlog?.proposeUseCase || "Proposer")}
           </Button>
         </DialogFooter>
       </DialogContent>

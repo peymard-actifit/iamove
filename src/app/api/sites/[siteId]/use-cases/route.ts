@@ -71,7 +71,7 @@ export async function POST(
     }
 
     const useCase = await prisma.useCase.create({
-      data: { title, description, category, tools, impact, url, personId, siteId },
+      data: { title, description, category: category || null, tools: tools || null, impact: impact || null, url: url || null, personId, siteId },
       include: {
         person: { select: { id: true, name: true, jobTitle: true, avatar: true } },
         likes: { select: { personId: true } },
@@ -176,7 +176,7 @@ export async function PATCH(
   }
 }
 
-/** DELETE : supprimer un use case */
+/** DELETE : supprimer un use case (owner only) */
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ siteId: string }> }
@@ -186,11 +186,24 @@ export async function DELETE(
     if (!session) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
-    await params;
+    const { siteId } = await params;
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
     if (!id) return NextResponse.json({ error: "ID requis" }, { status: 400 });
 
+    // Vérifier que le use case appartient à l'utilisateur
+    let personId = session.userId;
+    if (session.userType === "STUDIO_USER") {
+      const person = await prisma.person.findFirst({ where: { siteId, email: session.email } });
+      if (person) personId = person.id;
+    }
+
+    const useCase = await prisma.useCase.findUnique({ where: { id }, select: { personId: true } });
+    if (!useCase) return NextResponse.json({ error: "Use case non trouvé" }, { status: 404 });
+    if (useCase.personId !== personId) return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+
+    // Supprimer les likes d'abord puis le use case
+    await prisma.useCaseLike.deleteMany({ where: { useCaseId: id } });
     await prisma.useCase.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {

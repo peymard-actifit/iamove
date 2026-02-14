@@ -63,7 +63,7 @@ export async function POST(
     }
 
     const tip = await prisma.techTip.create({
-      data: { title, content, category, personId, siteId },
+      data: { title, content, category: category || null, personId, siteId },
       include: {
         person: { select: { id: true, name: true, jobTitle: true, avatar: true } },
         likes: { select: { personId: true } },
@@ -164,7 +164,7 @@ export async function PATCH(
   }
 }
 
-/** DELETE : supprimer un tech tip */
+/** DELETE : supprimer un tech tip (owner only) */
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ siteId: string }> }
@@ -174,11 +174,24 @@ export async function DELETE(
     if (!session) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
-    await params;
+    const { siteId } = await params;
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
     if (!id) return NextResponse.json({ error: "ID requis" }, { status: 400 });
 
+    // Vérifier que le tech tip appartient à l'utilisateur
+    let personId = session.userId;
+    if (session.userType === "STUDIO_USER") {
+      const person = await prisma.person.findFirst({ where: { siteId, email: session.email } });
+      if (person) personId = person.id;
+    }
+
+    const tip = await prisma.techTip.findUnique({ where: { id }, select: { personId: true } });
+    if (!tip) return NextResponse.json({ error: "Tech tip non trouvé" }, { status: 404 });
+    if (tip.personId !== personId) return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+
+    // Supprimer les likes d'abord puis le tech tip
+    await prisma.techTipLike.deleteMany({ where: { techTipId: id } });
     await prisma.techTip.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {

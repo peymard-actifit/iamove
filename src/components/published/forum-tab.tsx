@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Button, Input } from "@/components/ui";
-import { Plus, MessageCircle, Send, Trash2, X, ChevronDown, ChevronUp, Pencil } from "lucide-react";
+import { Plus, MessageCircle, Send, Trash2, X, ChevronDown, ChevronUp, Pencil, AlertCircle } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 interface Person {
@@ -46,29 +46,52 @@ export function ForumTab({ siteId, currentPersonId }: ForumTabProps) {
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchPosts = useCallback(async () => {
-    const res = await fetch(`/api/sites/${siteId}/forum`);
-    if (res.ok) setPosts(await res.json());
+    try {
+      const res = await fetch(`/api/sites/${siteId}/forum`);
+      if (res.ok) setPosts(await res.json());
+    } catch {
+      // silently fail on fetch
+    }
     setLoading(false);
   }, [siteId]);
 
   useEffect(() => { fetchPosts(); }, [fetchPosts]);
 
   const handleSubmit = async () => {
-    if (!form.title || !form.content) return;
-    const method = editId ? "PATCH" : "POST";
-    const body = editId ? { ...form, id: editId } : form;
-    const res = await fetch(`/api/sites/${siteId}/forum`, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (res.ok) {
-      setShowForm(false);
-      setEditId(null);
-      setForm({ title: "", content: "", category: "" });
-      fetchPosts();
+    if (!form.title.trim() || !form.content.trim()) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      const method = editId ? "PATCH" : "POST";
+      const payload = {
+        title: form.title.trim(),
+        content: form.content.trim(),
+        category: form.category || null,
+        ...(editId && { id: editId }),
+      };
+      const res = await fetch(`/api/sites/${siteId}/forum`, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        setShowForm(false);
+        setEditId(null);
+        setForm({ title: "", content: "", category: "" });
+        fetchPosts();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || `Erreur ${res.status}`);
+      }
+    } catch (err) {
+      setError("Erreur réseau, réessayez.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -76,26 +99,42 @@ export function ForumTab({ siteId, currentPersonId }: ForumTabProps) {
     setForm({ title: post.title, content: post.content, category: post.category || "" });
     setEditId(post.id);
     setShowForm(true);
+    setError(null);
   };
 
   const handleReply = async (postId: string) => {
     if (!replyContent.trim()) return;
-    const res = await fetch(`/api/sites/${siteId}/forum/${postId}/replies`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: replyContent }),
-    });
-    if (res.ok) {
-      setReplyTo(null);
-      setReplyContent("");
-      fetchPosts();
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/sites/${siteId}/forum/${postId}/replies`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ content: replyContent.trim() }),
+      });
+      if (res.ok) {
+        setReplyTo(null);
+        setReplyContent("");
+        fetchPosts();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || `Erreur ${res.status}`);
+      }
+    } catch {
+      setError("Erreur réseau, réessayez.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm(t.forum?.deleteConfirm || "Supprimer cette discussion ?")) return;
-    await fetch(`/api/sites/${siteId}/forum?id=${id}`, { method: "DELETE" });
-    fetchPosts();
+    try {
+      await fetch(`/api/sites/${siteId}/forum?id=${id}`, { method: "DELETE", credentials: "include" });
+      fetchPosts();
+    } catch {
+      // ignore
+    }
   };
 
   const toggleExpand = (postId: string) => {
@@ -122,12 +161,21 @@ export function ForumTab({ siteId, currentPersonId }: ForumTabProps) {
         </Button>
       </div>
 
+      {/* Message d'erreur */}
+      {error && (
+        <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">
+          <AlertCircle className="h-4 w-4 flex-shrink-0" />
+          <span>{error}</span>
+          <Button variant="ghost" size="sm" onClick={() => setError(null)} className="h-6 px-1 ml-auto"><X className="h-3 w-3" /></Button>
+        </div>
+      )}
+
       {/* Formulaire nouveau post */}
       {showForm && (
         <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="font-medium text-sm">{editId ? (t.forum?.editPost || "Modifier la discussion") : (t.forum?.newPost || "Nouvelle discussion")}</h3>
-            <Button variant="ghost" size="sm" onClick={() => { setShowForm(false); setEditId(null); }}><X className="h-4 w-4" /></Button>
+            <Button variant="ghost" size="sm" onClick={() => { setShowForm(false); setEditId(null); setError(null); }}><X className="h-4 w-4" /></Button>
           </div>
           <Input placeholder="Titre de la discussion *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="h-8 text-sm" />
           <textarea
@@ -146,7 +194,9 @@ export function ForumTab({ siteId, currentPersonId }: ForumTabProps) {
               <option value="">Catégorie</option>
               {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
-            <Button size="sm" onClick={handleSubmit} className="h-8">{editId ? (t.common?.save || "Enregistrer") : (t.useCases?.publish || "Publier")}</Button>
+            <Button size="sm" onClick={handleSubmit} disabled={submitting || !form.title.trim() || !form.content.trim()} className="h-8">
+              {submitting ? (t.common?.loading || "...") : editId ? (t.common?.save || "Enregistrer") : (t.forum?.publish || "Publier")}
+            </Button>
           </div>
         </div>
       )}
@@ -226,7 +276,7 @@ export function ForumTab({ siteId, currentPersonId }: ForumTabProps) {
                           className="h-8 text-sm flex-1"
                           onKeyDown={(e) => { if (e.key === "Enter") handleReply(post.id); }}
                         />
-                        <Button size="sm" onClick={() => handleReply(post.id)} className="h-8 px-3">
+                        <Button size="sm" onClick={() => handleReply(post.id)} disabled={submitting || !replyContent.trim()} className="h-8 px-3">
                           <Send className="h-3.5 w-3.5" />
                         </Button>
                       </div>
