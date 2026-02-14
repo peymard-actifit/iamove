@@ -3,7 +3,7 @@
 import { useState, useCallback, createContext, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger, TabsContent, Button } from "@/components/ui";
-import { Network, User, GraduationCap, ClipboardCheck, LogOut, Users, Lightbulb, MessageCircle, Code2, ClipboardList, BarChart3 } from "lucide-react";
+import { Network, User, GraduationCap, ClipboardCheck, LogOut, Users, Lightbulb, MessageCircle, Code2, ClipboardList, BarChart3, Globe } from "lucide-react";
 import { Tab2Organigramme } from "@/components/studio/tabs/tab2-organigramme";
 import { Tab4Formation } from "@/components/studio/tabs/tab4-formation";
 import { Tab5Quiz } from "@/components/studio/tabs/tab5-quiz";
@@ -14,6 +14,7 @@ import { ForumTab } from "./forum-tab";
 import { TechTipsTab } from "./tech-tips-tab";
 import { BacklogTab } from "./backlog-tab";
 import { RefinementTab } from "./refinement-tab";
+import { EcosystemTab } from "./ecosystem-tab";
 import { DynamicFavicon } from "./dynamic-favicon";
 import { LevelSelfAssessment } from "./level-self-assessment";
 import { LanguageSelector } from "@/components/studio/language-selector";
@@ -236,6 +237,10 @@ export function PublishedSiteApp({
                   <Code2 className="h-3 w-3" />
                   <span className="hidden lg:inline">Tech</span>
                 </TabsTrigger>
+                <TabsTrigger value="tab-ecosystem" className="gap-0.5" data-pp-menu="tab-ecosystem">
+                  <Globe className="h-3 w-3" />
+                  <span className="hidden lg:inline">Écosystème</span>
+                </TabsTrigger>
                 <TabsTrigger value="tab-backlog" className="gap-0.5" data-pp-menu="tab-backlog">
                   <ClipboardList className="h-3 w-3" />
                   <span className="hidden lg:inline">Backlog</span>
@@ -345,6 +350,10 @@ export function PublishedSiteApp({
             {currentPerson && (
               <TechTipsTab siteId={site.id} currentPersonId={currentPerson.id} />
             )}
+          </TabsContent>
+
+          <TabsContent value="tab-ecosystem" className="mt-0 flex-1 min-h-0 data-[state=inactive]:hidden flex flex-col">
+            <EcosystemTab siteId={site.id} isAdmin={isPersonAdmin} />
           </TabsContent>
 
           <TabsContent value="tab-backlog" className="mt-0 flex-1 min-h-0 data-[state=inactive]:hidden flex flex-col">

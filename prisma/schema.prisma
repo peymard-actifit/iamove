@@ -157,6 +157,9 @@ model SiteSettings {
   tab5QuestionsPerQuiz  Int      @default(20)
   tab5PassThreshold     Int      @default(10)
   
+  // Onglet Écosystème (contenu riche géré par les admins)
+  ecosystemContent       String   @default("") @db.Text
+  
   // Inscription publique
   allowPublicRegistration Boolean @default(true)
   
