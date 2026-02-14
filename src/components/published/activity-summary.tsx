@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { GraduationCap, ClipboardCheck, MessageCircle, Lightbulb, Code2, Award, Zap } from "lucide-react";
+import { GraduationCap, ClipboardCheck, MessageCircle, Lightbulb, Code2, Zap } from "lucide-react";
 
 interface ActivityData {
   training: {
@@ -71,24 +71,6 @@ export function ActivitySummary({ siteId, personId }: ActivitySummaryProps) {
           </div>
         ))}
       </div>
-
-      {/* Badges */}
-      {data.badges.length > 0 && (
-        <div>
-          <div className="flex items-center gap-1.5 mb-2">
-            <Award className="h-4 w-4 text-amber-500" />
-            <h4 className="text-xs font-semibold text-gray-600">Badges ({data.badges.length})</h4>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {data.badges.map((badge, i) => (
-              <div key={i} className="flex items-center gap-1.5 border rounded-full px-2.5 py-1 bg-amber-50 dark:bg-amber-900/20">
-                <span className="text-sm">{badge.icon || "🏆"}</span>
-                <span className="text-xs font-medium">{badge.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Formations récentes */}
       {data.training.recentModules.length > 0 && (
