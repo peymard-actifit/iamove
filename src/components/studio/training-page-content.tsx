@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useHeaderContent } from "./header-context";
+import { getLevelIcon } from "@/lib/levels";
 
 interface TrainingMethodTranslation {
   id: string;
@@ -128,6 +129,8 @@ export function TrainingPageContent() {
   const [showAddPathItemDialog, setShowAddPathItemDialog] = useState<TrainingPath | null>(null);
   // Viewer PDF pour un module ARTICLE
   const [viewingPdfModuleId, setViewingPdfModuleId] = useState<string | null>(null);
+  // Filtre niveau pour les parcours (null = tous)
+  const [pathLevelFilter, setPathLevelFilter] = useState<number | null>(null);
   // Génération automatique des parcours
   const [isGeneratingPaths, setIsGeneratingPaths] = useState(false);
   const [generationResults, setGenerationResults] = useState<{ level: number; pathId: string; created: boolean; itemsCount: number }[] | null>(null);
@@ -588,6 +591,71 @@ export function TrainingPageContent() {
             </div>
           </div>
         )}
+        {/* Barre de filtre par niveau */}
+        {paths.length > 0 && (() => {
+          const availableLevels = Array.from(
+            new Set(
+              paths
+                .map((p) => {
+                  const m = p.name.match(/Niveau (\d+)/);
+                  return m ? parseInt(m[1], 10) : null;
+                })
+                .filter((n): n is number => n !== null)
+            )
+          ).sort((a, b) => a - b);
+
+          const noLevelCount = paths.filter((p) => !p.name.match(/Niveau (\d+)/)).length;
+
+          return availableLevels.length > 1 || noLevelCount > 0 ? (
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+              <button
+                type="button"
+                onClick={() => setPathLevelFilter(null)}
+                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                  pathLevelFilter === null
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+              >
+                Tous ({paths.length})
+              </button>
+              {availableLevels.map((lvl) => {
+                const count = paths.filter((p) => p.name.match(new RegExp(`Niveau ${lvl}\\b`))).length;
+                const isActive = pathLevelFilter === lvl;
+                return (
+                  <button
+                    key={lvl}
+                    type="button"
+                    onClick={() => setPathLevelFilter(isActive ? null : lvl)}
+                    className={`flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                      isActive
+                        ? "bg-blue-600 text-white shadow-sm"
+                        : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    {getLevelIcon(lvl, "h-3.5 w-3.5")}
+                    <span>Niv. {lvl}</span>
+                    {count > 1 && <span className="opacity-60">({count})</span>}
+                  </button>
+                );
+              })}
+              {noLevelCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setPathLevelFilter(pathLevelFilter === -1 ? null : -1)}
+                  className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                    pathLevelFilter === -1
+                      ? "bg-purple-600 text-white shadow-sm"
+                      : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  Transversal ({noLevelCount})
+                </button>
+              )}
+            </div>
+          ) : null;
+        })()}
+
         {paths.length === 0 ? (
           <Card className="p-6 text-center text-gray-500">
             <Route className="h-12 w-12 mx-auto mb-2 opacity-50" />
@@ -595,7 +663,18 @@ export function TrainingPageContent() {
           </Card>
         ) : (
           <div className="space-y-4">
-            {paths.map((path) => (
+            {(() => {
+              const filteredPaths = pathLevelFilter === null
+                ? paths
+                : pathLevelFilter === -1
+                  ? paths.filter((p) => !p.name.match(/Niveau (\d+)/))
+                  : paths.filter((p) => p.name.match(new RegExp(`Niveau ${pathLevelFilter}\\b`)));
+
+              return filteredPaths.length === 0 ? (
+                <Card className="p-6 text-center text-gray-400">
+                  <p className="text-sm">Aucun parcours pour ce niveau.</p>
+                </Card>
+              ) : filteredPaths.map((path) => (
               <Card key={path.id} className="p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -715,7 +794,8 @@ export function TrainingPageContent() {
                   </div>
                 )}
               </Card>
-            ))}
+            ));
+            })()}
           </div>
         )}
       </section>
