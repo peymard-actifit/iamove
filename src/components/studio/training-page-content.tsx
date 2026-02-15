@@ -438,6 +438,97 @@ export function TrainingPageContent() {
 
   const allModules = methods.flatMap((m) => m.modules);
 
+  // ── Panneau de modules inline (affiché sous la grille de la typologie sélectionnée) ──
+  const renderModulesPanel = () => {
+    if (!selectedMethod) return null;
+    return (
+      <Card className="p-4 mt-4">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <div className={`p-1.5 rounded-lg ${TYPE_COLORS[selectedMethod.type] || "bg-gray-100"}`}>
+              {ICONS[selectedMethod.icon || "Layers"]}
+            </div>
+            {getTranslatedMethod(selectedMethod).name}
+            <span className="text-sm font-normal text-gray-400">— {selectedMethod.modules.length} module(s)</span>
+          </h2>
+          <Button size="sm" onClick={() => {
+            resetModuleForm();
+            setShowModuleDialog(true);
+          }}>
+            <Plus className="h-4 w-4 mr-1" />
+            {t.common?.add || "Ajouter"} un module
+          </Button>
+        </div>
+
+        {selectedMethod.modules.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            <Layers className="h-12 w-12 mx-auto mb-2 opacity-50" />
+            <p>Aucun module pour cette méthode</p>
+            <p className="text-sm">Cliquez sur &quot;Ajouter un module&quot; pour commencer</p>
+          </div>
+        ) : (
+          <div className="space-y-2 max-h-[500px] overflow-y-auto">
+            {selectedMethod.modules.map(module => {
+              const translated = getTranslatedModule(module);
+              return (
+                <div
+                  key={module.id}
+                  className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="px-2 py-1 rounded text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                      Niv. {module.level.number}
+                    </span>
+                    <div>
+                      <h4 className="font-medium">{translated.title}</h4>
+                      <p className="text-sm text-gray-500">{translated.description}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm text-gray-500">{module.duration} min</span>
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <span
+                          key={star}
+                          className={`text-xs ${star <= module.difficulty ? "text-yellow-500" : "text-gray-300"}`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex gap-1">
+                      {selectedMethod.type === "ARTICLE" && (
+                        <Button variant="ghost" size="icon" title="Voir le PDF" onClick={() => setViewingPdfModuleId(module.id)}>
+                          <FileText className="h-4 w-4 text-amber-600" />
+                        </Button>
+                      )}
+                      <Button variant="ghost" size="icon" onClick={() => {
+                        setEditingModule(module);
+                        setModuleForm({
+                          title: module.title,
+                          description: module.description || "",
+                          levelId: module.level.id,
+                          duration: module.duration,
+                          difficulty: module.difficulty,
+                        });
+                        setShowModuleDialog(true);
+                      }}>
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDeleteModule(module.id)}>
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Card>
+    );
+  };
+
   // ── Écran de chargement ──────────────────────────────────────────────
   if (dataLoading) {
     return (
@@ -487,6 +578,8 @@ export function TrainingPageContent() {
             );
           })}
         </div>
+        {/* Modules de la méthode Connaissance sélectionnée — inline sous la grille */}
+        {selectedMethod && TYPOLOGY_KNOWLEDGE.includes(selectedMethod.type) && renderModulesPanel()}
       </section>
 
       {/* Applications : serious game, exercices */}
@@ -526,6 +619,8 @@ export function TrainingPageContent() {
             );
           })}
         </div>
+        {/* Modules de la méthode Application sélectionnée — inline sous la grille */}
+        {selectedMethod && TYPOLOGY_APPLICATIONS.includes(selectedMethod.type) && renderModulesPanel()}
       </section>
 
       {/* Parcours : enchaînements vers un objectif */}
@@ -799,90 +894,6 @@ export function TrainingPageContent() {
           </div>
         )}
       </section>
-
-      {/* Modules de la méthode sélectionnée */}
-      {selectedMethod && (
-        <Card className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">
-              Modules de formation - {getTranslatedMethod(selectedMethod).name}
-            </h2>
-            <Button size="sm" onClick={() => {
-              resetModuleForm();
-              setShowModuleDialog(true);
-            }}>
-              <Plus className="h-4 w-4 mr-1" />
-              {t.common?.add || "Ajouter"} un module
-            </Button>
-          </div>
-
-          {selectedMethod.modules.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <Layers className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p>Aucun module pour cette méthode</p>
-              <p className="text-sm">Cliquez sur "Ajouter un module" pour commencer</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {selectedMethod.modules.map(module => {
-                const translated = getTranslatedModule(module);
-                return (
-                  <div
-                    key={module.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="px-2 py-1 rounded text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                        Niv. {module.level.number}
-                      </span>
-                      <div>
-                        <h4 className="font-medium">{translated.title}</h4>
-                        <p className="text-sm text-gray-500">{translated.description}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-sm text-gray-500">{module.duration} min</span>
-                      <div className="flex gap-1">
-                        {[1, 2, 3, 4, 5].map(star => (
-                          <span
-                            key={star}
-                            className={`text-xs ${star <= module.difficulty ? "text-yellow-500" : "text-gray-300"}`}
-                          >
-                            ★
-                          </span>
-                        ))}
-                      </div>
-                      <div className="flex gap-1">
-                        {selectedMethod.type === "ARTICLE" && (
-                          <Button variant="ghost" size="icon" title="Voir le PDF" onClick={() => setViewingPdfModuleId(module.id)}>
-                            <FileText className="h-4 w-4 text-amber-600" />
-                          </Button>
-                        )}
-                        <Button variant="ghost" size="icon" onClick={() => {
-                          setEditingModule(module);
-                          setModuleForm({
-                            title: module.title,
-                            description: module.description || "",
-                            levelId: module.level.id,
-                            duration: module.duration,
-                            difficulty: module.difficulty,
-                          });
-                          setShowModuleDialog(true);
-                        }}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteModule(module.id)}>
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </Card>
-      )}
 
       {/* Dialog création/édition module */}
       <Dialog open={showModuleDialog} onOpenChange={setShowModuleDialog}>
