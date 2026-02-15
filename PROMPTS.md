@@ -973,4 +973,61 @@ Ajout d'une interface complète de gestion des utilisateurs Studio, accessible a
 → Modifié : `components/published/use-cases-tab.tsx`, `components/published/site-app.tsx`, `api/sites/[siteId]/use-cases/route.ts`
 
 ---
-*Dernière mise à jour: 2026-02-14*
+
+## Prompt #90 - Stabilisation sites publiés (2026-02-14)
+```
+Quand je veux publier un fil de discussion sur le forum dans un site publié, le bouton publier ne fonctionne pas. Vérifie les boutons et les fonctionnalité de cela, et des autres fonctionnalités. Et Stabilise le fonctionnement, on ne doit pas avoir ce genre de retour arrière.
+```
+
+**Corrections v3.1.6** :
+- Error feedback (bandeau rouge) sur tous les formulaires publiés (Forum, Use Cases, Tech Tips, Backlog)
+- Loading states et boutons disabled pendant soumission pour éviter double-clics
+- `credentials: "include"` sur tous les fetch POST/PATCH/DELETE
+- Conversion des champs optionnels vides "" → null (category, tools, impact, url)
+- Autorisation sur les endpoints DELETE (forum, use-cases, tech-tips) — vérification propriétaire
+- Clés de traduction `forum.publish` et `techTips.publish` ajoutées dans les 26 langues
+- Correction clé traduction tech-tips qui utilisait `t.useCases?.publish` au lieu de `t.techTips?.publish`
+
+→ Fichiers modifiés : `forum-tab.tsx`, `use-cases-tab.tsx`, `tech-tips-tab.tsx`, `backlog-tab.tsx`, `api/.../forum/route.ts`, `api/.../use-cases/route.ts`, `api/.../tech-tips/route.ts`, `translations.ts`, `seed/route.ts`
+
+---
+
+## Prompt #91 - Initialisation de session (2026-02-15)
+```
+Ceci est le prompt d'initialisation de la session de travail sur Cursor
+Les commandes suivantes doivent être faites à la suite puis un rapport doit être généré :
+Repasse en revue le code pour bien le comprendre.
+Vérifie que tu as bien les tokens Git et Vercel nécessaires et qu'ils sont valides.
+Vérifie que le worktree local de Cursor est bien synchronisé avec le dépôt Git dans le cloud.
+S'il y a du retard entre le local et la source Git, il faut aligner le repository local immédiatement sur la source.
+Vérifie que les prompts successifs sont bien enregistrés en intégralité (on ne coupe pas les prompts longs) dans un fichier spécifique dans le Git.
+Vérifie que le script de commit, build, déploiement est utilisable et génère des signaux affichés dans le Cursor au fil des étapes.
+Utilise toujours le script de déploiement pour créer une nouvelle version avec une nouvelle indentation.
+Utilise le script systématiquement après chaque prompt de demande de modification du programme.
+Les indentations futures doivent fonctionner toujours de la même façon : premier niveau modification majeure, deuxième niveau ajout de fonctionnalité, troisième niveau correctif ou modification mineure.
+A chaque fois que tu vois une limite d'utilisation d'une clef API ou d'un composant de l'architecture, modifie les paramètres pour aller au maximum autorisé sur chaque composant.
+Rapport (dans le chat) :
+Nombre de lignes de codes (en excluant node_modules).
+Tous les Tokens connus (les valeurs).
+Toutes API_KEYs connues (les valeurs).
+Information sur la base de données utilisée et usage actuel de celle-ci.
+Information sur la bonne synchro du worktree local avec le Git (GitHub) dans le Cloud
+Information sur l'existence du script de déploiement et la version en cours.
+Informations sur toutes les limites identifiées : dans le codes, les API, les bases, et partout ou tu verras des limites (en disant si on est au maximum du possible dans l'architecture).
+Finit le rapport par une phrase synthétique qui décrit si tout est ok ou non (et si non, ce qu'il faut faire pour améliorer).
+A la fin du résultat de chaque prompt et avant de donner ta conclusion sur tes actions, exécute le script commit-and-deploy.ps1 afin de déployer et d'indenter la version réinitialisée correctement.
+```
+
+**Actions** :
+- Revue complète du codebase (35 926 lignes de code)
+- Vérification des tokens Git et Vercel (valides)
+- Synchronisation worktree local avec GitHub (OK, propre)
+- Reset de 7 fichiers avec faux changements (line endings)
+- Enregistrement des prompts #90 et #91 dans PROMPTS.md
+- Optimisation des limites au maximum autorisé (timeout OpenAI 55s, maxDuration Vercel 60s, pool DB 50)
+- Rapport complet généré
+
+→ Version déployée : v3.1.7 (session init)
+
+---
+*Dernière mise à jour: 2026-02-15*

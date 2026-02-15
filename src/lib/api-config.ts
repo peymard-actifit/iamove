@@ -8,7 +8,8 @@
 // =============================================================================
 export const OPENAI_CONFIG = {
   // Timeout maximum pour les requêtes (en ms)
-  timeout: 120000, // 2 minutes
+  // Aligné sur le timeout Vercel Pro (60s) avec marge de sécurité
+  timeout: 55000, // 55 secondes (Vercel Pro max = 60s)
 
   // Nombre maximum de tentatives en cas d'échec
   maxRetries: 5,
@@ -59,19 +60,20 @@ export const DEEPL_CONFIG = {
 // CONFIGURATION BASE DE DONNÉES (Neon PostgreSQL)
 // =============================================================================
 export const DATABASE_CONFIG = {
-  // Pool de connexions
+  // Pool de connexions (Neon PostgreSQL)
+  // Neon free/pro supporte jusqu'à 100 connexions simultanées via pooler
   pool: {
     min: 2,
-    max: 20, // Maximum de connexions simultanées
+    max: 50, // Augmenté pour Neon pooler (max recommandé : 50-100)
     idleTimeoutMs: 30000, // 30 secondes
     connectionTimeoutMs: 10000, // 10 secondes
   },
 
-  // Timeout des requêtes (en ms)
-  queryTimeout: 30000, // 30 secondes
+  // Timeout des requêtes (en ms) — aligné sur Vercel Pro
+  queryTimeout: 55000, // 55 secondes (Vercel Pro max = 60s)
 
   // Limite de taille des résultats
-  maxResultRows: 10000,
+  maxResultRows: 50000, // Augmenté pour supporter de gros datasets
 
   // Configuration SSL
   ssl: {
