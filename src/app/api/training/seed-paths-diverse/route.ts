@@ -3,96 +3,116 @@ import prisma from "@/lib/prisma";
 import { TrainingMethodType } from "@prisma/client";
 
 /**
- * Parcours transversaux motivants avec diversité de formats.
- * Chaque parcours mélange VIDEO, TUTORIAL, EXERCISE, SERIOUS_GAME, INTERACTIVE
- * pour une progression ludique et concrète.
+ * Parcours mono-niveau ludiques et diversifiés.
+ * Chaque parcours utilise les 6 types de méthodes disponibles au sein
+ * d'un SEUL niveau, avec une progression pédagogique claire.
  */
 
 interface PathDefinition {
   name: string;
   description: string;
-  levelNumber: number; // niveau recommandé (début du parcours)
-  items: { title: string; type: TrainingMethodType }[]; // titre exact du module existant + type pour lookup
+  levelNumber: number;
+  items: { title: string; type: TrainingMethodType }[];
 }
 
 const DIVERSE_PATHS: PathDefinition[] = [
-  // ─── PARCOURS 1 : Explorer IA (Niveaux 5→9) ────────────────────────────────
+  // ─── PARCOURS NIVEAU 7 : Maîtriser l'IA Générative ──────────────────────
+  // Progression : Regarder → Lire → Explorer → Apprendre → Pratiquer → Jouer
   {
-    name: "Explorer IA : De la Théorie à la Pratique",
-    description: `Un parcours progressif et ludique pour passer de la compréhension du Machine Learning à l'IA responsable. Chaque étape alterne entre découverte visuelle, expérimentation pratique et défis engageants.
+    name: "Niveau 7 : Maîtriser l'IA Générative — Parcours Complet",
+    description: `Parcours immersif pour maîtriser les grands modèles de langage et l'IA générative. Six étapes qui alternent vidéo, lecture, expérimentation, tutoriel guidé, exercice pratique et défi ludique.
 
-**Objectifs :**
-• Comprendre comment une IA apprend à partir des données
-• Expérimenter la création de modèles et le prompt engineering
-• Développer un regard critique sur les biais et l'éthique de l'IA
-• Savoir prendre des décisions responsables face aux dilemmes de l'IA
+**Progression pédagogique :**
+🎬 Découvrir → 📖 Comprendre → 🔬 Explorer → 📘 Apprendre → 🔧 Pratiquer → 🎮 Se dépasser
 
-**Public :** Niveaux 5 à 9 — Vous maîtrisez les bases de l'IA et voulez passer à la pratique.
-**Durée estimée :** ~3h30 réparties en 7 étapes`,
-    levelNumber: 5,
+**Objectifs concrets :**
+• Comprendre le fonctionnement interne de ChatGPT et des LLM
+• Savoir formuler des prompts efficaces et créatifs
+• Être capable de construire un chatbot personnalisé
+• Maîtriser les techniques avancées du prompt engineering
+
+**Durée estimée :** ~2h50`,
+    levelNumber: 7,
     items: [
-      // Étape 1 : Hook visuel — comprendre l'apprentissage
-      { title: "Comment une IA apprend-elle ?", type: "VIDEO" },
-      // Étape 2 : Mise en pratique immédiate — entraîner un modèle
-      { title: "Playground : Entraîner un classificateur", type: "INTERACTIVE" },
-      // Étape 3 : Montée en compétence — analyser des données
-      { title: "Analyser des données avec l'IA", type: "TUTORIAL" },
-      // Étape 4 : Challenge ludique — maîtriser les prompts
+      // 1. Hook visuel — comprendre comment ChatGPT fonctionne
+      { title: "ChatGPT : comment ça marche vraiment ?", type: "VIDEO" },
+      // 2. Lecture approfondie — bases théoriques des LLM
+      { title: "IA générative et grands modèles de langage (LLM)", type: "ARTICLE" },
+      // 3. Expérimentation libre — tester et comparer ses prompts
+      { title: "Laboratoire de prompts", type: "INTERACTIVE" },
+      // 4. Apprentissage guidé — construire un chatbot pas-à-pas
+      { title: "Créer un chatbot personnalisé", type: "TUTORIAL" },
+      // 5. Mise en pratique — créer 10 prompts créatifs
+      { title: "Challenge : Créer 10 prompts créatifs", type: "EXERCISE" },
+      // 6. Défi final — compétition de prompt engineering
       { title: "Prompt Master", type: "SERIOUS_GAME" },
-      // Étape 5 : Travail analytique — détecter les biais
-      { title: "Audit : Trouver les biais dans un dataset", type: "EXERCISE" },
-      // Étape 6 : Réflexion guidée — naviguer les dilemmes éthiques
-      { title: "Simulateur de décision éthique", type: "INTERACTIVE" },
-      // Étape 7 : Conclusion mémorable — jugement et responsabilité
-      { title: "Le tribunal de l'IA", type: "SERIOUS_GAME" },
     ],
   },
 
-  // ─── PARCOURS 2 : Builder IA (Niveaux 10→14) ───────────────────────────────
+  // ─── PARCOURS NIVEAU 12 : Déployer l'IA en Production ───────────────────
+  // Progression : Comprendre → Voir → Apprendre → Simuler → Pratiquer → Défier
   {
-    name: "Builder IA : Du Code au Déploiement",
-    description: `Un parcours technique et stimulant pour passer de la gouvernance IA à la mise en production de modèles. Alternance de cadrage réglementaire, coding hands-on, simulations réalistes et défis gamifiés.
+    name: "Niveau 12 : Déployer l'IA en Production — Parcours Complet",
+    description: `Parcours technique et stimulant pour passer de la théorie au déploiement réel d'un modèle IA. Six étapes qui mêlent lecture de cadrage, démonstration vidéo, tutoriel Docker, simulation de déploiement, exercice pratique et défi contre-la-montre.
 
-**Objectifs :**
-• Maîtriser le cadre réglementaire européen (AI Act, RGPD)
-• Intégrer des API d'IA (OpenAI, Anthropic) dans une application
+**Progression pédagogique :**
+📖 Comprendre → 🎬 Voir → 📘 Apprendre → 🔬 Simuler → 🔧 Pratiquer → 🎮 Se dépasser
+
+**Objectifs concrets :**
+• Comprendre le cycle de déploiement d'un modèle IA (API, conteneur, monitoring)
+• Savoir conteneuriser un modèle avec Docker
 • Simuler un déploiement en production de bout en bout
-• Mettre en place un pipeline MLOps complet avec monitoring
+• Publier un modèle sur Hugging Face
 
-**Public :** Niveaux 10 à 14 — Vous comprenez l'IA et voulez la construire et la déployer.
-**Durée estimée :** ~5h réparties en 8 étapes`,
-    levelNumber: 10,
+**Durée estimée :** ~4h20`,
+    levelNumber: 12,
     items: [
-      // Étape 1 : Contexte réglementaire — savoir avant de faire
-      { title: "AI Act européen : ce que vous devez savoir", type: "VIDEO" },
-      // Étape 2 : Gamification du cadrage — rendre le réglementaire engageant
-      { title: "AI Compliance Challenge", type: "SERIOUS_GAME" },
-      // Étape 3 : Hands-on technique — première intégration d'API
-      { title: "Intégrer l'API Claude dans une app", type: "TUTORIAL" },
-      // Étape 4 : Pratique de code — consolider par l'exercice
-      { title: "Coding : Premier appel API OpenAI", type: "EXERCISE" },
-      // Étape 5 : Simulation réaliste — préparer le déploiement
+      // 1. Cadrage théorique — comprendre l'intégration applicative
+      { title: "Intégrer un modèle IA dans une application", type: "ARTICLE" },
+      // 2. Démonstration visuelle — voir les étapes clés du déploiement
+      { title: "Déployer un modèle ML en production", type: "VIDEO" },
+      // 3. Apprentissage guidé — packager avec Docker
+      { title: "Conteneuriser un modèle avec Docker", type: "TUTORIAL" },
+      // 4. Simulation réaliste — déployer dans un environnement virtuel
       { title: "Deployment Simulator", type: "INTERACTIVE" },
-      // Étape 6 : Workflow data science — structurer le travail
-      { title: "Créer un notebook Jupyter pour le ML", type: "TUTORIAL" },
-      // Étape 7 : Challenge final immersif — gérer la production
-      { title: "MLOps Simulator", type: "SERIOUS_GAME" },
-      // Étape 8 : Compétence technique finale — outillage MLOps
-      { title: "MLOps : Configurer MLflow", type: "EXERCISE" },
+      // 5. Mise en pratique — publier un vrai modèle
+      { title: "DevOps : Déployer un modèle sur Hugging Face", type: "EXERCISE" },
+      // 6. Défi final contre-la-montre — mettre en production avant le deadline
+      { title: "Deploy or Die", type: "SERIOUS_GAME" },
     ],
   },
 ];
 
 /**
- * GET — Seed les parcours diversifiés transversaux
+ * GET — Seed les parcours diversifiés mono-niveau
+ *
+ * L'endpoint commence par supprimer les anciens parcours multi-niveaux
+ * (créés par erreur dans une version précédente), puis crée les nouveaux.
  */
 export async function GET() {
   try {
-    // Récupérer les méthodes (pour lookup par type)
+    // ── Nettoyage des anciens parcours multi-niveaux ────────────────────
+    const oldPaths = await prisma.trainingPath.findMany({
+      where: {
+        OR: [
+          { name: "Explorer IA : De la Théorie à la Pratique" },
+          { name: "Builder IA : Du Code au Déploiement" },
+        ],
+      },
+      select: { id: true, name: true },
+    });
+
+    let cleaned = 0;
+    for (const old of oldPaths) {
+      await prisma.trainingPathItem.deleteMany({ where: { pathId: old.id } });
+      await prisma.trainingPath.delete({ where: { id: old.id } });
+      cleaned++;
+    }
+
+    // ── Récupérer les méthodes et niveaux ───────────────────────────────
     const methods = await prisma.trainingMethod.findMany({ where: { isActive: true } });
     const methodMap = new Map(methods.map((m) => [m.type, m.id]));
 
-    // Récupérer les niveaux
     const levels = await prisma.level.findMany({ orderBy: { number: "asc" } });
     const levelMap = new Map(levels.map((l) => [l.number, l.id]));
 
@@ -120,19 +140,19 @@ export async function GET() {
         continue;
       }
 
-      // Créer le parcours
+      // Créer le parcours — rattaché au bon niveau
       const levelId = levelMap.get(pathDef.levelNumber);
       const path = await prisma.trainingPath.create({
         data: {
           name: pathDef.name,
           description: pathDef.description,
-          order: 100 + DIVERSE_PATHS.indexOf(pathDef), // Après les parcours par niveau
+          order: 100 + DIVERSE_PATHS.indexOf(pathDef),
           isActive: true,
           ...(levelId && { levelId }),
         },
       });
 
-      // Lier les modules existants au parcours
+      // Lier les modules existants (lookup par titre + type de méthode)
       let itemsLinked = 0;
       const itemsMissing: string[] = [];
 
@@ -145,35 +165,26 @@ export async function GET() {
           continue;
         }
 
-        // Chercher le module par titre exact et type de méthode
-        const module = await prisma.trainingModule.findFirst({
-          where: {
-            title: item.title,
-            methodId,
-            isActive: true,
-          },
-        });
+        // Pour ARTICLE, chercher par titre dans les modules du bon niveau
+        const whereClause = item.type === "ARTICLE"
+          ? { title: item.title, methodId, isActive: true, ...(levelId && { levelId }) }
+          : { title: item.title, methodId, isActive: true };
+
+        const module = await prisma.trainingModule.findFirst({ where: whereClause });
 
         if (!module) {
           itemsMissing.push(`${item.title} (${item.type})`);
           continue;
         }
 
-        // Vérifier que l'item n'existe pas déjà
-        const existingItem = await prisma.trainingPathItem.findFirst({
-          where: { pathId: path.id, moduleId: module.id },
+        await prisma.trainingPathItem.create({
+          data: {
+            pathId: path.id,
+            moduleId: module.id,
+            order: i,
+          },
         });
-
-        if (!existingItem) {
-          await prisma.trainingPathItem.create({
-            data: {
-              pathId: path.id,
-              moduleId: module.id,
-              order: i,
-            },
-          });
-          itemsLinked++;
-        }
+        itemsLinked++;
       }
 
       results.push({
@@ -186,7 +197,8 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      message: `${results.filter((r) => r.created).length} parcours créés`,
+      message: `${cleaned} ancien(s) parcours supprimé(s), ${results.filter((r) => r.created).length} nouveau(x) créé(s)`,
+      cleaned,
       results,
     });
   } catch (error) {
