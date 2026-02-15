@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+// useRouter retiré — les données sont chargées/rechargées côté client via reloadData()
 import { Button, Card, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Input } from "@/components/ui";
 import { 
   Gamepad2, BookOpen, Wrench, Video, FileText, Layers, 
@@ -84,12 +84,6 @@ interface TrainingPath {
   items: TrainingPathItem[];
 }
 
-interface TrainingPageContentProps {
-  methods: TrainingMethod[];
-  levels: Level[];
-  paths: TrainingPath[];
-}
-
 const ICONS: Record<string, React.ReactNode> = {
   Gamepad2: <Gamepad2 className="h-6 w-6" />,
   BookOpen: <BookOpen className="h-6 w-6" />,
@@ -110,15 +104,24 @@ const TYPE_COLORS: Record<string, string> = {
 
 const TRAINING_SUBTITLE = "Gérez les méthodes et modules de formation";
 
-export function TrainingPageContent({ methods, levels, paths: initialPaths }: TrainingPageContentProps) {
-  const router = useRouter();
+/**
+ * TrainingPageContent — chargement côté client pour éviter les
+ * problèmes de streaming RSC avec de gros payloads (100 KB+ de data).
+ */
+export function TrainingPageContent() {
   const { language: globalLanguage, t } = useI18n();
   const { setCenterContent, setRightActions } = useHeaderContent();
+
+  // ── Chargement côté client des données ──────────────────────────────
+  const [methods, setMethods] = useState<TrainingMethod[]>([]);
+  const [levels, setLevels] = useState<Level[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
+
   const [selectedMethod, setSelectedMethod] = useState<TrainingMethod | null>(null);
   const [showModuleDialog, setShowModuleDialog] = useState(false);
   const [editingModule, setEditingModule] = useState<TrainingModule | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [paths, setPaths] = useState<TrainingPath[]>(initialPaths);
+  const [paths, setPaths] = useState<TrainingPath[]>([]);
   const [showPathDialog, setShowPathDialog] = useState(false);
   const [editingPath, setEditingPath] = useState<TrainingPath | null>(null);
   const [pathForm, setPathForm] = useState({ name: "", description: "" });
@@ -130,8 +133,48 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
   const [generationResults, setGenerationResults] = useState<{ level: number; pathId: string; created: boolean; itemsCount: number }[] | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
 
+  // ── Chargement initial des données côté client ──────────────────────
+  useEffect(() => {
+    let cancelled = false;
+    setDataLoading(true);
+
+    Promise.all([
+      fetch("/api/training/methods", { credentials: "include" }).then((r) => r.ok ? r.json() : { methods: [], levels: [] }),
+      fetch("/api/training/paths", { credentials: "include" }).then((r) => r.ok ? r.json() : { paths: [] }),
+    ])
+      .then(([methodsData, pathsData]) => {
+        if (cancelled) return;
+        setMethods(Array.isArray(methodsData.methods) ? methodsData.methods : []);
+        setLevels(Array.isArray(methodsData.levels) ? methodsData.levels : []);
+        setPaths(Array.isArray(pathsData.paths) ? pathsData.paths : []);
+      })
+      .catch((err) => {
+        console.error("[TrainingPageContent] Chargement échoué:", err);
+      })
+      .finally(() => {
+        if (!cancelled) setDataLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, []);
+
   const knowledgeMethods = methods.filter((m) => TYPOLOGY_KNOWLEDGE.includes(m.type));
   const applicationMethods = methods.filter((m) => TYPOLOGY_APPLICATIONS.includes(m.type));
+
+  // Fonction utilitaire pour recharger les données
+  const reloadData = useCallback(async () => {
+    try {
+      const [methodsData, pathsData] = await Promise.all([
+        fetch("/api/training/methods", { credentials: "include" }).then((r) => r.ok ? r.json() : { methods: [], levels: [] }),
+        fetch("/api/training/paths", { credentials: "include" }).then((r) => r.ok ? r.json() : { paths: [] }),
+      ]);
+      setMethods(Array.isArray(methodsData.methods) ? methodsData.methods : []);
+      setLevels(Array.isArray(methodsData.levels) ? methodsData.levels : []);
+      setPaths(Array.isArray(pathsData.paths) ? pathsData.paths : []);
+    } catch (e) {
+      console.error("[reloadData]", e);
+    }
+  }, []);
 
   const handleInitMethods = useCallback(async () => {
     setIsLoading(true);
@@ -140,12 +183,12 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
         method: "POST",
         credentials: "include",
       });
-      if (res.ok) router.refresh();
+      if (res.ok) await reloadData();
     } catch (e) {
       console.error("Erreur:", e);
     }
     setIsLoading(false);
-  }, []);
+  }, [reloadData]);
 
   // Générer automatiquement les parcours avec l'IA
   const handleGeneratePaths = useCallback(async (regenerate = false) => {
@@ -165,13 +208,13 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
       }
       const data = await res.json();
       setGenerationResults(data.results || []);
-      router.refresh();
+      await reloadData();
     } catch (e) {
       setGenerationError(String(e));
     } finally {
       setIsGeneratingPaths(false);
     }
-  }, [router]);
+  }, [reloadData]);
 
   // Titre et sous-titre au centre du header, bouton "Initialiser" à droite si besoin
   useEffect(() => {
@@ -254,7 +297,7 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
       if (res.ok) {
         setShowModuleDialog(false);
         resetModuleForm();
-        router.refresh();
+        reloadData();
       }
     } catch (error) {
       console.error("Erreur:", error);
@@ -270,7 +313,7 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
         method: "DELETE",
         credentials: "include",
       });
-      router.refresh();
+      reloadData();
     } catch (error) {
       console.error("Erreur:", error);
     }
@@ -291,7 +334,7 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
         setPaths((prev) => [...prev, { ...path, items: [] }]);
         setShowPathDialog(false);
         setPathForm({ name: "", description: "" });
-        router.refresh();
+        reloadData();
       }
     } catch (e) {
       console.error(e);
@@ -311,7 +354,7 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
         const { path } = await res.json();
         setPaths((prev) => prev.map((p) => (p.id === pathId ? path : p)));
         setEditingPath(null);
-        router.refresh();
+        reloadData();
       }
     } catch (e) {
       console.error(e);
@@ -324,7 +367,7 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
       const res = await fetch(`/api/training/paths/${pathId}`, { method: "DELETE", credentials: "include" });
       if (res.ok) {
         setPaths((prev) => prev.filter((p) => p.id !== pathId));
-        router.refresh();
+        reloadData();
       }
     } catch (e) {
       console.error(e);
@@ -345,7 +388,7 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
           prev.map((p) => (p.id === pathId ? { ...p, items: [...p.items, item] } : p))
         );
         setShowAddPathItemDialog(null);
-        router.refresh();
+        reloadData();
       } else {
         const data = await res.json();
         alert(data.error || "Erreur");
@@ -365,7 +408,7 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
         setPaths((prev) =>
           prev.map((p) => (p.id === pathId ? { ...p, items: p.items.filter((i) => i.id !== itemId) } : p))
         );
-        router.refresh();
+        reloadData();
       }
     } catch (e) {
       console.error(e);
@@ -383,7 +426,7 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
       if (res.ok) {
         const { path } = await res.json();
         setPaths((prev) => prev.map((p) => (p.id === pathId ? path : p)));
-        router.refresh();
+        reloadData();
       }
     } catch (e) {
       console.error(e);
@@ -391,6 +434,16 @@ export function TrainingPageContent({ methods, levels, paths: initialPaths }: Tr
   };
 
   const allModules = methods.flatMap((m) => m.modules);
+
+  // ── Écran de chargement ──────────────────────────────────────────────
+  if (dataLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
+        <p className="text-sm text-gray-500">Chargement des données de formation...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="px-3 py-2 sm:px-4 sm:py-3 space-y-6 max-w-full">
