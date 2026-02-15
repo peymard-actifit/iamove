@@ -320,6 +320,7 @@ export function PublishedSiteApp({
               siteId={site.id}
               isStudioMode={false}
               personId={currentPerson?.id}
+              currentLevel={currentPerson?.currentLevel || 0}
               levelsWithTranslations={levels}
             />
           </TabsContent>

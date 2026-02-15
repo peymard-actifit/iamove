@@ -29,6 +29,8 @@ interface Tab4FormationProps {
   siteId: string;
   isStudioMode: boolean;
   personId?: string;
+  /** Niveau actuel de la personne connectée (pour pré-filtrer les parcours) */
+  currentLevel?: number;
   /** En mode publié : niveaux avec traductions pour afficher noms/catégories dans la langue sélectionnée */
   levelsWithTranslations?: LevelWithTranslations[];
 }
@@ -129,7 +131,7 @@ function getMethodBadgeColor(type?: string): string {
   }
 }
 
-export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTranslations }: Tab4FormationProps) {
+export function Tab4Formation({ siteId, isStudioMode, personId, currentLevel, levelsWithTranslations }: Tab4FormationProps) {
   const { t, language } = useI18n();
   const ppApi = usePP();
   const locale = (() => {
@@ -455,8 +457,10 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
   const [selectedPathId, setSelectedPathId] = useState<string | null>(null);
   // Module sélectionné dans un parcours
   const [selectedPathModuleId, setSelectedPathModuleId] = useState<string | null>(null);
-  // Filtre niveau pour les parcours (null = tous)
-  const [pathLevelFilter, setPathLevelFilter] = useState<number | null>(null);
+  // Filtre niveau pour les parcours (null = tous, pré-rempli avec le niveau de la personne)
+  const [pathLevelFilter, setPathLevelFilter] = useState<number | null>(
+    currentLevel && currentLevel > 0 ? currentLevel : null
+  );
 
   // Charger les parcours de formation (site publié uniquement)
   useEffect(() => {
