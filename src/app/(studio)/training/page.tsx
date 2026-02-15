@@ -3,6 +3,9 @@ import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { TrainingPageContent } from "@/components/studio/training-page-content";
 
+// Vercel Pro : max 60s pour les fonctions serveur (pages incluses)
+export const maxDuration = 60;
+
 export default async function TrainingPage() {
   const session = await getSession();
   
@@ -10,16 +13,20 @@ export default async function TrainingPage() {
     redirect("/dashboard");
   }
 
-  // Récupérer les méthodes de formation
+  // Récupérer les méthodes de formation (sans charger TOUTES les traductions de modules)
   const methods = await prisma.trainingMethod.findMany({
     where: { isActive: true },
     orderBy: { order: "asc" },
     include: {
       translations: true,
       modules: {
+        where: { isActive: true },
         include: {
           level: true,
-          translations: true,
+          // Ne charger que la traduction de la langue courante (pas les 26)
+          translations: {
+            take: 2, // FR + une langue max
+          },
         },
         orderBy: [
           { level: { number: "asc" } },

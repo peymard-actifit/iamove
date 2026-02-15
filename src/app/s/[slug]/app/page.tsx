@@ -4,6 +4,8 @@ import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { PublishedSiteApp } from "@/components/published/site-app";
 
+export const maxDuration = 60;
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }

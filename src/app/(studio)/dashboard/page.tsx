@@ -3,6 +3,8 @@ import prisma from "@/lib/prisma";
 import { SitesList } from "@/components/studio/sites-list";
 import { DashboardHeaderContent } from "@/components/studio/dashboard-header-content";
 
+export const maxDuration = 60;
+
 export default async function DashboardPage() {
   const session = await getSession();
   
