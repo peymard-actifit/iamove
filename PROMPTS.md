@@ -1030,4 +1030,22 @@ A la fin du résultat de chaque prompt et avant de donner ta conclusion sur tes 
 → Version déployée : v3.1.7 (session init)
 
 ---
+
+## Prompt #92 – Parcours de formation ludiques et diversifiés (niveaux 5-14)
+
+**Prompt :**
+Pour ce qui concerne les parcours de formation, il faut absolument qu'ils soient ludiques et associés à des objectifs concrets de progression. Essaye de concevoir un ou deux parcours motivants pour les niveaux 5 à 14, de 5 à 8 éléments, en utilisant à chaque fois une bonne diversité d'éléments de formation et avec une logique claire dans le parcours.
+
+**Actions :**
+- Analyse du système de formation existant (6 types de méthodes, 100 modules variés, 20 parcours mono-articles)
+- Conception de 2 parcours transversaux motivants :
+  1. **Explorer IA : De la Théorie à la Pratique** (niveaux 5→9, 7 étapes) : VIDEO → INTERACTIVE → TUTORIAL → SERIOUS_GAME → EXERCISE → INTERACTIVE → SERIOUS_GAME
+  2. **Builder IA : Du Code au Déploiement** (niveaux 10→14, 8 étapes) : VIDEO → SERIOUS_GAME → TUTORIAL → EXERCISE → INTERACTIVE → TUTORIAL → SERIOUS_GAME → EXERCISE
+- Création du endpoint `seed-paths-diverse` pour générer ces parcours avec liaison aux modules existants
+- Exécution du seed : 2 parcours créés, 7/7 et 8/8 modules liés (0 manquant)
+- Amélioration de l'affichage des étapes : icônes et badges colorés selon le type de méthode (Gamepad rose, Video rouge, BookOpen bleu, Wrench orange, Layers violet, FileText ambre)
+
+→ Version déployée : v3.2.1 (parcours diversifiés + UI améliorée)
+
+---
 *Dernière mise à jour: 2026-02-15*

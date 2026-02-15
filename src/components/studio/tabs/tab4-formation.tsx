@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Button, Input, Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui";
-import { Send, Bot, User, Sparkles, FileText, Clock, ExternalLink, Loader2, Eye, EyeOff, GraduationCap, Route, ChevronRight, Target, BookOpen, CheckCircle2 } from "lucide-react";
+import { Send, Bot, User, Sparkles, FileText, Clock, ExternalLink, Loader2, Eye, EyeOff, GraduationCap, Route, ChevronRight, Target, BookOpen, CheckCircle2, Gamepad2, Video, Wrench, Layers, Play } from "lucide-react";
 import { LEVELS, getLevelIcon } from "@/lib/levels";
 import { useI18n, getLanguageInfo } from "@/lib/i18n";
 import { usePP } from "@/components/published/site-app";
@@ -94,6 +94,39 @@ interface TrainingPath {
   description: string | null;
   order: number;
   items: TrainingPathItem[];
+}
+
+/** Icône et couleur selon le type de méthode de formation */
+function getMethodIcon(type?: string, className = "h-4 w-4") {
+  switch (type) {
+    case "SERIOUS_GAME":
+      return <Gamepad2 className={`${className} text-pink-500`} />;
+    case "VIDEO":
+      return <Video className={`${className} text-red-500`} />;
+    case "TUTORIAL":
+      return <BookOpen className={`${className} text-blue-500`} />;
+    case "EXERCISE":
+      return <Wrench className={`${className} text-orange-500`} />;
+    case "INTERACTIVE":
+      return <Layers className={`${className} text-purple-500`} />;
+    case "ARTICLE":
+      return <FileText className={`${className} text-amber-500`} />;
+    default:
+      return <Play className={`${className} text-gray-400`} />;
+  }
+}
+
+/** Badge couleur selon le type de méthode */
+function getMethodBadgeColor(type?: string): string {
+  switch (type) {
+    case "SERIOUS_GAME": return "bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300";
+    case "VIDEO": return "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300";
+    case "TUTORIAL": return "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300";
+    case "EXERCISE": return "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300";
+    case "INTERACTIVE": return "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300";
+    case "ARTICLE": return "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300";
+    default: return "bg-gray-100 dark:bg-gray-800 text-gray-500";
+  }
 }
 
 export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTranslations }: Tab4FormationProps) {
@@ -676,11 +709,11 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
                                 ← Retour aux étapes
                               </button>
                               <div className="flex items-center gap-2 mb-3">
-                                <BookOpen className="h-5 w-5 text-amber-500" />
+                                {getMethodIcon(mod.method?.type, "h-5 w-5")}
                                 <h4 className="font-semibold">{mod.title}</h4>
                               </div>
                               <div className="flex items-center gap-3 text-xs text-gray-500 mb-4">
-                                {mod.method && <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">{mod.method.name}</span>}
+                                {mod.method && <span className={`px-2 py-0.5 rounded font-medium ${getMethodBadgeColor(mod.method.type)}`}>{mod.method.name}</span>}
                                 {mod.duration && <span>{mod.duration} min</span>}
                               </div>
                               {/* Contenu unifié via iframe pour tous les types */}
@@ -707,11 +740,15 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
                               <div className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-xs font-bold flex-shrink-0">
                                 {idx + 1}
                               </div>
-                              <BookOpen className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                              {getMethodIcon(item.module.method?.type)}
                               <div className="flex-1 min-w-0">
                                 <p className="font-medium text-sm truncate">{item.module.title}</p>
                                 <div className="flex items-center gap-2 text-xs text-gray-500">
-                                  {item.module.method && <span>{item.module.method.name}</span>}
+                                  {item.module.method && (
+                                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${getMethodBadgeColor(item.module.method.type)}`}>
+                                      {item.module.method.name}
+                                    </span>
+                                  )}
                                   {item.module.duration && <span>· {item.module.duration} min</span>}
                                 </div>
                               </div>
