@@ -461,6 +461,26 @@ export function Tab4Formation({ siteId, isStudioMode, personId, currentLevel, le
   const [pathLevelFilter, setPathLevelFilter] = useState<number | null>(
     currentLevel && currentLevel > 0 ? currentLevel : null
   );
+  // Ref sur la barre de filtre pour auto-scroll vers le bouton actif
+  const pathFilterBarRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll la barre de filtre pour centrer le bouton actif
+  useEffect(() => {
+    const bar = pathFilterBarRef.current;
+    if (!bar || pathLevelFilter === null) return;
+    // Petit délai pour que le DOM soit rendu
+    const timer = setTimeout(() => {
+      const activeBtn = bar.querySelector("[data-level-active=\"true\"]") as HTMLElement | null;
+      if (activeBtn) {
+        const barRect = bar.getBoundingClientRect();
+        const btnRect = activeBtn.getBoundingClientRect();
+        // Centrer le bouton dans la barre visible
+        const scrollLeft = activeBtn.offsetLeft - barRect.width / 2 + btnRect.width / 2;
+        bar.scrollTo({ left: Math.max(0, scrollLeft), behavior: "smooth" });
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [pathLevelFilter, pathsLoading]);
 
   // Charger les parcours de formation (site publié uniquement)
   useEffect(() => {
@@ -788,10 +808,11 @@ export function Tab4Formation({ siteId, isStudioMode, personId, currentLevel, le
 
                     return availableLevels.length > 0 ? (
                       <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 px-3 py-2 bg-gray-50/50 dark:bg-gray-800/30">
-                        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+                        <div ref={pathFilterBarRef} className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
                           <button
                             type="button"
                             onClick={() => setPathLevelFilter(null)}
+                            data-level-active={pathLevelFilter === null ? "true" : undefined}
                             className={`flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
                               pathLevelFilter === null
                                 ? "bg-blue-600 text-white shadow-sm"
@@ -808,6 +829,7 @@ export function Tab4Formation({ siteId, isStudioMode, personId, currentLevel, le
                                 key={lvl}
                                 type="button"
                                 onClick={() => setPathLevelFilter(isActive ? null : lvl)}
+                                data-level-active={isActive ? "true" : undefined}
                                 className={`flex-shrink-0 flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors ${
                                   isActive
                                     ? "bg-blue-600 text-white shadow-sm"
@@ -824,6 +846,7 @@ export function Tab4Formation({ siteId, isStudioMode, personId, currentLevel, le
                             <button
                               type="button"
                               onClick={() => setPathLevelFilter(-1)}
+                              data-level-active={pathLevelFilter === -1 ? "true" : undefined}
                               className={`flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
                                 pathLevelFilter === -1
                                   ? "bg-purple-600 text-white shadow-sm"
