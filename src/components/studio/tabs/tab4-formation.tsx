@@ -455,6 +455,8 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
   const [selectedPathId, setSelectedPathId] = useState<string | null>(null);
   // Module sélectionné dans un parcours
   const [selectedPathModuleId, setSelectedPathModuleId] = useState<string | null>(null);
+  // Filtre niveau pour les parcours (null = tous)
+  const [pathLevelFilter, setPathLevelFilter] = useState<number | null>(null);
 
   // Charger les parcours de formation (site publié uniquement)
   useEffect(() => {
@@ -761,12 +763,92 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
                   );
                 })()
               ) : (
-                /* Liste des parcours */
-                <div className="flex-1 overflow-auto p-4 space-y-3">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    Suivez des parcours structurés pour progresser étape par étape.
-                  </p>
-                  {trainingPaths.map((path) => {
+                /* Liste des parcours avec filtre par niveau */
+                <div className="flex-1 flex flex-col min-h-0">
+                  {/* Barre de filtre par niveau — horizontale, scrollable */}
+                  {(() => {
+                    // Extraire les niveaux uniques présents dans les parcours
+                    const availableLevels = Array.from(
+                      new Set(
+                        trainingPaths
+                          .map((p) => {
+                            const m = p.name.match(/Niveau (\d+)/);
+                            return m ? parseInt(m[1], 10) : null;
+                          })
+                          .filter((n): n is number => n !== null)
+                      )
+                    ).sort((a, b) => a - b);
+
+                    // Compter les parcours sans niveau
+                    const noLevelCount = trainingPaths.filter((p) => !p.name.match(/Niveau (\d+)/)).length;
+
+                    return availableLevels.length > 0 ? (
+                      <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 px-3 py-2 bg-gray-50/50 dark:bg-gray-800/30">
+                        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+                          <button
+                            type="button"
+                            onClick={() => setPathLevelFilter(null)}
+                            className={`flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+                              pathLevelFilter === null
+                                ? "bg-blue-600 text-white shadow-sm"
+                                : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            }`}
+                          >
+                            Tous ({trainingPaths.length})
+                          </button>
+                          {availableLevels.map((lvl) => {
+                            const count = trainingPaths.filter((p) => p.name.match(new RegExp(`Niveau ${lvl}\\b`))).length;
+                            const isActive = pathLevelFilter === lvl;
+                            return (
+                              <button
+                                key={lvl}
+                                type="button"
+                                onClick={() => setPathLevelFilter(isActive ? null : lvl)}
+                                className={`flex-shrink-0 flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors ${
+                                  isActive
+                                    ? "bg-blue-600 text-white shadow-sm"
+                                    : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                }`}
+                              >
+                                {getLevelIcon(lvl, "h-3.5 w-3.5")}
+                                <span>Niv. {lvl}</span>
+                                {count > 1 && <span className="opacity-60">({count})</span>}
+                              </button>
+                            );
+                          })}
+                          {noLevelCount > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => setPathLevelFilter(-1)}
+                              className={`flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+                                pathLevelFilter === -1
+                                  ? "bg-purple-600 text-white shadow-sm"
+                                  : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              }`}
+                            >
+                              Transversal ({noLevelCount})
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ) : null;
+                  })()}
+
+                  {/* Liste filtrée des parcours */}
+                  <div className="flex-1 overflow-auto p-4 space-y-3">
+                  {(() => {
+                    const filteredPaths = pathLevelFilter === null
+                      ? trainingPaths
+                      : pathLevelFilter === -1
+                        ? trainingPaths.filter((p) => !p.name.match(/Niveau (\d+)/))
+                        : trainingPaths.filter((p) => p.name.match(new RegExp(`Niveau ${pathLevelFilter}\\b`)));
+
+                    return filteredPaths.length === 0 ? (
+                      <div className="text-center text-gray-400 py-8">
+                        <p className="text-sm">Aucun parcours pour ce niveau.</p>
+                      </div>
+                    ) : (
+                      filteredPaths.map((path) => {
                     // Extraire le numéro de niveau si présent dans le nom
                     const levelMatch = path.name.match(/Niveau (\d+)/);
                     const levelNumber = levelMatch ? parseInt(levelMatch[1], 10) : null;
@@ -810,7 +892,10 @@ export function Tab4Formation({ siteId, isStudioMode, personId, levelsWithTransl
                         </div>
                       </button>
                     );
-                  })}
+                  })
+                    );
+                  })()}
+                  </div>
                 </div>
               )}
             </TabsContent>
