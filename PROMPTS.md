@@ -1048,4 +1048,21 @@ Pour ce qui concerne les parcours de formation, il faut absolument qu'ils soient
 → Version déployée : v3.2.1 (parcours diversifiés + UI améliorée)
 
 ---
+
+## Prompt #93 – Correction parcours : mono-niveau (pas multi-niveaux)
+
+**Prompt :**
+Les parcours ne sont pas prévus pour monter de niveau, mais pour s'améliorer au sein d'un niveau. Revoit ce que tu as faite et créé des parcours pour qu'ils soient utilisable dans un seul niveau.
+
+**Actions :**
+- Suppression des 2 parcours multi-niveaux erronés (Explorer IA 5→9 et Builder IA 10→14)
+- Reconception de 2 parcours mono-niveau avec les 6 types de méthodes :
+  1. **Niveau 7 : Maîtriser l'IA Générative** (6 étapes) : VIDEO → ARTICLE → INTERACTIVE → TUTORIAL → EXERCISE → SERIOUS_GAME
+  2. **Niveau 12 : Déployer l'IA en Production** (6 étapes) : ARTICLE → VIDEO → TUTORIAL → INTERACTIVE → EXERCISE → SERIOUS_GAME
+- Progression pédagogique au sein de chaque niveau : Découvrir → Comprendre → Explorer → Apprendre → Pratiquer → Se dépasser
+- Seed exécuté : 2 anciens supprimés, 2 nouveaux créés, 6/6 modules liés à chaque fois
+
+→ Version déployée : v3.2.2 (parcours mono-niveau corrigés)
+
+---
 *Dernière mise à jour: 2026-02-15*
