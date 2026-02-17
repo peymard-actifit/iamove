@@ -1065,4 +1065,83 @@ Les parcours ne sont pas prévus pour monter de niveau, mais pour s'améliorer a
 → Version déployée : v3.2.2 (parcours mono-niveau corrigés)
 
 ---
-*Dernière mise à jour: 2026-02-15*
+
+## Prompt #94 – Fix page Training "Connection closed"
+
+**Prompt :** (capture d'écran) Page /training plante avec "Connection closed"
+
+**Actions :**
+- Diagnostic : payload RSC trop lourd (100KB+ de données streamées du serveur vers le client)
+- Ajout `maxDuration=60` sur 4 pages serveur (training, dashboard, studio, published)
+- Insuffisant → restructuration complète : page serveur allégée (auth only), données chargées côté client via 2 API (`/api/training/methods` + `/api/training/paths`)
+- Création de l'API `/api/training/methods` (retourne méthodes + modules + niveaux)
+- Spinner de chargement pendant le fetch client-side, remplacement de tous les `router.refresh()` par `reloadData()`
+
+→ Versions déployées : v3.2.3 → v3.2.5
+
+---
+
+## Prompt #95 – Barre filtre par niveau dans les parcours
+
+**Prompt :** Dans la gestion des parcours de formation, dans le studio des sites, il me faut une barre horizontale de filtre des parcours par niveau, car il y en a trop en hauteur
+
+**Actions :**
+- Ajout barre horizontale scrollable dans l'onglet Parcours (tab4-formation.tsx) : boutons "Tous", Niv. 1-20 avec icônes, "Transversal"
+- Ajout de la même barre dans la page Training studio (training-page-content.tsx)
+
+→ Versions déployées : v3.2.6 → v3.2.7
+
+---
+
+## Prompt #96 – Focus par défaut sur le niveau de la personne
+
+**Prompt :** Dans la barre horizontale de filtre des parcours de formation dans les sites publiés, je veux que le focus soit par défaut sur le niveau atteint par la personne connectée.
+
+**Actions :**
+- Ajout prop `currentLevel` passée de site-app.tsx vers Tab4Formation
+- Initialisation du filtre sur `currentLevel` si > 0, sinon "Tous"
+
+→ Version déployée : v3.2.8
+
+---
+
+## Prompt #97 – Auto-scroll vers le niveau actif
+
+**Prompt :** Dans le mode publié, quand le focus est bien sur le niveau, alors on essaie de centrer l'ascenseur sur le focus pour le voir.
+
+**Actions :**
+- Ref sur la barre de filtre + `data-level-active` sur les boutons
+- `useEffect` qui scrolle automatiquement (smooth) pour centrer le bouton actif dans la vue
+
+→ Version déployée : v3.2.9
+
+---
+
+## Prompt #98 – Modules inline sous la tuile de typologie
+
+**Prompt :** En mode studio, quand on clique sur une typologie de formation, la liste des éléments de formation de cette typologie s'insère juste en dessous de la tuile pour qu'on puisse les voir et les éditer. Et les éléments de parcours sont relégués en dessous.
+
+**Actions :**
+- Extraction du panneau de modules en fonction `renderModulesPanel()`
+- Insertion inline : modules Connaissances sous la grille Connaissances, modules Applications sous la grille Applications
+- Parcours toujours en dessous, scroll interne `max-h-[500px]` sur le panneau
+
+→ Version déployée : v3.2.10
+
+---
+
+## Prompt #99 – Initialisation session Cursor
+
+**Prompt :** Prompt d'initialisation complet (revue code, tokens, sync Git, PROMPTS.md, limites, rapport)
+
+**Actions :**
+- Revue globale du code et de l'architecture
+- Vérification sync Git (local = remote = 482bcb97)
+- Nettoyage fichiers line-ending fantômes
+- Mise à jour PROMPTS.md (prompts #94 à #99)
+- Rapport complet généré
+
+→ Version déployée : v3.2.11
+
+---
+*Dernière mise à jour: 2026-02-17*
